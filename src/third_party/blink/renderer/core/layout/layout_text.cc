@@ -88,6 +88,7 @@ struct SameSizeAsLayoutText : public LayoutObject {
   DOMNodeId node_id;
   float widths[4];
   String text;
+  String previous_text_;
   void* pointers[2];
   PhysicalOffset previous_starting_point;
 };
@@ -1997,6 +1998,7 @@ UChar LayoutText::PreviousCharacter() const {
 void LayoutText::SetTextInternal(scoped_refptr<StringImpl> text) {
   NOT_DESTROYED();
   DCHECK(text);
+  previous_text_ = text;
   text_ = String(std::move(text));
   DCHECK(text_);
   DCHECK(!IsBR() || (TextLength() == 1 && text_[0] == kNewlineCharacter));
@@ -2063,6 +2065,17 @@ void LayoutText::ForceSetText(scoped_refptr<StringImpl> text) {
   DCHECK(text);
   SetTextInternal(std::move(text));
   TextDidChange();
+}
+
+void LayoutText::UpdateTextIfNeeded() {
+  NOT_DESTROYED();
+  // If previous text is empty, and current text is 1 character then we have to
+  // again set text
+  Node* node = GetNode();
+  if (node && node->IsEditingText()) {
+    if (previous_text_.length() == 0 && GetText().Impl()->length() == 1)
+      ForceSetText(GetText().Impl());
+  }
 }
 
 void LayoutText::TextDidChange() {

@@ -170,6 +170,9 @@ void LayoutTreeBuilderForText::CreateLayoutObject() {
   new_layout_object->SetStyle(&style);
 
   layout_object_parent->AddChild(new_layout_object, next_layout_object);
+
+  // Update layout text if needed
+  new_layout_object->UpdateTextIfNeeded();
 }
 
 }  // namespace blink
