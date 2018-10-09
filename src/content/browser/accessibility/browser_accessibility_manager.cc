@@ -418,6 +418,7 @@ bool BrowserAccessibilityManager::OnAccessibilityEvents(
     tree_updates = &merged_tree_updates;
 
   // Process all changes to the accessibility tree first.
+  bool should_send_initial_focus = false;
   for (const ui::AXTreeUpdate& tree_update : *tree_updates) {
     if (!Unserialize(tree_update)) {
       // This is a fatal error, but if there is a delegate, it will handle the
@@ -426,6 +427,13 @@ bool BrowserAccessibilityManager::OnAccessibilityEvents(
       if (!delegate_)
         CHECK(false) << ax_tree()->error();
       return false;
+    }
+
+    // Set focus to the root if it's not anywhere else.
+    // For webos, allow initial focus event only when tree root changed
+    if (!GetLastFocusedNode()) {
+      SetLastFocusedNode(GetRoot());
+      should_send_initial_focus = true;
     }
 
     // It's a bug if we got an update containing more nodes than
@@ -473,8 +481,12 @@ bool BrowserAccessibilityManager::OnAccessibilityEvents(
   // If this manager is disconnected from the top document, then root_manager
   // will be a null pointer and FireFocusEventsIfNeeded won't be able to
   // retrieve the global focus (not firing an event anyway).
-  if (root_manager)
+
+  // For webos, send initial focus when it's allowed
+  if (root_manager && should_send_initial_focus &&
+      (!delegate_ || delegate_->AccessibilityViewHasFocus())) {
     root_manager->FireFocusEventsIfNeeded();
+  }
 
   bool received_load_complete_event = false;
   // Fire any events related to changes to the tree.
@@ -499,9 +511,15 @@ bool BrowserAccessibilityManager::OnAccessibilityEvents(
 
   // Fire events from Blink.
   for (const ui::AXEvent& event : details.events) {
-    // We already handled all focus events above.
-    if (delegate_ && !delegate_->AccessibilityViewHasFocus())
-      break;
+    if (event.event_type == ax::mojom::Event::kFocus ||
+        event.event_type == ax::mojom::Event::kBlur) {
+      if (should_send_initial_focus)
+        continue;
+
+      // We already handled all focus events above.
+      if (delegate_ && !delegate_->AccessibilityViewHasFocus())
+        continue;
+    }
 
     // Fire the native event.
     BrowserAccessibility* event_target = GetFromID(event.id);
