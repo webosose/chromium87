@@ -214,6 +214,8 @@ struct BLINK_COMMON_EXPORT WebPreferences {
   // Representation of the Web App Manifest scope if any.
   GURL web_app_scope;
 
+  bool accessibility_explore_by_mouse_enabled;
+
 #if defined(OS_ANDROID)
   float font_scale_factor;
   float device_scale_adjustment;

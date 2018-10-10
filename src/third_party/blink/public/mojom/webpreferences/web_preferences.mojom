@@ -251,6 +251,8 @@ struct WebPreferences {
   // Representation of the Web App Manifest scope if any.
   url.mojom.Url web_app_scope;
 
+  bool accessibility_explore_by_mouse_enabled;
+
   [EnableIf=is_android]
   float font_scale_factor;
 

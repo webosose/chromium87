@@ -157,6 +157,10 @@ void WebSettingsImpl::SetAccessibilityAlwaysShowFocus(bool always_show_focus) {
   settings_->SetAccessibilityAlwaysShowFocus(always_show_focus);
 }
 
+void WebSettingsImpl::SetAccessibilityExploreByMouseEnabled(bool enabled) {
+  settings_->SetAccessibilityExploreByMouseEnabled(enabled);
+}
+
 void WebSettingsImpl::SetAccessibilityPasswordValuesEnabled(bool enabled) {
   settings_->SetAccessibilityPasswordValuesEnabled(enabled);
 }
@@ -571,6 +575,10 @@ void WebSettingsImpl::SetPrefersReducedMotion(bool enabled) {
 
 bool WebSettingsImpl::ViewportEnabled() const {
   return settings_->GetViewportEnabled();
+}
+
+bool WebSettingsImpl::GetAccessibilityExploreByMouseEnabled() {
+  return settings_->GetAccessibilityExploreByMouseEnabled();
 }
 
 bool WebSettingsImpl::ViewportMetaEnabled() const {

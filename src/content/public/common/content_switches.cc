@@ -969,6 +969,12 @@ const char kRendererWaitForJavaDebugger[] = "renderer-wait-for-java-debugger";
 const char kDisableOoprDebugCrashDump[] = "disable-oopr-debug-crash-dump";
 #endif
 
+// Enable exploring by mouse feature for accessibility.
+// This feature read out describing the node under the mouse cursor on screen
+// when accessiblity is enabled.
+const char kEnableAccessibilityExploreByMouse[] =
+    "enable-accessibility-explore-by-mouse";
+
 // Enable the experimental Accessibility Object Model APIs in development.
 const char kEnableAccessibilityObjectModel[] =
     "enable-accessibility-object-model";
