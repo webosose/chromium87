@@ -1460,6 +1460,14 @@ void AXObjectCacheImpl::PostNotification(AXObject* object,
   if (!object || !object->AXObjectID() || object->IsDetached())
     return;
 
+  // User creates alert event first but spokes later than focus event
+  // because the focus event fired as sync event.
+  // So, to meet enyo's requirement, AlertRole should be sync event.
+  if (event_type == ax::mojom::blink::Event::kAlert) {
+    PostPlatformNotification(object, event_type);
+    return;
+  }
+
   modification_count_++;
 
   // It's possible for FireAXEventImmediately to post another notification.
@@ -1803,6 +1811,11 @@ void AXObjectCacheImpl::HandleRoleChangeWithCleanLayout(Node* node) {
     if (parent)
       ChildrenChangedWithCleanLayout(parent->GetNode(), parent);
     modification_count_++;
+
+    // Notify when the node gets the alert role.
+    if (obj->RoleValue() == ax::mojom::Role::kAlert ||
+        obj->RoleValue() == ax::mojom::Role::kAlertDialog)
+      PostNotification(obj, ax::mojom::Event::kAlert);
   }
 }
 

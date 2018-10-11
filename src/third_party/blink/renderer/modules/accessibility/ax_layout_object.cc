@@ -288,6 +288,11 @@ Node* AXLayoutObject::GetNodeOrContainingBlockNode() const {
 
 void AXLayoutObject::Init() {
   AXNodeObject::Init();
+
+  // Notify if the layoutObject has the alert role.
+  if (RoleValue() == ax::mojom::Role::kAlert ||
+      RoleValue() == ax::mojom::Role::kAlertDialog)
+    AXObjectCache().PostNotification(this, ax::mojom::Event::kAlert);
 }
 
 void AXLayoutObject::Detach() {
