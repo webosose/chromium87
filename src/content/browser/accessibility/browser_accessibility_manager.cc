@@ -499,6 +499,10 @@ bool BrowserAccessibilityManager::OnAccessibilityEvents(
 
   // Fire events from Blink.
   for (const ui::AXEvent& event : details.events) {
+    // We already handled all focus events above.
+    if (delegate_ && !delegate_->AccessibilityViewHasFocus())
+      break;
+
     // Fire the native event.
     BrowserAccessibility* event_target = GetFromID(event.id);
     if (!event_target)
