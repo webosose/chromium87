@@ -1502,6 +1502,8 @@ class CORE_EXPORT Document : public ContainerNode,
   SlotAssignmentEngine& GetSlotAssignmentEngine();
 
   bool IsSlotAssignmentOrLegacyDistributionDirty() const;
+  bool AddDeferredBackgroundImage();
+  void RemoveDeferredBackgroundImage();
 
 #if DCHECK_IS_ON()
   unsigned& SlotAssignmentRecalcForbiddenRecursionDepth() {
@@ -2199,6 +2201,8 @@ class CORE_EXPORT Document : public ContainerNode,
 
   int async_script_count_ = 0;
   bool first_paint_recorded_ = false;
+
+  int deferred_background_image_count_ = 0;
 
   WeakMember<Node> find_in_page_active_match_node_;
 

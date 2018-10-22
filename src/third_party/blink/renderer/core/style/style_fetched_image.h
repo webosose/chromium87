@@ -24,8 +24,10 @@
 #ifndef THIRD_PARTY_BLINK_RENDERER_CORE_STYLE_STYLE_FETCHED_IMAGE_H_
 #define THIRD_PARTY_BLINK_RENDERER_CORE_STYLE_STYLE_FETCHED_IMAGE_H_
 
+#include "base/optional.h"
 #include "third_party/blink/renderer/core/loader/resource/image_resource_observer.h"
 #include "third_party/blink/renderer/core/style/style_image.h"
+#include "third_party/blink/renderer/platform/graphics/paint/ignore_paint_timing_scope.h"
 #include "third_party/blink/renderer/platform/weborigin/kurl.h"
 #include "third_party/blink/renderer/platform/wtf/casting.h"
 
@@ -91,6 +93,11 @@ class StyleFetchedImage final : public StyleImage,
 
   // Whether this was created by an ad-related CSSParserContext.
   const bool is_ad_related_;
+
+#if defined(OS_WEBOS)
+  bool commit_deferred_ = false;
+  base::Optional<IgnorePaintTimingScope> ignore_paint_timing_;
+#endif
 };
 
 template <>

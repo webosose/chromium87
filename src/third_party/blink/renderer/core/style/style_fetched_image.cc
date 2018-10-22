@@ -56,6 +56,18 @@ StyleFetchedImage::StyleFetchedImage(const Document& document,
   // ResourceFetcher is not determined from StyleFetchedImage and it is
   // impossible to send a request for refetching.
   image_->SetNotRefetchableDataFromDiskCache();
+
+#if defined(OS_WEBOS)
+  if (!image_->IsLoaded() && url_.ProtocolIs("file") &&
+      !(LocalFrame::HasTransientUserActivation(document.GetFrame()))) {
+    commit_deferred_ =
+        const_cast<Document*>(document_.Get())->AddDeferredBackgroundImage();
+    VLOG(1) << __func__ << " found an image to defer " << url_
+            << ", deferred=" << commit_deferred_;
+    if (commit_deferred_)
+      ignore_paint_timing_.emplace();
+  }
+#endif
 }
 
 StyleFetchedImage::~StyleFetchedImage() = default;
@@ -148,6 +160,15 @@ void StyleFetchedImage::ImageNotifyFinished(ImageResourceContent*) {
     if (LocalDOMWindow* window = document_->domWindow())
       ImageElementTiming::From(*window).NotifyBackgroundImageFinished(this);
   }
+
+#if defined(OS_WEBOS)
+  if (commit_deferred_ && document_) {
+    VLOG(1) << __func__ << " removing deferred image" << url_;
+    ignore_paint_timing_.reset();
+    const_cast<Document*>(document_.Get())->RemoveDeferredBackgroundImage();
+    commit_deferred_ = false;
+  }
+#endif
 
   // Oilpan: do not prolong the Document's lifetime.
   document_.Clear();

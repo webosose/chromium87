@@ -7741,7 +7741,8 @@ bool Document::HaveScriptBlockingStylesheetsLoaded() const {
 bool Document::HaveRenderBlockingResourcesLoaded() const {
   return HaveImportsLoaded() &&
          style_engine_->HaveRenderBlockingStylesheetsLoaded() &&
-         !font_preload_manager_.HasPendingRenderBlockingFonts();
+         !font_preload_manager_.HasPendingRenderBlockingFonts() &&
+         deferred_background_image_count_ == 0;
 }
 
 Locale& Document::GetCachedLocale(const AtomicString& locale) {
@@ -8553,6 +8554,28 @@ void Document::SetFindInPageActiveMatchNode(Node* node) {
 
 const Node* Document::GetFindInPageActiveMatchNode() const {
   return find_in_page_active_match_node_;
+}
+
+bool Document::AddDeferredBackgroundImage() {
+  if (!IsMainThread() || !frame_ || !frame_->IsMainFrame())
+    return false;
+
+  VLOG(1) << __func__;
+
+  ++deferred_background_image_count_;
+  return true;
+}
+
+void Document::RemoveDeferredBackgroundImage() {
+  if (!IsMainThread() || !frame_ || !frame_->IsMainFrame())
+    return;
+
+  VLOG(1) << __func__;
+  --deferred_background_image_count_;
+
+  // resume update when all background images were undeferred
+  if (deferred_background_image_count_ == 0)
+    BeginLifecycleUpdatesIfRenderingReady();
 }
 
 template class CORE_TEMPLATE_EXPORT Supplement<Document>;
