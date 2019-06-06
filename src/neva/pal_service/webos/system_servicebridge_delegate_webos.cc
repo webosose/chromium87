@@ -40,14 +40,13 @@ namespace pal {
 namespace webos {
 
 SystemServiceBridgeDelegateWebOS::SystemServiceBridgeDelegateWebOS(
-        std::string name,
         std::string appid,
         Response callback)
     : callback_(std::move(callback))
     , weak_factory_(this) {
   luna::Client::Params params;
   params.bus = luna::Bus::Private;
-  params.name = std::move(name);
+  params.name = luna::GetServiceNameWithRandSuffix(appid.c_str(), "-");
   params.appid = std::move(appid);
   luna_client_ = luna::GetSharedClient(params);
 }

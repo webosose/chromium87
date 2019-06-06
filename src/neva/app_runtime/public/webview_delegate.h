@@ -51,6 +51,7 @@ class WebViewDelegate {
   virtual void DidHistoryBackOnTopPage() = 0;
   virtual void DidClearWindowObject() = 0;
   virtual void DidSwapCompositorFrame() = 0;
+  virtual void DidErrorPageLoadedFromNetErrorHelper() = 0;
 
   virtual void DidLoadingEnd() {}
   virtual void DidFirstPaint() {}

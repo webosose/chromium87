@@ -29,8 +29,7 @@ namespace webos {
 
 class SystemServiceBridgeDelegateWebOS : public SystemServiceBridgeDelegate {
  public:
-  SystemServiceBridgeDelegateWebOS(std::string name,
-                                   std::string appid,
+  SystemServiceBridgeDelegateWebOS(std::string appid,
                                    Response callback);
   SystemServiceBridgeDelegateWebOS(const SystemServiceBridgeDelegateWebOS&) =
       delete;

@@ -17,6 +17,7 @@
 #include "neva/pal_service/webos/luna/luna_client_impl.h"
 
 #include "base/logging.h"
+#include "neva/pal_service/webos/luna/luna_names.h"
 
 #include <glib.h>
 #include <memory>
@@ -52,11 +53,9 @@ ClientImpl::ClientImpl(const Params& params)
   Error error;
   bool registered = false;
 
-  if (params.appid.empty()) {
-    registered = LSRegisterPubPriv(
-        params.name.c_str(),
+  if (params.appid.empty() || params.name.find(service_name::kSettingsClient) == 0) {
+    registered = LSRegister(params.name.c_str(),
         &handle_,
-        static_cast<int>(params.bus),
         &error);
   } else {
     registered = LSRegisterApplicationService(

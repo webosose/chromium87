@@ -32,19 +32,16 @@ SystemServiceBridgeImpl::SystemServiceBridgeImpl()
 SystemServiceBridgeImpl::~SystemServiceBridgeImpl() {
 }
 
-void SystemServiceBridgeImpl::Connect(const std::string& name,
-                                      const std::string& appid,
+void SystemServiceBridgeImpl::Connect(const std::string& appid,
                                       ConnectCallback callback) {
   if (delegate_) {
-    LOG(ERROR) << "SystemServiceBridge [ name = " << name
-               << ", appid = " << appid
+    LOG(ERROR) << "SystemServiceBridge [ appid = " << appid
                << "] is already connected";
     std::move(callback).Run(mojo::NullAssociatedReceiver());
     return;
   }
 
   delegate_ = PlatformFactory::Get()->CreateSystemServiceBridgeDelegate(
-      name,
       appid,
       base::BindRepeating(&SystemServiceBridgeImpl::OnResponse,
                           weak_factory_.GetWeakPtr()));

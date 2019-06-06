@@ -36,7 +36,6 @@ class COMPONENT_EXPORT(PAL_SERVICE) PlatformFactory {
 
   std::unique_ptr<SystemServiceBridgeDelegate>
   CreateSystemServiceBridgeDelegate(
-      std::string name,
       std::string appid,
       SystemServiceBridgeDelegate::Response callback);
 

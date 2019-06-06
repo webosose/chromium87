@@ -27,7 +27,7 @@ interface SystemServiceBridgeClient {
 };
 
 interface SystemServiceBridge {
-  Connect(string name, string appid) => (pending_associated_receiver<SystemServiceBridgeClient> client);
+  Connect(string appid) => (pending_associated_receiver<SystemServiceBridgeClient> client);
   Call(string uri, string payload);
   Cancel();
 };

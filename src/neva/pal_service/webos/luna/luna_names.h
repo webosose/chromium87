@@ -37,12 +37,13 @@ namespace service_name {
 extern const char kChromiumMedia[];
 extern const char kChromiumMemory[];
 extern const char kChromiumPlatformSystem[];
+extern const char kSettingsClient[];
 
 }  // namespace service_name
 
 std::string GetServiceURI(const char* uri, const char* action);
 
-std::string GetServiceNameWithRandSuffix(const char* name);
+std::string GetServiceNameWithRandSuffix(const char* name, const std::string delimiter = ".");
 
 std::string GetServiceNameWithPID(const char* name);
 

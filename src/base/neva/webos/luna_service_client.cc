@@ -30,13 +30,6 @@ static const char* const luna_service_uris[] = {
     "luna://com.webos.settingsservice",        // SETTING
 };
 
-struct AutoLSError : LSError {
-  AutoLSError() { LSErrorInit(this); }
-  ~AutoLSError() { LSErrorFree(this); }
-};
-
-static const char kServiceName[] = "com.webos.chromium.media.";
-
 // static
 std::string LunaServiceClient::GetServiceURI(URIType type,
                                              const std::string& action) {
@@ -50,22 +43,14 @@ std::string LunaServiceClient::GetServiceURI(URIType type,
 }
 
 // LunaServiceClient implematation
-LunaServiceClient::LunaServiceClient(BusType type, bool need_service_name)
-    : handle(NULL), context(NULL) {
-  AutoLSError error;
-  std::string service_name;
-  if (need_service_name)
-    service_name = kServiceName + std::to_string(base::RandInt(10000, 99999));
-  if (LSRegisterPubPriv(service_name.c_str(), &handle, type, &error)) {
-    context = g_main_context_ref(g_main_context_default());
-    LSGmainContextAttach(handle, context, &error);
-  }
+LunaServiceClient::LunaServiceClient(const std::string& identifier)
+    : handle_(nullptr), context_(nullptr) {
+  if (!RegisterService(identifier))
+    LOG(INFO) << "Failed to register service " << identifier.c_str();
 }
 
 LunaServiceClient::~LunaServiceClient() {
-  AutoLSError error;
-  LSUnregister(handle, &error);
-  g_main_context_unref(context);
+  UnregisterService();
 }
 
 bool HandleAsync(LSHandle* sh, LSMessage* reply, void* ctx) {
@@ -118,8 +103,13 @@ bool LunaServiceClient::CallAsync(const std::string& uri,
   wrapper->uri = uri;
   wrapper->param = param;
 
+  if (!handle_) {
+    delete wrapper;
+    return false;
+  }
+
   LOG(INFO) << "[REQ] - " << uri << " " << param;
-  if (!LSCallOneReply(handle, uri.c_str(), param.c_str(), HandleAsync, wrapper,
+  if (!LSCallOneReply(handle_, uri.c_str(), param.c_str(), HandleAsync, wrapper,
                       NULL, &error)) {
     std::move(wrapper->callback).Run("");
     delete wrapper;
@@ -142,7 +132,12 @@ bool LunaServiceClient::Subscribe(const std::string& uri,
   wrapper->uri = uri;
   wrapper->param = param;
 
-  if (!LSCall(handle, uri.c_str(), param.c_str(), HandleSubscribe, wrapper,
+  if (!handle_) {
+    delete wrapper;
+    return false;
+  }
+
+  if (!LSCall(handle_, uri.c_str(), param.c_str(), HandleSubscribe, wrapper,
               subscribeKey, &error)) {
     LOG(INFO) << "[SUB] " << uri << ":[" << param << "] fail[" << error.message
               << "]";
@@ -150,7 +145,7 @@ bool LunaServiceClient::Subscribe(const std::string& uri,
     return false;
   }
 
-  handlers[*subscribeKey] = std::unique_ptr<ResponseHandlerWrapper>(wrapper);
+  handlers_[*subscribeKey] = std::unique_ptr<ResponseHandlerWrapper>(wrapper);
 
   return true;
 }
@@ -158,18 +153,58 @@ bool LunaServiceClient::Subscribe(const std::string& uri,
 bool LunaServiceClient::Unsubscribe(LSMessageToken subscribeKey) {
   AutoLSError error;
 
-  if (!LSCallCancel(handle, subscribeKey, &error)) {
+  if (!handle_)
+    return false;
+
+  if (!LSCallCancel(handle_, subscribeKey, &error)) {
     LOG(INFO) << "[UNSUB] " << subscribeKey << " fail[" << error.message << "]";
-    handlers.erase(subscribeKey);
+    handlers_.erase(subscribeKey);
     return false;
   }
 
-  if (handlers[subscribeKey])
-    handlers[subscribeKey]->callback.Reset();
+  if (handlers_[subscribeKey])
+    handlers_[subscribeKey]->callback.Reset();
 
-  handlers.erase(subscribeKey);
+  handlers_.erase(subscribeKey);
 
   return true;
+}
+
+bool LunaServiceClient::RegisterService(const std::string& identifier) {
+  AutoLSError error;
+  std::string service_name = identifier + '-' + std::to_string(getpid());
+  if (!LSRegisterApplicationService(service_name.c_str(),
+                                             identifier.c_str(), &handle_, &error)) {
+    LogError("Fail to register to LS2", error);
+    return false;
+  }
+  context_ = g_main_context_ref(g_main_context_default());
+  if (!LSGmainContextAttach(handle_, context_, &error)) {
+    UnregisterService();
+    LogError("Fail to attach a service to a mainloop", error);
+    return false;
+  }
+
+  return true;
+}
+
+bool LunaServiceClient::UnregisterService() {
+  AutoLSError error;
+  if (!handle_)
+    return false;
+  if (!LSUnregister(handle_, &error)) {
+    LogError("Fail to unregister service", error);
+    return false;
+  }
+  g_main_context_unref(context_);
+  return true;
+}
+
+void LunaServiceClient::LogError(const std::string& message,
+                                 AutoLSError& lserror) {
+  LOG(ERROR) << message.c_str() << " " << lserror.error_code << " : "
+             << lserror.message << "(" << lserror.func << " @ " << lserror.file
+             << ":" << lserror.line << ")";
 }
 
 }  // namespace base

@@ -32,8 +32,7 @@ MemoryManagerDelegateWebOS::MemoryManagerDelegateWebOS() {
   using namespace luna;
   Client::Params params;
   params.bus = Bus::Private;
-  params.name = luna::GetServiceNameWithRandSuffix(
-      service_name::kChromiumMemory);
+  params.name = luna::GetServiceNameWithRandSuffix(service_name::kChromiumMemory);
   luna_client_ = CreateClient(params);
 }
 

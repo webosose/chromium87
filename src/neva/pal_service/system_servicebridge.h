@@ -36,8 +36,7 @@ class SystemServiceBridgeImpl : public mojom::SystemServiceBridge {
   ~SystemServiceBridgeImpl() override;
 
   // mojom::SystemServiceBridge
-  void Connect(const std::string& name,
-               const std::string& appid,
+  void Connect(const std::string& appid,
                ConnectCallback callback) override;
   void Call(const std::string& uri, const std::string& payload) override;
   void Cancel() override;

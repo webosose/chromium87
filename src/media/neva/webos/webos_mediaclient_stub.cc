@@ -22,7 +22,7 @@ namespace media {
 std::unique_ptr<WebOSMediaClient> WebOSMediaClient::Create(
     const scoped_refptr<base::SingleThreadTaskRunner>& main_task_runner,
     base::WeakPtr<WebOSMediaClient::EventListener> event_listener,
-    std::string& app_id) {
+    const std::string& app_id) {
   return std::make_unique<WebOSMediaClientStub>();
 }
 
