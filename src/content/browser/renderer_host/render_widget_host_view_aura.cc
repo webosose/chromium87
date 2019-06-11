@@ -50,6 +50,7 @@
 #include "content/public/browser/content_browser_client.h"
 #include "content/public/browser/render_view_host.h"
 #include "content/public/common/content_features.h"
+#include "content/public/common/content_switches.h"
 #include "content/public/common/use_zoom_for_dsf_policy.h"
 #include "gpu/ipc/common/gpu_messages.h"
 #include "services/service_manager/public/cpp/interface_provider.h"
@@ -2430,6 +2431,9 @@ void RenderWidgetHostViewAura::CreateSelectionController() {
   tsc_config.tap_slop = ui::GestureConfiguration::GetInstance()
                             ->max_touch_move_in_pixels_for_click();
   tsc_config.enable_longpress_drag_selection = false;
+  tsc_config.hide_selection_handle =
+      base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kHideSelectionHandles);
   selection_controller_.reset(new ui::TouchSelectionController(
       selection_controller_client_.get(), tsc_config));
 }

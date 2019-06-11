@@ -499,6 +499,9 @@ const char kGpuSandboxStartEarly[] = "gpu-sandbox-start-early";
 // Causes the GPU process to display a dialog on launch.
 const char kGpuStartupDialog[]              = "gpu-startup-dialog";
 
+// Hide selection handles on input when touch is enabled.
+const char kHideSelectionHandles[] = "hide-selection-handles";
+
 // Start the renderer with an initial virtual time override specified in
 // seconds since the epoch.
 const char kInitialVirtualTime[] = "initial-virtual-time";
