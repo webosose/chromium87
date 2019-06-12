@@ -596,8 +596,13 @@ void ResourcePool::OnMemoryPressure(
     base::MemoryPressureListener::MemoryPressureLevel level) {
   switch (level) {
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_NONE:
+#if !defined(OS_WEBOS)
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_MODERATE:
       break;
+#else   // defined(OS_WEBOS)
+      break;
+    case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_MODERATE:
+#endif  // !defined(OS_WEBOS)
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_CRITICAL:
       EvictResourcesNotUsedSince(base::TimeTicks() + base::TimeDelta::Max());
       FlushEvictedResources();

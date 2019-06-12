@@ -53,6 +53,9 @@ namespace {
 // the system. This limit can be breached by in-use cache items, which cannot
 // be deleted.
 static const int kNormalMaxItemsInCacheForGpu = 2000;
+#if defined(OS_WEBOS)
+static const int kThrottledMaxItemsInCacheForGpu = 100;
+#endif
 static const int kSuspendedMaxItemsInCacheForGpu = 0;
 
 // The maximum number of images that we can lock simultaneously in our working
@@ -1832,7 +1835,11 @@ bool GpuImageDecodeCache::ExceedsPreferredCount() const {
   if (aggressively_freeing_resources_) {
     items_limit = kSuspendedMaxItemsInCacheForGpu;
   } else {
+#if !defined(OS_WEBOS)
     items_limit = kNormalMaxItemsInCacheForGpu;
+#else   // defined(OS_WEBOS)
+    items_limit = kThrottledMaxItemsInCacheForGpu;
+#endif  // !defined(OS_WEBOS)
   }
 
   return persistent_cache_.size() > items_limit;
@@ -2785,7 +2792,13 @@ void GpuImageDecodeCache::OnMemoryPressure(
   base::AutoLock lock(lock_);
   switch (level) {
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_NONE:
+#if !defined(OS_WEBOS)
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_MODERATE:
+      break;
+#else   // defined(OS_WEBOS)
+      break;
+    case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_MODERATE:
+#endif  // !defined(OS_WEBOS)
       break;
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_CRITICAL:
       base::AutoReset<bool> reset(&aggressively_freeing_resources_, true);

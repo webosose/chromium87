@@ -423,8 +423,13 @@ void StagingBufferPool::OnMemoryPressure(
   base::AutoLock lock(lock_);
   switch (level) {
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_NONE:
+#if !defined(OS_WEBOS)
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_MODERATE:
       break;
+#else   // defined(OS_WEBOS)
+      break;
+    case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_MODERATE:
+#endif  // !defined(OS_WEBOS)
     case base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_CRITICAL:
       // Release all buffers, regardless of how recently they were used.
       ReleaseBuffersNotUsedSince(base::TimeTicks() + base::TimeDelta::Max());

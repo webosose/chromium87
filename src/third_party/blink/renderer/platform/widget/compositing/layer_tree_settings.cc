@@ -67,9 +67,13 @@ cc::ManagedMemoryPolicy GetGpuMemoryPolicy(
     if (base::StringToSizeT(
             base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
                 ::switches::kForceGpuMemAvailableMb),
-            &actual.bytes_limit_when_visible))
+            &actual.bytes_limit_when_visible)) {
       actual.bytes_limit_when_visible *= 1024 * 1024;
-    return actual;
+#if defined(OS_WEBOS)
+      actual.priority_cutoff_when_visible =
+          gpu::MemoryAllocation::CUTOFF_ALLOW_NICE_TO_HAVE;
+#endif
+    }    return actual;
   }
 
 #if defined(OS_ANDROID)
