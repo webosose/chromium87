@@ -19,6 +19,7 @@ import("//build/toolchain/cc_wrapper.gni")
 import("//build/toolchain/goma.gni")
 import("//build/toolchain/toolchain.gni")
 import("//build_overrides/build.gni")
+import("//neva/neva.gni")
 
 if (current_cpu == "arm" || current_cpu == "arm64") {
   import("//build/config/arm.gni")
@@ -153,6 +154,16 @@ declare_args() {
   # Turn off the --call-graph-profile-sort flag for lld by default. Enable
   # selectively for targets where it's beneficial.
   enable_call_graph_profile_sort = false
+
+  # Compress resulting debug symbols section, reducing the size of the
+  # non-stripped binary sizes. It is required at least in ARM32 with
+  # symbol_level 2 as otherwise the binary will be too big and toolchain
+  # tools will fail to handle the resulting binary, breaking debuggability.
+  #
+  # Though, this could potentially make breakpad fail, as it does not
+  # support compressed debug sections. See https://crbug.com/google-breakpad/615
+  compress_debug_info =
+      current_cpu == "arm" && !is_component_build && symbol_level == 2
 }
 
 declare_args() {
@@ -394,6 +405,16 @@ config("compiler") {
         "-Wl,-z,defs",
         "-Wl,--as-needed",
       ]
+    }
+
+    # Use long PLT header in ARM32. In some cases, the resulting binary is too
+    # much big, and that makes debugging fail to resolve symbols.
+    if (current_cpu == "arm") {
+      ldflags += [ "-Wl,--long-plt" ]
+    }
+
+    if (compress_debug_info) {
+      ldflags += [ "-Wl,--compress-debug-sections=zlib" ]
     }
   }
 
@@ -2073,6 +2094,12 @@ config("no_optimize") {
     # On Fuchsia, we optimize for size here to reduce the size of debug build
     # packages so they can be run in a KVM. See crbug.com/910243 for details.
     cflags = [ "-Og" ]
+  } else if (is_webos) {
+    # Replicate Android build options for no_optimize
+    cflags = [ "-Os" ] + common_optimize_on_cflags
+    if (!is_component_build) {
+      ldflags = [ "-Wl,--gc-sections" ]
+    }
   } else {
     cflags = [ "-O0" ]
     ldflags = []
