@@ -250,6 +250,7 @@ class AX_EXPORT AXEventGenerator : public AXTreeObserver {
   void OnAtomicUpdateFinished(AXTree* tree,
                               bool root_changed,
                               const std::vector<Change>& changes) override;
+  void OnNodeReparented(AXTree* tree, AXNode* node) override;
 
  private:
   void FireLiveRegionEvents(AXNode* node);
@@ -286,6 +287,7 @@ class AX_EXPORT AXEventGenerator : public AXTreeObserver {
 
   AXTree* tree_ = nullptr;  // Not owned.
   std::map<AXNode*, std::set<EventParams>> tree_events_;
+  std::map<int32_t, std::set<EventParams>> reparenting_node_events_;
 
   // Valid between the call to OnIntAttributeChanged and the call to
   // OnAtomicUpdateFinished. List of nodes whose active descendant changed.
