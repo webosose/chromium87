@@ -22,6 +22,7 @@
 
 #include <string>
 
+#include "base/logging.h"
 #include "ozone/platform/webos_constants.h"
 #include "ozone/wayland/display.h"
 #include "ozone/wayland/input/keyboard.h"
@@ -121,6 +122,7 @@ void WaylandTextInput::ResetIme() {
 
 void WaylandTextInput::ActivateTextModel(WaylandWindow* active_window) {
   if (text_model_ && active_window && !activated_) {
+    VLOG(1) << __func__ << " handle=" << active_window->Handle();
     text_model_activate(text_model_, serial, seat_->GetWLSeat(),
                         active_window->ShellSurface()->GetWLSurface());
   }
@@ -130,6 +132,7 @@ void WaylandTextInput::DeactivateTextModel() {
   if (text_model_ && activated_) {
     SetHiddenState();
     text_model_reset(text_model_, serial);
+    VLOG(1) << __func__;
     text_model_deactivate(text_model_, seat_->GetWLSeat());
     text_model_destroy(text_model_);
     text_model_ = nullptr;
