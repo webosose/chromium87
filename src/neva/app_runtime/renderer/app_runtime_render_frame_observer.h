@@ -41,14 +41,13 @@ class AppRuntimeRenderFrameObserver : public content::RenderFrameObserver,
   void SetBackgroundColor(int32_t r, int32_t g, int32_t b, int32_t a) override;
   void SuspendDOM() override;
   void ResumeDOM() override;
-  void ResetStateToMarkNextPaintForContainer() override;
+  void ResetStateToMarkNextPaint() override;
   void SetVisibilityState(mojom::VisibilityState visibility_state) override;
   void ChangeLocale(const std::string& locale) override;
   void SetNetworkQuietTimeout(double timeout) override;
   void SetDisallowScrollbarsInMainFrame(bool disallow) override;
   void GrantLoadLocalResources() override;
   void InsertStyleSheet(const std::string& css) override;
-  void ReplaceBaseURL(const std::string& new_url) override;
 
   void AddInjectionToLoad(const std::string& injection) override;
   void UnloadInjections() override;

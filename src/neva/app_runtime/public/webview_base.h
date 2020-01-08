@@ -68,7 +68,6 @@ class APP_RUNTIME_EXPORT WebViewBase : public WebViewDelegate,
   void LoadUrl(const std::string& url);
   void StopLoading();
   void LoadExtension(const std::string& name);
-  void ReplaceBaseURL(const std::string& new_url, const std::string& old_url);
   void EnableInspectablePage();
   void DisableInspectablePage();
   int DevToolsPort() const;

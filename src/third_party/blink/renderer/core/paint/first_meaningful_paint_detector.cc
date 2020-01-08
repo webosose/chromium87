@@ -246,7 +246,7 @@ void FirstMeaningfulPaintDetector::SetFirstMeaningfulPaint(
 }
 
 #if defined(USE_NEVA_APPRUNTIME)
-void FirstMeaningfulPaintDetector::ResetStateToMarkNextPaintForContainer() {
+void FirstMeaningfulPaintDetector::ResetStateToMarkNextPaint() {
   next_paint_is_meaningful_ = false;
   had_user_input_ = kNoUserInput;
   had_user_input_before_provisional_first_meaningful_paint_ = kNoUserInput;

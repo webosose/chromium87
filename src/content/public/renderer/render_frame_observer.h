@@ -268,7 +268,7 @@ class CONTENT_EXPORT RenderFrameObserver : public IPC::Listener,
       mojo::ScopedMessagePipeHandle* interface_pipe) {}
 
 #if defined(USE_NEVA_APPRUNTIME)
-  virtual void DidResetStateToMarkNextPaintForContainer() {}
+  virtual void DidResetStateToMarkNextPaint() {}
 #endif
 
 #if defined(USE_NEVA_MEDIA)

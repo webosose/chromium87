@@ -2210,12 +2210,12 @@ void WebLocalFrameImpl::SendPings(const WebURL& destination_url) {
 }
 
 #if defined(USE_NEVA_APPRUNTIME)
-void WebLocalFrameImpl::ResetStateToMarkNextPaintForContainer() {
+void WebLocalFrameImpl::ResetStateToMarkNextPaint() {
   if (!GetFrame())
     return;
 
   FirstMeaningfulPaintDetector::From(*(GetFrame()->GetDocument())).
-      ResetStateToMarkNextPaintForContainer();
+      ResetStateToMarkNextPaint();
 }
 #endif
 

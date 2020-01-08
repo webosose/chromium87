@@ -305,8 +305,6 @@ void WamDemoService::DataUpdated(const std::string& url,
       EmulatorSendData(response::kAppStarted, appid);
     } else if (cmd == command::kReloadPage) {
       app->GetWebView()->Reload();
-    } else if (cmd == command::kReplaceBaseURL) {
-      app->ReplaceBaseUrl(appurl);
     } else if (cmd == command::kStopLoading) {
       app->GetWebView()->StopLoading();
     } else if (cmd == command::kLaunchApp) {

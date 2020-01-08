@@ -230,15 +230,6 @@ void WebView::ClearExtensions() {
   RequestClearInjections();
 }
 
-void WebView::ReplaceBaseURL(const std::string& new_url) {
-  if (auto* frame_host = web_contents_->GetMainFrame()) {
-    mojo::AssociatedRemote<mojom::AppRuntimeWebViewClient> client;
-    frame_host->GetRemoteAssociatedInterfaces()->GetInterface(&client);
-    if (client)
-      client->ReplaceBaseURL(new_url);
-  }
-}
-
 const std::string& WebView::GetUrl() {
   return web_contents_->GetVisibleURL().spec();
 }
@@ -953,12 +944,12 @@ void WebView::RequestClearInjections() {
   injection_manager_->RequestUnloadInjections(web_contents_->GetMainFrame());
 }
 
-void WebView::ResetStateToMarkNextPaintForContainer() {
+void WebView::ResetStateToMarkNextPaint() {
   content::RenderViewHost* rvh = web_contents_->GetRenderViewHost();
   if (rvh) {
     mojo::AssociatedRemote<mojom::AppRuntimeWebViewClient> client;
     rvh->GetMainFrame()->GetRemoteAssociatedInterfaces()->GetInterface(&client);
-    client->ResetStateToMarkNextPaintForContainer();
+    client->ResetStateToMarkNextPaint();
   }
 }
 

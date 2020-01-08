@@ -488,20 +488,6 @@ function changeURL() {
   checkChangedURL();
 }
 
-function replaceBaseURL() {
-  appsDescription[activeNode].url = document.getElementById("url_data_value_input").value;
-  let url = appsDescription[activeNode].url;
-  let command = {
-    app_id: getFocusedElementAppId(),
-    url: appsDescription[activeNode].url,
-    cmd: 'replaceBaseURL'
-  };
-
-  console.log('command = ', command);
-  createExpectation(kWAM_commandSet, JSON.stringify(command));
-  checkChangedURL();
-}
-
 function enableSizePos(enable) {
   disabled = !enable;
   let names = [

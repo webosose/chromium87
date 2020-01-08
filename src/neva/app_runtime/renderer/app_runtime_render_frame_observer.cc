@@ -116,8 +116,8 @@ void AppRuntimeRenderFrameObserver::ResumeDOM() {
   page_pauser_.reset();
 }
 
-void AppRuntimeRenderFrameObserver::ResetStateToMarkNextPaintForContainer() {
-  render_frame()->ResetStateToMarkNextPaintForContainer();
+void AppRuntimeRenderFrameObserver::ResetStateToMarkNextPaint() {
+  render_frame()->ResetStateToMarkNextPaint();
 }
 
 void AppRuntimeRenderFrameObserver::SetVisibilityState(
@@ -182,14 +182,6 @@ void AppRuntimeRenderFrameObserver::GrantLoadLocalResources() {
 void AppRuntimeRenderFrameObserver::InsertStyleSheet(const std::string& css) {
   render_frame()->GetWebFrame()->GetDocument().InsertStyleSheet(
       blink::WebString::FromUTF8(css));
-}
-
-void AppRuntimeRenderFrameObserver::ReplaceBaseURL(const std::string& new_url) {
-  blink::WebNavigationControl* navi_control =
-      static_cast<blink::WebNavigationControl*>(render_frame()->GetWebFrame());
-  if (!navi_control)
-    return;
-  navi_control->UpdateForSameDocumentNavigation(new_url);
 }
 
 void AppRuntimeRenderFrameObserver::AddInjectionToLoad(

@@ -116,7 +116,6 @@ class WebOSSystemInjection : public gin::Wrappable<WebOSSystemInjection>,
   void EnableFullScreenMode(bool param);
   void StagePreparing();
   void StageReady();
-  void ContainerReady();
   void EditorFocused();
   void KeepAlive(bool param);
   void ApplyLaunchFeedback();

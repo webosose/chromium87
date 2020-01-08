@@ -28,14 +28,13 @@ interface AppRuntimeWebViewClient {
   SetBackgroundColor(int32 r, int32 g, int32 b, int32 a);
   SuspendDOM();
   ResumeDOM();
-  ResetStateToMarkNextPaintForContainer();
+  ResetStateToMarkNextPaint();
   SetVisibilityState(VisibilityState visibility_state);
   ChangeLocale(string locale);
   SetNetworkQuietTimeout(double timeout);
   SetDisallowScrollbarsInMainFrame(bool disallow);
   GrantLoadLocalResources();
   InsertStyleSheet(string css);
-  ReplaceBaseURL(string new_url);
 
   AddInjectionToLoad(string injection);
   UnloadInjections();

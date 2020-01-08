@@ -35,7 +35,6 @@ const char kActivityId[] = "activityId";
 const char kAddBannerMessage[] = "addBannerMessage";
 const char kAddNewContentIndicator[] = "addNewContentIndicator";
 const char kClearBannerMessages[] = "clearBannerMessages";
-const char kContainerReady[] = "containerReady";
 const char kCountry[] = "country";
 const char kCurrentCountryGroup[] = "currentCountryGroup";
 const char kCursorVisibility[] = "cursorVisibility";
@@ -91,7 +90,6 @@ std::set<std::string> unhandled = {
     kAddBannerMessage,
     kAddNewContentIndicator,
     kClearBannerMessages,
-    kContainerReady,
     kCurrentCountryGroup,
     kCursorVisibility,
     kDeactivate,

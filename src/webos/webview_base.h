@@ -109,7 +109,6 @@ class WEBOS_EXPORT WebViewBase
   void StopLoading();
   void LoadExtension(const std::string& name);
   void ClearExtensions();
-  void ReplaceBaseURL(const std::string& new_url, const std::string& old_url);
   void EnableInspectablePage();
   void DisableInspectablePage();
   void SetInspectable(bool enable);
@@ -179,7 +178,7 @@ class WEBOS_EXPORT WebViewBase
   void SetBlockWriteDiskcache(bool blocked);
   void SetCacheStorageUseMode(neva_app_runtime::StorageUseMode mode);
   void SetTransparentBackground(bool enabled);
-  void ResetStateToMarkNextPaintForContainer();
+  void ResetStateToMarkNextPaint();
 
   // RenderPreference
   void SetAllowFakeBoldText(bool allow);

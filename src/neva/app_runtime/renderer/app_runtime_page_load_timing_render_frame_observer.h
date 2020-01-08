@@ -36,7 +36,7 @@ class AppRuntimePageLoadTimingRenderFrameObserver
 
   // RenderFrameObserver implementation
   void DidChangePerformanceTiming() override;
-  void DidResetStateToMarkNextPaintForContainer() override;
+  void DidResetStateToMarkNextPaint() override;
 
   void OnDestruct() override;
 

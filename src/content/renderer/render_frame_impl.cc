@@ -5011,12 +5011,12 @@ void RenderFrameImpl::DidChangeCpuTiming(base::TimeDelta time) {
 }
 
 #if defined(USE_NEVA_APPRUNTIME)
-void RenderFrameImpl::ResetStateToMarkNextPaintForContainer() {
+void RenderFrameImpl::ResetStateToMarkNextPaint() {
   for (auto& observer : observers_)
-    observer.DidResetStateToMarkNextPaintForContainer();
+    observer.DidResetStateToMarkNextPaint();
 
   if (IsMainFrame() && GetWebFrame())
-    GetWebFrame()->ResetStateToMarkNextPaintForContainer();
+    GetWebFrame()->ResetStateToMarkNextPaint();
 }
 #endif
 

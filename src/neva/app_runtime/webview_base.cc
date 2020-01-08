@@ -220,12 +220,6 @@ void WebViewBase::SuspendWebPageDOM() {
   webview_->SuspendDOM();
 }
 
-void WebViewBase::ReplaceBaseURL(const std::string& new_url,
-                                 const std::string& old_url) {
-  if (new_url != old_url)
-    webview_->ReplaceBaseURL(new_url);
-}
-
 void WebViewBase::ResumeWebPageDOM() {
   webview_->ResumeDOM();
 }

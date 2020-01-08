@@ -466,7 +466,7 @@ class CONTENT_EXPORT RenderFrameImpl
   void ConvertViewportToWindow(blink::WebRect* rect) override;
   float GetDeviceScaleFactor() override;
 #if defined(USE_NEVA_APPRUNTIME)
-  void ResetStateToMarkNextPaintForContainer() override;
+  void ResetStateToMarkNextPaint() override;
 #endif
 #if defined(USE_NEVA_MEDIA)
   content::mojom::FrameVideoWindowFactory* GetFrameVideoWindowFactory()

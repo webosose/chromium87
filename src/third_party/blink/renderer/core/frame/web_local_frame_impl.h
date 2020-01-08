@@ -245,7 +245,7 @@ class CORE_EXPORT WebLocalFrameImpl final
   void DeleteSurroundingTextInCodePoints(int before, int after) override;
 
 #if defined(USE_NEVA_APPRUNTIME)
-  void ResetStateToMarkNextPaintForContainer() override;
+  void ResetStateToMarkNextPaint() override;
 #endif
 #if defined(USE_NEVA_MEDIA)
   void SetSuppressMediaPlay(bool suppress) override;
