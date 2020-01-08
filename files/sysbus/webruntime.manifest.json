@@ -1,0 +1,13 @@
+{
+    "id": "webruntime",
+    "version": "1.0.0",
+    "serviceFiles": [
+        "/usr/share/luna-service2/services.d/app-shell.service"
+    ],
+    "clientPermissionFiles": [
+        "/usr/share/luna-service2/client-permissions.d/app-shell.perm.json"
+    ],
+    "roleFiles": [
+        "/usr/share/luna-service2/roles.d/app-shell.role.json"
+    ]
+}
