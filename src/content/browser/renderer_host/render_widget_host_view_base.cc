@@ -524,7 +524,18 @@ base::WeakPtr<RenderWidgetHostViewBase> RenderWidgetHostViewBase::GetWeakPtr() {
 
 void RenderWidgetHostViewBase::GetScreenInfo(blink::ScreenInfo* screen_info) {
   DisplayUtil::GetNativeViewScreenInfo(screen_info, GetNativeView());
+#if defined(USE_NEVA_MEDIA)
+  if (!additional_contents_scale_.IsOrigin())
+    screen_info->additional_contents_scale = additional_contents_scale_;
+#endif
 }
+
+#if defined(USE_NEVA_MEDIA)
+void RenderWidgetHostViewBase::SetAdditionalContentsScale(float scale_x,
+                                                          float scale_y) {
+  additional_contents_scale_ = gfx::PointF(scale_x, scale_y);
+}
+#endif
 
 float RenderWidgetHostViewBase::GetDeviceScaleFactor() {
   blink::ScreenInfo screen_info;

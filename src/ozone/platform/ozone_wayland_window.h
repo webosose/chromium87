@@ -77,9 +77,12 @@ class OzoneWaylandWindow : public PlatformWindow,
   void ReleaseCapture() override;
   bool HasCapture() const override;
   void ToggleFullscreen() override;
+  void ToggleFullscreenWithSize(const gfx::Size& size) override;
   void Maximize() override;
   void Minimize() override;
   void Restore() override;
+  void SetResizeEnabled(bool enabled) override;
+  bool GetResizeEnabled() const { return resize_enabled_; }
   PlatformWindowState GetPlatformWindowState() const override;
 
   void Activate() override;
@@ -158,6 +161,7 @@ class OzoneWaylandWindow : public PlatformWindow,
   WindowManagerWayland* window_manager_;  // Not owned.
   bool transparent_;
   gfx::Rect bounds_;
+  bool resize_enabled_;
   unsigned handle_;
   unsigned parent_;
   ui::WidgetType type_;

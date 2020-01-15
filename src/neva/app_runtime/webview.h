@@ -166,6 +166,7 @@ class WebView : public content::WebContentsDelegate,
   void ForwardAppRuntimeEvent(AppRuntimeEvent* event);
   bool CanGoBack() const;
   void GoBack();
+  void SetAdditionalContentsScale(float scale_x, float scale_y);
   void SetHardwareResolution(int width, int height);
   void SetEnableHtmlSystemKeyboardAttr(bool enable);
 

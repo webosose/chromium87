@@ -918,6 +918,19 @@ void WebView::SendGetCookiesResponse(
     webview_delegate_->SendCookiesForHostname(cookie_line);
 }
 
+void WebView::SetAdditionalContentsScale(float scale_x, float scale_y) {
+#if defined(USE_NEVA_MEDIA)
+  content::RenderWidgetHostViewAura* const host_view =
+      static_cast<content::RenderWidgetHostViewAura*>(
+          web_contents_->GetRenderViewHost()->GetWidget()->GetView());
+
+  if (!host_view)
+    return;
+
+  host_view->SetAdditionalContentsScale(scale_x, scale_y);
+#endif
+}
+
 void WebView::SetHardwareResolution(int width, int height) {
   // FIXME(neva): Looks like this is fully dead legacy unneeded API.
   // We need to completely get rid of it or restore after upgrade to Chromium v.87

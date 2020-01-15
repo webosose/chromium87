@@ -2288,6 +2288,17 @@ void RenderWidgetHostViewAura::InternalSetBounds(const gfx::Rect& rect) {
   if (!in_bounds_changed_)
     window_->SetBounds(rect);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // Calculate scale ratio only for non popup window
+  if (!popup_parent_host_view_ && rect.height()) {
+    window_scale_ratio_ = static_cast<float>(display::Screen::GetScreen()
+                                                 ->GetPrimaryDisplay()
+                                                 .bounds()
+                                                 .height()) /
+                          rect.height();
+  }
+#endif
+
   // Even if not showing yet, we need to synchronize on size. As the renderer
   // needs to begin layout. Waiting until we show to start layout leads to
   // significant delays in embedding the first shown surface (500+ ms.)
@@ -2563,6 +2574,11 @@ bool RenderWidgetHostViewAura::IsKeepAliveWebApp() const {
   if (owner_delegate)
     return owner_delegate->GetWebkitPreferencesForWidget().keep_alive_webapp;
   return false;
+}
+
+gfx::Size RenderWidgetHostViewAura::GetCompositorViewportPixelSize() {
+  return gfx::ScaleToCeiledSize(GetRequestedRendererSize(),
+                                GetDeviceScaleFactor() * window_scale_ratio_);
 }
 #endif
 

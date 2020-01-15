@@ -84,6 +84,8 @@ class PlatformWindow {
   virtual void SetSurroundingText(const std::string& text,
                                   size_t cursor_position,
                                   size_t anchor_position) {}
+  virtual void SetResizeEnabled(bool enabled) {}
+  virtual void ToggleFullscreenWithSize(const gfx::Size& size){};
   virtual void XInputActivate(const std::string& type) {}
   virtual void XInputDeactivate() {}
   virtual void XInputInvokeAction(uint32_t keysym,
