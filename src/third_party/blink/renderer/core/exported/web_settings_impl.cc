@@ -40,7 +40,8 @@ namespace blink {
 
 WebSettingsImpl::WebSettingsImpl(Settings* settings,
                                  DevToolsEmulator* dev_tools_emulator)
-    : settings_(settings),
+    : WebSettingsImplNeva(settings),
+      settings_(settings),
       dev_tools_emulator_(dev_tools_emulator),
       render_v_sync_notification_enabled_(false),
       auto_zoom_focused_node_to_legible_scale_(false),

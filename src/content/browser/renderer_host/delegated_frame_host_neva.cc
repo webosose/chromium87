@@ -17,7 +17,11 @@
 #include "content/browser/renderer_host/delegated_frame_host_neva.h"
 
 #include "base/command_line.h"
+#include "base/task/post_task.h"
 #include "cc/base/switches.h"
+#include "components/viz/service/frame_sinks/compositor_frame_sink_support.h"
+#include "content/public/browser/browser_task_traits.h"
+#include "content/public/browser/browser_thread.h"
 
 namespace content {
 
@@ -58,6 +62,9 @@ void DelegatedFrameHost::WasShown(
     if (compositor_)
       compositor_->ResumeDrawing();
   }
+
+  DelegatedFrameHostClient* client =
+      static_cast<DelegatedFrameHostClient*>(client_);
 }
 
 void DelegatedFrameHost::WasHidden(HiddenCause cause) {

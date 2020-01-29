@@ -2770,6 +2770,8 @@ source_set("browser") {
     ]
     if (use_neva_appruntime) {
       sources += [
+        "renderer_host/delegated_frame_host_client_neva.cc",
+        "renderer_host/delegated_frame_host_client_neva.h",
         "renderer_host/delegated_frame_host_neva.cc",
         "renderer_host/delegated_frame_host_neva.h",
       ]

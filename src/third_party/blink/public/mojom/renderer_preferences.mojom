@@ -182,6 +182,9 @@ struct RendererPreferences {
 
   // Is application Enact-based Browser
   bool is_enact_browser = false;
+
+  // Keep alive webapp
+  bool keep_alive_webapp = false;
   ///@}
 
   // Whether the selection clipboard buffer is available.  Linux environments

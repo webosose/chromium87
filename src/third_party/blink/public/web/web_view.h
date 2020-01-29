@@ -504,6 +504,12 @@ class WebView {
 
   // Portals --------------------------------------------------------------
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // Set WebSettingsImpl::m_keepAliveWebApp to meet timing.
+  // The injection calls this function directly
+  virtual void SetKeepAliveWebApp(bool keep_alive) = 0;
+#endif
+
  protected:
   ~WebView() = default;
 };

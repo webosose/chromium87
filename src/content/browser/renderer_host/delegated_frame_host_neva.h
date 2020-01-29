@@ -28,6 +28,7 @@ class CONTENT_EXPORT DelegatedFrameHostClient
     : public neva_wrapped::DelegatedFrameHostClient {
  public:
   ~DelegatedFrameHostClient() override {}
+  virtual bool DelegatedFrameHostIsKeepAliveWebApp() const = 0;
 };
 
 // The DelegatedFrameHost is used to host all of the RenderWidgetHostView state

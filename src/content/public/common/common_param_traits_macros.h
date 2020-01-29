@@ -168,6 +168,7 @@ IPC_STRUCT_TRAITS_BEGIN(blink::mojom::RendererPreferences)
   IPC_STRUCT_TRAITS_MEMBER(file_security_origin)
   IPC_STRUCT_TRAITS_MEMBER(use_unlimited_media_policy)
   IPC_STRUCT_TRAITS_MEMBER(is_enact_browser)
+  IPC_STRUCT_TRAITS_MEMBER(keep_alive_webapp)
   ///@}
 IPC_STRUCT_TRAITS_END()
 

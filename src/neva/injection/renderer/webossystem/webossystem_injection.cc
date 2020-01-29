@@ -37,6 +37,7 @@
 #include "third_party/blink/public/web/blink.h"
 #include "third_party/blink/public/web/web_local_frame.h"
 #include "third_party/blink/public/web/web_script_source.h"
+#include "third_party/blink/public/web/web_view.h"
 #include "ui/base/resource/resource_bundle.h"
 
 namespace injections {
@@ -333,6 +334,14 @@ void WebOSSystemInjection::ApplyLaunchFeedback() {
 }
 
 void WebOSSystemInjection::KeepAlive(bool param) {
+  blink::WebLocalFrame* frame = blink::WebLocalFrame::FrameForCurrentContext();
+  if (!frame)
+    return;
+  blink::WebView* view = frame->View();
+  if (!view)
+    return;
+  view->SetKeepAliveWebApp(param);
+
   std::vector<std::string> arguments;
   arguments.push_back(param ? "true" : "false");
   SendCommand("keepAlive", arguments);

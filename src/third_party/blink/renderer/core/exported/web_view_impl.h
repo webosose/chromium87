@@ -220,6 +220,10 @@ class CORE_EXPORT WebViewImpl final : public WebView,
   void SetWebPreferences(const web_pref::WebPreferences& preferences) override;
   const web_pref::WebPreferences& GetWebPreferences() override;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void SetKeepAliveWebApp(bool keep_alive) override;
+#endif
+
   // Overrides the page's background and base background color. You
   // can use this to enforce a transparent background, which is useful if you
   // want to have some custom background rendered behind the widget.
