@@ -477,6 +477,11 @@ class CONTENT_EXPORT RenderWidgetHostViewBase : public RenderWidgetHostView {
   // Process swap messages sent before |frame_token| in RenderWidgetHostImpl.
   void OnFrameTokenChangedForView(uint32_t frame_token);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // For any swap that has been completed.
+  void OnSwapCompleted();
+#endif
+
   // Add and remove observers for lifetime event notifications. The order in
   // which notifications are sent to observers is undefined. Clients must be
   // sure to remove the observer before they go away.

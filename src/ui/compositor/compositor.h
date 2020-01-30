@@ -369,6 +369,9 @@ class COMPOSITOR_EXPORT Compositor : public cc::LayerTreeHostClient,
 #if defined(OS_LINUX) && !defined(OS_CHROMEOS)
   void OnCompleteSwapWithNewSize(const gfx::Size& size);
 #endif
+#if defined(USE_NEVA_APPRUNTIME)
+  void OnCompleteSwap();
+#endif
 
   bool IsLocked() { return lock_manager_.IsLocked(); }
 
@@ -399,6 +402,8 @@ class COMPOSITOR_EXPORT Compositor : public cc::LayerTreeHostClient,
 #if defined(USE_NEVA_APPRUNTIME)
   void SuspendDrawing();
   void ResumeDrawing();
+  void RenderProcessGone();
+  void SetDisplayVisibilityEnabled(bool enabled);
 #endif
 
   ScrollInputHandler* scroll_input_handler() const {
@@ -474,7 +479,8 @@ class COMPOSITOR_EXPORT Compositor : public cc::LayerTreeHostClient,
   float device_scale_factor_ = 0.f;
 
 #if defined(USE_NEVA_APPRUNTIME)
-  bool disable_drawing_ = false;
+  bool disable_drawing_ = true;
+  bool display_visibility_enabled_ = true;
 #endif
 
   LayerAnimatorCollection layer_animator_collection_;

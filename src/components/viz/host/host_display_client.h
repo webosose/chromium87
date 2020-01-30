@@ -47,6 +47,10 @@ class VIZ_HOST_EXPORT HostDisplayClient : public mojom::DisplayClient {
   void DidCompleteSwapWithNewSize(const gfx::Size& size) override;
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void DidCompleteSwap() override;
+#endif
+
   mojo::Receiver<mojom::DisplayClient> receiver_{this};
 #if defined(OS_APPLE) || defined(OS_WIN)
   gfx::AcceleratedWidget widget_;

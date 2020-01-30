@@ -35,6 +35,9 @@ class CONTENT_EXPORT DelegatedFrameHostClientAura
   void InvalidateLocalSurfaceIdOnEviction() override;
   std::vector<viz::SurfaceId> CollectSurfaceIdsForEviction() override;
   bool ShouldShowStaleContentOnEviction() override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void OnSwapCompleted() override;
+#endif
 
  private:
   RenderWidgetHostViewAura* render_widget_host_view_;

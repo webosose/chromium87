@@ -55,6 +55,13 @@ mojom("mojom") {
     "//ui/latency/mojom",
   ]
 
+  if (use_neva_appruntime) {
+    if (!defined(enabled_features)) {
+      enabled_features = []
+    }
+    enabled_features += [ "use_neva_appruntime" ]
+  }
+
   if (is_chromeos) {
     public_deps += [ "//components/chromeos_camera/common" ]
   }

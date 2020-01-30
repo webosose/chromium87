@@ -44,6 +44,7 @@ class AppRuntimeMainDelegate : public content::ContentMainDelegate,
   // content::ContentMainDelegate implementation:
   void PreSandboxStartup() override;
   void ProcessExiting(const std::string& process_type) override;
+  bool BasicStartupComplete(int* exit_code) override;
 
   content::ContentClient* CreateContentClient() override;
   content::ContentBrowserClient* CreateContentBrowserClient() override;

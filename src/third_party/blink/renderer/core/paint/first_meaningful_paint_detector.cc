@@ -175,8 +175,8 @@ bool FirstMeaningfulPaintDetector::SeenFirstMeaningfulPaint() const {
 void FirstMeaningfulPaintDetector::RegisterNotifySwapTime(PaintEvent event) {
   ++outstanding_swap_promise_count_;
   paint_timing_->RegisterNotifySwapTime(
-      CrossThreadBindOnce(&FirstMeaningfulPaintDetector::ReportSwapTime,
-                          WrapCrossThreadWeakPersistent(this), event));
+      event, CrossThreadBindOnce(&FirstMeaningfulPaintDetector::ReportSwapTime,
+                                 WrapCrossThreadWeakPersistent(this), event));
 }
 
 void FirstMeaningfulPaintDetector::ReportSwapTime(PaintEvent event,
@@ -218,6 +218,13 @@ void FirstMeaningfulPaintDetector::ReportSwapTime(PaintEvent event,
     DCHECK(!first_meaningful_paint_.is_null());
     SetFirstMeaningfulPaint(provisional_first_meaningful_paint_swap_);
   }
+#if defined(USE_NEVA_APPRUNTIME)
+  else if (seen_first_meaningful_paint_candidate_) {
+    first_meaningful_paint_ = g_clock->NowTicks();
+    network_quiet_reached_ = true;
+    SetFirstMeaningfulPaint(provisional_first_meaningful_paint_swap_);
+  }
+#endif
 }
 
 void FirstMeaningfulPaintDetector::NotifyFirstContentfulPaint(
@@ -259,6 +266,13 @@ void FirstMeaningfulPaintDetector::ResetStateToMarkNextPaint() {
   outstanding_swap_promise_count_ = 0;
   defer_first_meaningful_paint_ = kDoNotDefer;
 
+  paint_timing_->RegisterNotifySwapTime(
+      PaintEvent::kFirstContainerResetPaint,
+      CrossThreadBindOnce(
+          &FirstMeaningfulPaintDetector::ReportFirstContainerResetPaint,
+          WrapCrossThreadWeakPersistent(this),
+          PaintEvent::kFirstContainerResetPaint));
+
   if (GetDocument() && GetDocument()->GetFrame() &&
       GetDocument()->GetFrame()->GetIdlenessDetector())
     GetDocument()->GetFrame()->GetIdlenessDetector()->DomContentLoadedEventFired();
@@ -270,6 +284,11 @@ void FirstMeaningfulPaintDetector::NotifyNonFirstMeaningfulPaint() {
   if (GetDocument() && GetDocument()->Loader())
     GetDocument()->Loader()->CommitNonFirstMeaningfulPaintAfterLoad();
 }
+
+void FirstMeaningfulPaintDetector::ReportFirstContainerResetPaint(
+    PaintEvent event,
+    WebSwapResult result,
+    base::TimeTicks timestamp) {}
 #endif
 
 // static

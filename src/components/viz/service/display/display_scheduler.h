@@ -27,6 +27,12 @@ class VIZ_SERVICE_EXPORT DisplayScheduler : public DisplaySchedulerBase {
   DisplayScheduler(BeginFrameSource* begin_frame_source,
                    base::SingleThreadTaskRunner* task_runner,
                    int max_pending_swaps,
+#if defined(USE_NEVA_APPRUNTIME)
+                   // Doesn't matter if these are here because if only three
+                   // first params are given then they are unit tests
+                   bool use_viz_fmp_with_timeout = false,
+                   uint32_t viz_fmp_timeout = 0,
+#endif
                    bool wait_for_all_surfaces_before_draw = false);
   ~DisplayScheduler() override;
 
@@ -42,6 +48,14 @@ class VIZ_SERVICE_EXPORT DisplayScheduler : public DisplaySchedulerBase {
   void OnDisplayDamaged(SurfaceId surface_id) override;
   void OnRootFrameMissing(bool missing) override;
   void OnPendingSurfacesChanged() override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void OnSurfaceActivated(SurfaceId surface_id,
+                          bool is_first_contentful_paint,
+                          bool did_reset_container_state,
+                          bool seen_first_contentful_paint) override;
+  void NotifyPendingActivation() override;
+  void RenderProcessGone() override;
+#endif
 
  protected:
   class BeginFrameObserver;
@@ -92,6 +106,11 @@ class VIZ_SERVICE_EXPORT DisplayScheduler : public DisplaySchedulerBase {
   // Updates |has_pending_surfaces_| and returns whether its value changed.
   bool UpdateHasPendingSurfaces();
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void NotifyFirstSurfaceActivation();
+  void NotifyFirstSetVisibleActivationTimeout();
+#endif
+
   std::unique_ptr<BeginFrameObserver> begin_frame_observer_;
   BeginFrameSource* begin_frame_source_;
   base::SingleThreadTaskRunner* task_runner_;
@@ -114,9 +133,20 @@ class VIZ_SERVICE_EXPORT DisplayScheduler : public DisplaySchedulerBase {
   int next_swap_id_;
   int pending_swaps_;
   int max_pending_swaps_;
+#if defined(USE_NEVA_APPRUNTIME)
+  bool use_viz_fmp_with_timeout_;
+  uint32_t viz_fmp_timeout_;
+#endif
   bool wait_for_all_surfaces_before_draw_;
 
   bool observing_begin_frame_source_;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  bool seen_first_surface_activation_ = false;
+  bool first_surface_activated_ = false;
+  bool pending_first_surface_activation_ = false;
+  base::CancelableOnceClosure notify_first_activation_eventually_task_;
+#endif
 
   base::WeakPtrFactory<DisplayScheduler> weak_ptr_factory_{this};
 

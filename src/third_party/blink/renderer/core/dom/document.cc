@@ -8557,7 +8557,7 @@ const Node* Document::GetFindInPageActiveMatchNode() const {
 }
 
 bool Document::AddDeferredBackgroundImage() {
-  if (!IsMainThread() || !frame_ || !frame_->IsMainFrame())
+  if (!IsMainThread() || !IsInMainFrame())
     return false;
 
   VLOG(1) << __func__;
@@ -8567,7 +8567,7 @@ bool Document::AddDeferredBackgroundImage() {
 }
 
 void Document::RemoveDeferredBackgroundImage() {
-  if (!IsMainThread() || !frame_ || !frame_->IsMainFrame())
+  if (!IsMainThread() || !IsInMainFrame())
     return;
 
   VLOG(1) << __func__;

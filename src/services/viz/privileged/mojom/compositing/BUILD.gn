@@ -4,6 +4,7 @@
 
 import("//build/config/ui.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
+import("//neva/neva.gni")
 
 mojom("compositing") {
   sources = [
@@ -37,6 +38,9 @@ mojom("compositing") {
   }
   if (use_x11) {
     enabled_features += [ "use_x11" ]
+  }
+  if (use_neva_appruntime) {
+    enabled_features += [ "use_neva_appruntime" ]
   }
 
   cpp_typemaps = [

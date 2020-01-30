@@ -192,6 +192,10 @@ class VIZ_SERVICE_EXPORT Display : public DisplaySchedulerClient,
   // API has been used.
   DelegatedInkPointRendererBase* GetDelegatedInkPointRenderer();
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void RenderProcessGone();
+#endif
+
  private:
   friend class DisplayTest;
   // PresentationGroupTiming stores rendering pipeline stage timings associated

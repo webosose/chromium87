@@ -1066,6 +1066,7 @@ class CC_EXPORT LayerTreeHostImpl : public TileManagerClient,
 #if defined(USE_NEVA_APPRUNTIME)
   base::MemoryPressureListener::MemoryPressureLevel memory_pressure_level_;
   size_t bytes_limit_reduction_factor_ = 1;
+  bool seen_first_contentful_paint_ = false;
 #endif
   std::unique_ptr<SynchronousTaskGraphRunner>
       single_thread_synchronous_task_graph_runner_;

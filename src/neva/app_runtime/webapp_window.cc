@@ -246,6 +246,7 @@ void WebAppWindow::SetupWebContents(content::WebContents* web_contents) {
   }
 
   web_contents_ = web_contents;
+  Observe(web_contents_);
 }
 
 content::WebContents* WebAppWindow::GetWebContents() {
@@ -339,8 +340,17 @@ ui::WidgetState WebAppWindow::GetWindowHostStateAboutToChange() const {
 }
 
 void WebAppWindow::Activate() {
-  if (widget_)
+  VLOG(1) << __func__;
+  if (!contents_swapped_) {
+    VLOG(1) << __func__ << ": contents not swapped, waiting";
+    pending_activate_ = true;
+    return;
+  }
+  pending_activate_ = false;
+  if (widget_) {
+    VLOG(1) << __func__ << ": contents swapped, activating";
     widget_->Activate();
+  }
 }
 
 void WebAppWindow::SetBounds(int x, int y, int width, int height) {
@@ -373,8 +383,17 @@ void WebAppWindow::SetLocationHint(gfx::LocationHint value) {
 }
 
 void WebAppWindow::Show() {
-  if (widget_)
+  VLOG(1) << __func__;
+  if (!contents_swapped_) {
+    VLOG(1) << __func__ << " waiting swap";
+    pending_show_ = true;
+    return;
+  }
+  pending_show_ = false;
+  if (widget_) {
+    VLOG(1) << __func__ << " ready to show";
     widget_->Show();
+  }
 }
 
 void WebAppWindow::Minimize() {
@@ -384,6 +403,8 @@ void WebAppWindow::Minimize() {
 
 void WebAppWindow::Close() {
   widget_closed_ = true;
+  contents_swapped_ = false;
+  pending_show_ = false;
 
   if (widget_)
     widget_->Close();
@@ -847,6 +868,20 @@ int WebAppWindow::GetHeight() const {
   return widget_ ? widget_->GetWindowBoundsInScreen().height() : 0;
 }
 
+void WebAppWindow::BeginPrepareStackForWebApp() {
+  if (!host_)
+    return;
+
+  host_->AsWindowTreeHost()->BeginPrepareStackForWebApp();
+}
+
+void WebAppWindow::FinishPrepareStackForWebApp() {
+  if (!host_)
+    return;
+
+  host_->AsWindowTreeHost()->FinishPrepareStackForWebApp();
+}
+
 void WebAppWindow::CreateGroup(const WindowGroupConfiguration& config) {
   if (!host_)
     return;
@@ -882,6 +917,14 @@ void WebAppWindow::DetachGroup() {
     return;
 
   host_->AsWindowTreeHost()->DetachGroup();
+}
+
+void WebAppWindow::DidCompleteSwap() {
+  contents_swapped_ = true;
+  if (pending_activate_)
+    Activate();
+  if (pending_show_)
+    Show();
 }
 
 }  // namespace neva_app_runtime

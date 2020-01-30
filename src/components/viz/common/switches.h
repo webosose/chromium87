@@ -28,6 +28,13 @@ VIZ_COMMON_EXPORT extern const char kShowDCLayerDebugBorders[];
 
 VIZ_COMMON_EXPORT base::Optional<uint32_t> GetDeadlineToSynchronizeSurfaces();
 
+#if defined(USE_NEVA_APPRUNTIME)
+VIZ_COMMON_EXPORT extern const char kUseVizFMPWithTimeout[];
+
+VIZ_COMMON_EXPORT bool UseVizFMPWithTimeout();
+VIZ_COMMON_EXPORT uint32_t GetVizFMPTimeout();
+#endif
+
 }  // namespace switches
 
 #endif  // COMPONENTS_VIZ_COMMON_SWITCHES_H_

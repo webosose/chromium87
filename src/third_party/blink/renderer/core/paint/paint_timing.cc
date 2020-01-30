@@ -213,23 +213,35 @@ void PaintTiming::SetFirstContentfulPaint(base::TimeTicks stamp) {
 
 void PaintTiming::RegisterNotifySwapTime(PaintEvent event) {
   RegisterNotifySwapTime(
-      CrossThreadBindOnce(&PaintTiming::ReportSwapTime,
-                          WrapCrossThreadWeakPersistent(this), event));
+      event, CrossThreadBindOnce(&PaintTiming::ReportSwapTime,
+                                 WrapCrossThreadWeakPersistent(this), event));
 }
 
 void PaintTiming::RegisterNotifyFirstPaintAfterBackForwardCacheRestoreSwapTime(
     size_t index) {
-  RegisterNotifySwapTime(CrossThreadBindOnce(
-      &PaintTiming::ReportFirstPaintAfterBackForwardCacheRestoreSwapTime,
-      WrapCrossThreadWeakPersistent(this), index));
+  RegisterNotifySwapTime(
+      PaintEvent::kFirstPaint,
+      CrossThreadBindOnce(
+          &PaintTiming::ReportFirstPaintAfterBackForwardCacheRestoreSwapTime,
+          WrapCrossThreadWeakPersistent(this), index));
 }
 
-void PaintTiming::RegisterNotifySwapTime(ReportTimeCallback callback) {
+void PaintTiming::RegisterNotifySwapTime(PaintEvent event,
+                                         ReportTimeCallback callback) {
   // ReportSwapTime will queue a swap-promise, the callback is called when the
   // compositor submission of the current render frame completes or fails to
   // happen.
   if (!GetFrame() || !GetFrame()->GetPage())
     return;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  bool is_fcp = (event == PaintEvent::kFirstContentfulPaint);
+  bool is_container_reset = (event == PaintEvent::kFirstContainerResetPaint);
+  if (is_fcp || is_container_reset)
+    GetFrame()->GetPage()->GetChromeClient().NotifyVizFMPSwap(
+        *GetFrame(), is_fcp, is_container_reset);
+#endif
+
   GetFrame()->GetPage()->GetChromeClient().NotifySwapTime(*GetFrame(),
                                                           std::move(callback));
 }

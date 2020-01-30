@@ -63,6 +63,7 @@ class CONTENT_EXPORT DelegatedFrameHostClient {
   virtual void InvalidateLocalSurfaceIdOnEviction() = 0;
   virtual std::vector<viz::SurfaceId> CollectSurfaceIdsForEviction() = 0;
   virtual bool ShouldShowStaleContentOnEviction() = 0;
+  virtual void OnSwapCompleted() {}
 };
 
 // The DelegatedFrameHost is used to host all of the RenderWidgetHostView state
@@ -101,6 +102,9 @@ class CONTENT_EXPORT DelegatedFrameHost
 
   // ui::CompositorObserver implementation.
   void OnCompositingShuttingDown(ui::Compositor* compositor) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void OnCompositingCompleteSwap(ui::Compositor* compositor) override;
+#endif
 
   void ResetFallbackToFirstNavigationSurface();
 

@@ -451,6 +451,16 @@ void Surface::ActivateFrame(FrameData frame_data) {
 
   surface_manager_->SurfaceActivated(this);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  if (seen_first_frame_activation_) {
+    bool is_fmp = frame_data.frame.metadata.is_first_contentful_paint;
+    bool did_reset = frame_data.frame.metadata.did_reset_container_state;
+    bool seen_fcp = frame_data.frame.metadata.seen_first_contentful_paint;
+
+    surface_manager_->SurfaceActivatedEx(this, is_fmp, did_reset, seen_fcp);
+  }
+#endif
+
   // Defer notifying the embedder of an updated token until the frame has been
   // completely processed.
   const auto& metadata = GetActiveFrame().metadata;

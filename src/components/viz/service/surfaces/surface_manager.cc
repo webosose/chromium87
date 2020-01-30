@@ -468,6 +468,37 @@ void SurfaceManager::SurfaceActivated(Surface* surface) {
     observer.OnSurfaceActivated(surface->surface_id());
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+bool SurfaceManager::IsOrContainsFrameSink(
+    const FrameSinkId& parent_frame_sink_id,
+    const FrameSinkId& search_frame_sink_id) const {
+  if (parent_frame_sink_id == search_frame_sink_id)
+    return true;
+  for (auto& reference : references_) {
+    if (reference.first.frame_sink_id() == parent_frame_sink_id) {
+      for (auto& surface_id : reference.second) {
+        if (IsOrContainsFrameSink(surface_id.frame_sink_id(),
+                                  search_frame_sink_id))
+          return true;
+      }
+    }
+  }
+  return false;
+}
+
+void SurfaceManager::SurfaceActivatedEx(Surface* surface,
+                                        bool is_first_contentful_paint,
+                                        bool did_reset_container_state,
+                                        bool seen_first_contentful_paint) {
+  CHECK(thread_checker_.CalledOnValidThread());
+
+  for (auto& observer : observer_list_)
+    observer.OnSurfaceActivatedEx(
+        surface->surface_id(), is_first_contentful_paint,
+        did_reset_container_state, seen_first_contentful_paint);
+}
+#endif
+
 void SurfaceManager::SurfaceDestroyed(Surface* surface) {
   for (auto& observer : observer_list_)
     observer.OnSurfaceDestroyed(surface->surface_id());

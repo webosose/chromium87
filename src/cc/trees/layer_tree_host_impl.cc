@@ -2508,6 +2508,13 @@ viz::CompositorFrame LayerTreeHostImpl::GenerateCompositorFrame(
 
   metadata.activation_dependencies = std::move(frame->activation_dependencies);
   active_tree()->FinishSwapPromises(&metadata);
+
+#if defined(USE_NEVA_APPRUNTIME)
+  metadata.seen_first_contentful_paint = seen_first_contentful_paint_;
+  if (metadata.is_first_contentful_paint)
+    seen_first_contentful_paint_ = true;
+#endif
+
   // The swap-promises should not change the frame-token.
   DCHECK_EQ(metadata.frame_token, *next_frame_token_);
 

@@ -61,4 +61,13 @@ struct CompositorFrameMetadata {
   // before it disappears, regardless of whether or not the next frame contains
   // delegated ink metadata.
   DelegatedInkMetadata? delegated_ink_metadata;
+
+  [EnableIf=use_neva_appruntime]
+  bool is_first_contentful_paint;
+
+  [EnableIf=use_neva_appruntime]
+  bool did_reset_container_state;
+
+  [EnableIf=use_neva_appruntime]
+  bool seen_first_contentful_paint;
 };

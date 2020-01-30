@@ -61,6 +61,8 @@ class AURA_EXPORT WindowTreeHostNeva {
   virtual void FocusGroupOwner() {}
   virtual void FocusGroupLayer() {}
   virtual void DetachGroup() {}
+  virtual void BeginPrepareStackForWebApp() {}
+  virtual void FinishPrepareStackForWebApp() {}
 };
 
 }  // namespace aura

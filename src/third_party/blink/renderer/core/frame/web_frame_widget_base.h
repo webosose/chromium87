@@ -129,6 +129,8 @@ class CORE_EXPORT WebFrameWidgetBase
   void NotifySwapAndPresentationTimeInBlink(
       WebReportTimeCallback swap_callback,
       WebReportTimeCallback presentation_callback) final;
+  void NotifyVizFMPSwap(bool is_first_contentful_paint,
+                        bool did_reset_container_state) final;
   void RequestBeginMainFrameNotExpected(bool request) final;
   int GetLayerTreeId() final;
   void SetEventListenerProperties(cc::EventListenerClass,

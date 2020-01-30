@@ -902,6 +902,9 @@ class CONTENT_EXPORT WebContentsImpl : public WebContents,
   RenderFrameHostImpl* GetFocusedFrameFromFocusedDelegate() override;
   void OnVerticalScrollDirectionChanged(
       viz::VerticalScrollDirection scroll_direction) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void DidCompleteSwap() override;
+#endif
 
 #if !defined(OS_ANDROID)
   double GetPendingPageZoomLevel() override;

@@ -743,6 +743,10 @@ void RenderWidgetHostViewAura::SetIsLoading(bool is_loading) {
 }
 
 void RenderWidgetHostViewAura::RenderProcessGone() {
+#if defined(USE_NEVA_APPRUNTIME)
+  if (window_ && window_->GetHost() && window_->GetHost()->compositor())
+    window_->GetHost()->compositor()->RenderProcessGone();
+#endif
   UpdateCursorIfOverSelf();
   Destroy();
 }

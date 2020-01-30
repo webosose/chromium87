@@ -62,6 +62,13 @@ class VIZ_SERVICE_EXPORT SurfaceObserver {
   // to the surface that has |child_id| is removed.
   virtual void OnRemovedSurfaceReference(const SurfaceId& parent_id,
                                          const SurfaceId& child_id) {}
+
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void OnSurfaceActivatedEx(const SurfaceId& parent_id,
+                                    bool is_first_contentful_paint,
+                                    bool did_reset_container_state,
+                                    bool seen_first_contentful_paint) {}
+#endif
 };
 
 }  // namespace viz

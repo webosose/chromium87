@@ -197,6 +197,10 @@ class InProcessContextFactory::PerCompositorData
       mojo::PendingReceiver<viz::mojom::DelegatedInkPointRenderer> receiver)
       override {}
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void RenderProcessGone() override {}
+#endif
+
   void SetSurfaceHandle(gpu::SurfaceHandle surface_handle) {
     surface_handle_ = surface_handle;
   }

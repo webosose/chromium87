@@ -1126,6 +1126,12 @@ void WebView::DidDropAllPeerConnections(
   }
 }
 
+void WebView::DidCompleteSwap() {
+  VLOG(3) << __func__;
+  if (webview_delegate_)
+    webview_delegate_->DidSwapCompositorFrame();
+}
+
 void WebView::DidFrameFocused() {
   if (webview_delegate_)
     webview_delegate_->DidFirstFrameFocused();

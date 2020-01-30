@@ -31,31 +31,35 @@ void AppRuntimeWebViewHostImpl::SetDelegate(WebViewDelegate* delegate) {
 }
 
 void AppRuntimeWebViewHostImpl::DidLoadingEnd() {
+  VLOG(1) << __func__;
   if (webview_delegate_) {
     webview_delegate_->DidLoadingEnd();
     // FIXME(neva): This workaround temporarily fixes showing of WebApp window.
-    webview_delegate_->DidSwapCompositorFrame();
   }
 }
 
 void AppRuntimeWebViewHostImpl::DidFirstPaint() {
+  VLOG(1) << __func__;
   if (webview_delegate_) {
     webview_delegate_->DidFirstPaint();
-    webview_delegate_->DidSwapCompositorFrame();
   }
 }
 
 void AppRuntimeWebViewHostImpl::DidFirstContentfulPaint() {
-  if (webview_delegate_)
+  VLOG(1) << __func__;
+  if (webview_delegate_) {
     webview_delegate_->DidFirstContentfulPaint();
+  }
 }
 
 void AppRuntimeWebViewHostImpl::DidFirstImagePaint() {
+  VLOG(1) << __func__;
   if (webview_delegate_)
     webview_delegate_->DidFirstImagePaint();
 }
 
 void AppRuntimeWebViewHostImpl::DidFirstMeaningfulPaint() {
+  VLOG(1) << __func__;
   if (webview_delegate_)
     webview_delegate_->DidFirstMeaningfulPaint();
 }

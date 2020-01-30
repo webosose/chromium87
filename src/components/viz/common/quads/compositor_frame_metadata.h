@@ -164,6 +164,12 @@ class VIZ_COMMON_EXPORT CompositorFrameMetadata {
   // delegated ink metadata.
   std::unique_ptr<DelegatedInkMetadata> delegated_ink_metadata;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  bool is_first_contentful_paint = false;
+  bool did_reset_container_state = false;
+  bool seen_first_contentful_paint = false;
+#endif
+
  private:
   CompositorFrameMetadata(const CompositorFrameMetadata& other);
   CompositorFrameMetadata operator=(const CompositorFrameMetadata&) = delete;

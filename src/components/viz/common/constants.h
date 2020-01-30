@@ -14,6 +14,10 @@ namespace viz {
 // Keep list in alphabetical order.
 VIZ_COMMON_EXPORT extern const uint32_t kDefaultActivationDeadlineInFrames;
 
+#if defined(USE_NEVA_APPRUNTIME)
+VIZ_COMMON_EXPORT extern const uint32_t kDefaultVizFMPTimeout;
+#endif
+
 }  // namespace viz
 
 #endif  // COMPONENTS_VIZ_COMMON_CONSTANTS_H_

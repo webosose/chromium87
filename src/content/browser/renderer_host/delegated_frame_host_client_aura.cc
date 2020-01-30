@@ -62,4 +62,10 @@ bool DelegatedFrameHostClientAura::ShouldShowStaleContentOnEviction() {
   return render_widget_host_view_->ShouldShowStaleContentOnEviction();
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void DelegatedFrameHostClientAura::OnSwapCompleted() {
+  return render_widget_host_view_->OnSwapCompleted();
+}
+#endif
+
 }  // namespace content

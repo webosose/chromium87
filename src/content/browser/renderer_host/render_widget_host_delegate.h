@@ -337,6 +337,10 @@ class CONTENT_EXPORT RenderWidgetHostDelegate {
   // Notify the delegate that the screen orientation has been changed.
   virtual void DidChangeScreenOrientation() {}
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void DidCompleteSwap() {}
+#endif
+
   // Returns the FrameTree that this RenderWidgetHost is attached to. If the
   // RenderWidgetHost is attached to a frame, then its RenderFrameHost will be
   // in the tree. Otherwise, the RenderWidgetHost is for a popup which was

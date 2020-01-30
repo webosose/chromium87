@@ -697,6 +697,11 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   // there are any queued messages belonging to it, they will be processed.
   void DidProcessFrame(uint32_t frame_token);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // A swap has been completed
+  void DidCompleteSwap();
+#endif
+
   mojo::Remote<viz::mojom::InputTargetClient>& input_target_client() {
     return input_target_client_;
   }

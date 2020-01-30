@@ -21,6 +21,7 @@
 #include "base/lazy_instance.h"
 #include "base/logging.h"
 #include "base/path_service.h"
+#include "components/viz/common/switches.h"
 #include "content/public/common/content_switches.h"
 #include "neva/app_runtime/browser/app_runtime_content_browser_client.h"
 #include "ui/base/resource/resource_bundle.h"
@@ -59,6 +60,7 @@ bool WebOSContentMainDelegate::BasicStartupComplete(int* exit_code) {
   if (process_type.empty()) {
     startup_callback_.Run();
   }
+  parsedCommandLine->AppendSwitchASCII(switches::kUseVizFMPWithTimeout, "0");
 #if defined(USE_PMLOG)
   logging::PmLogProvider::Initialize("wam.log");
 #endif

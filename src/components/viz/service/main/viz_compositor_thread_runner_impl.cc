@@ -226,6 +226,10 @@ void VizCompositorThreadRunnerImpl::CreateFrameSinkManagerOnCompositorThread(
   init_params.log_capture_pipeline_in_webrtc =
       features::ShouldWebRtcLogCapturePipeline();
   init_params.debug_renderer_settings = params->debug_renderer_settings;
+#if defined(USE_NEVA_APPRUNTIME)
+  init_params.use_viz_fmp_with_timeout = switches::UseVizFMPWithTimeout();
+  init_params.viz_fmp_timeout = switches::GetVizFMPTimeout();
+#endif
 
   frame_sink_manager_ = std::make_unique<FrameSinkManagerImpl>(init_params);
   frame_sink_manager_->BindAndSetClient(

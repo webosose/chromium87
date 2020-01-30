@@ -98,6 +98,8 @@ class CONTENT_EXPORT WebContentsObserver : public IPC::Listener {
   // processed successfully.
   virtual void DidDropAllPeerConnections(
       blink::mojom::DropPeerConnectionReason reason) {}
+  // Notifies that a frame has been swapped
+  virtual void DidCompleteSwap() {}
 #endif
 
   // This method is invoked whenever one of the current frames of a WebContents

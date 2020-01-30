@@ -50,6 +50,12 @@ bool StructTraits<viz::mojom::CompositorFrameMetadataDataView,
         data.top_controls_visible_height());
   }
 
+#if defined(USE_NEVA_APPRUNTIME)
+  out->is_first_contentful_paint = data.is_first_contentful_paint();
+  out->did_reset_container_state = data.did_reset_container_state();
+  out->seen_first_contentful_paint = data.seen_first_contentful_paint();
+#endif
+
   if (!data.ReadLatencyInfo(&out->latency_info) ||
       !data.ReadReferencedSurfaces(&out->referenced_surfaces) ||
       !data.ReadDeadline(&out->deadline) ||

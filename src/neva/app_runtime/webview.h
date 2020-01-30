@@ -192,6 +192,7 @@ class WebView : public content::WebContentsDelegate,
   gfx::Size GetSizeForNewRenderView(
       content::WebContents* web_contents) override;
 
+  void DidCompleteSwap() override;
   void DidFrameFocused() override;
   bool GetAllowLocalResourceLoad() const override;
   void SetAllowLocalResourceLoad(bool enable);

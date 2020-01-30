@@ -894,9 +894,32 @@ void ChromeClientImpl::NotifySwapTime(LocalFrame& frame,
   FrameWidget* widget = frame.GetWidgetForLocalRoot();
   if (!widget)
     return;
+#if defined(OS_WEBOS)
+  // Splash screen detection in webOS depends on FMP, but FMP is
+  // now happening after first presentation has happened (so it
+  // will not actually dismiss splash as expected). As we are
+  // not using the histograms, this change just makes
+  // the swap events (and FMP) be emitted immediately,
+  // unbreaking splash.
+  widget->NotifySwapAndPresentationTimeInBlink(
+      ConvertToBaseOnceCallback(std::move(callback)), base::NullCallback());
+#else
   widget->NotifySwapAndPresentationTimeInBlink(
       base::NullCallback(), ConvertToBaseOnceCallback(std::move(callback)));
+#endif
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+void ChromeClientImpl::NotifyVizFMPSwap(LocalFrame& frame,
+                                        bool is_first_contentful_paint,
+                                        bool did_reset_container_state) {
+  FrameWidget* widget = frame.GetWidgetForLocalRoot();
+  if (!widget)
+    return;
+  widget->NotifyVizFMPSwap(is_first_contentful_paint,
+                           did_reset_container_state);
+}
+#endif
 
 void ChromeClientImpl::RequestBeginMainFrameNotExpected(LocalFrame& frame,
                                                         bool request) {

@@ -63,6 +63,9 @@ interface DisplayPrivate {
   [EnableIf=is_android]
   SetSupportedRefreshRates(array<float> refresh_rates);
 
+  [EnableIf=use_neva_appruntime]
+  RenderProcessGone();
+
   // Adds an observer that gets notified about vsync parameter changes. See
   // VSyncParameterObserver for details.
   //
@@ -87,6 +90,11 @@ interface DisplayClient {
   // window.
   [EnableIf=is_win]
   CreateLayeredWindowUpdater(pending_receiver<LayeredWindowUpdater> receiver);
+
+  // Notifies on any swap, so splash screen implementation can decide to show
+  // a web application window after swap has been completed.
+  [EnableIf=use_neva_appruntime]
+  DidCompleteSwap();
 
   // Notifies that a swap has occurred and provides information about the pixel
   // size of the swapped frame.

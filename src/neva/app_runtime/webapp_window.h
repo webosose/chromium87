@@ -18,6 +18,7 @@
 #define NEVA_APP_RUNTIME_WEBAPP_WINDOW_H_
 
 #include "base/timer/timer.h"
+#include "content/public/browser/web_contents_observer.h"
 #include "neva/app_runtime/public/app_runtime_constants.h"
 
 #include "ui/display/display_observer.h"
@@ -51,7 +52,8 @@ class WindowGroupConfiguration;
 
 class WebAppWindow : public views::NativeEventDelegate,
                      public display::DisplayObserver,
-                     public views::WidgetDelegateView {
+                     public views::WidgetDelegateView,
+                     public content::WebContentsObserver {
  public:
   struct CreateParams {
     gfx::Rect bounds;
@@ -105,6 +107,8 @@ class WebAppWindow : public views::NativeEventDelegate,
                           XInputEventType eventType);
   int GetWidth() const;
   int GetHeight() const;
+  void BeginPrepareStackForWebApp();
+  void FinishPrepareStackForWebApp();
 
   // Overridden from views::NativeEventDelegate
   void CursorVisibilityChanged(bool visible) override;
@@ -145,6 +149,9 @@ class WebAppWindow : public views::NativeEventDelegate,
   void OnMouseEvent(ui::MouseEvent* event) override;
   void OnKeyEvent(ui::KeyEvent* event) override;
 
+  // Overriden from content::WebContentsObserver
+  void DidCompleteSwap() override;
+
   // Converting values from |ui::WidgetState| to |neva_app_runtime::WidgetState|
   static WidgetState ToExposedWidgetStateType(ui::WidgetState state);
 
@@ -183,6 +190,9 @@ class WebAppWindow : public views::NativeEventDelegate,
   AppRuntimeDesktopNativeWidgetAura* desktop_native_widget_aura_ = nullptr;
   content::WebContents* web_contents_ = nullptr;
   std::map<std::string, std::string> window_property_list_;
+  bool pending_show_ = false;
+  bool pending_activate_ = false;
+  bool contents_swapped_ = false;
   bool deferred_deleting_ = false;
   bool widget_closed_ = false;
   base::OneShotTimer viewport_timer_;

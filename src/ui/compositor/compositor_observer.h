@@ -47,6 +47,9 @@ class COMPOSITOR_EXPORT CompositorObserver {
   virtual void OnCompositingCompleteSwapWithNewSize(ui::Compositor* compositor,
                                                     const gfx::Size& size) {}
 #endif  // defined(OS_LINUX) || defined(OS_CHROMEOS)
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void OnCompositingCompleteSwap(ui::Compositor* compositor) {}
+#endif
 
   // Called at the top of the compositor's destructor, to give observers a
   // chance to remove themselves.

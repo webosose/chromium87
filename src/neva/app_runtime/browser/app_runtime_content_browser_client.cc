@@ -24,6 +24,7 @@
 #include "base/system/sys_info.h"
 #include "cc/base/switches_neva.h"
 #include "components/network_session_configurator/common/network_switches.h"
+#include "components/viz/common/switches.h"
 #include "content/browser/web_contents/web_contents_impl.h"
 #include "content/public/browser/devtools_manager_delegate.h"
 #include "content/public/browser/login_delegate.h"
@@ -249,6 +250,7 @@ bool AppRuntimeContentBrowserClient::ShouldIsolateErrorPage(
 void AppRuntimeContentBrowserClient::AppendExtraCommandLineSwitches(
     base::CommandLine* command_line,
     int child_process_id) {
+  command_line->AppendSwitchASCII(switches::kUseVizFMPWithTimeout, "0");
 #if defined(OS_WEBOS)
   command_line->AppendSwitch(switches::kDisableQuic);
 #endif
