@@ -508,7 +508,8 @@ class CONTENT_EXPORT RenderWidgetHostViewAura
 
   bool SynchronizeVisualProperties(
       const cc::DeadlinePolicy& deadline_policy,
-      const base::Optional<viz::LocalSurfaceId>& child_local_surface_id);
+      const base::Optional<viz::LocalSurfaceId>& child_local_surface_id,
+      bool ignore_pending_ack = false);
 
   void OnDidUpdateVisualPropertiesComplete(
       const cc::RenderFrameMetadata& metadata);

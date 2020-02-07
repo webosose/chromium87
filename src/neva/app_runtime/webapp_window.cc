@@ -239,10 +239,12 @@ void WebAppWindow::SetupWebContents(content::WebContents* web_contents) {
     webview_ = new views::WebView(web_contents->GetBrowserContext());
     SetLayoutManager(std::make_unique<views::FillLayout>());
     AddChildView(webview_);
-    Layout();
   }
   if (webview_) {
     webview_->SetWebContents(web_contents);
+    // Do layout after web contents has been attached so that correct bounds
+    // will be propagated to content layer and render widget host.
+    Layout();
   }
 
   web_contents_ = web_contents;
