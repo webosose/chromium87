@@ -104,6 +104,8 @@ class ShellContentBrowserClient : public content::ContentBrowserClient {
   content::StoragePartitionConfig GetStoragePartitionConfigForSite(
       content::BrowserContext* browser_context,
       const GURL& site) override;
+  void OnNetworkServiceCreated(
+      network::mojom::NetworkService* network_service) override;
   void ConfigureNetworkContextParams(
       content::BrowserContext* context,
       bool in_memory,
