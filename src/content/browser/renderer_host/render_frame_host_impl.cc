@@ -8250,7 +8250,8 @@ bool RenderFrameHostImpl::ShouldBypassSecurityChecksForErrorPage(
     // commit in the old renderer process.  This may be true for subframe
     // navigations even when error page isolation is enabled for main frames.
     if (navigation_request &&
-        net::IsRequestBlockedError(navigation_request->GetNetErrorCode())) {
+        (net::IsRequestBlockedError(navigation_request->GetNetErrorCode()) ||
+         navigation_request->GetNetErrorCode() == net::ERR_ACCESS_DENIED)) {
       return true;
     }
   }
