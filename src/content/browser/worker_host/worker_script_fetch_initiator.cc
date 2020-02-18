@@ -213,11 +213,12 @@ WorkerScriptFetchInitiator::CreateFactoryBundle(
     // USER_VISIBLE because worker script fetch may affect the UI.
     base::TaskPriority file_factory_priority = base::TaskPriority::USER_VISIBLE;
     non_network_factories.emplace(
-        url::kFileScheme, FileURLLoaderFactory::Create(
-                              storage_partition->browser_context()->GetPath(),
-                              storage_partition->browser_context()
-                                  ->GetSharedCorsOriginAccessList(),
-                              file_factory_priority));
+        url::kFileScheme,
+        FileURLLoaderFactory::Create(
+            worker_process_id, storage_partition->browser_context()->GetPath(),
+            storage_partition->browser_context()
+                ->GetSharedCorsOriginAccessList(),
+            file_factory_priority));
   }
 
   switch (loader_type) {

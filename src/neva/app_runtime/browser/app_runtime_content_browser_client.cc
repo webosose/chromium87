@@ -29,6 +29,7 @@
 #include "content/public/browser/login_delegate.h"
 #include "content/public/browser/network_service_instance.h"
 #include "content/public/browser/render_frame_host.h"
+#include "content/public/browser/render_view_host.h"
 #include "content/public/browser/storage_partition.h"
 #include "content/public/common/content_neva_switches.h"
 #include "content/public/common/content_switches.h"
@@ -43,6 +44,7 @@
 #include "neva/app_runtime/public/proxy_settings.h"
 #include "neva/app_runtime/webview.h"
 #include "sandbox/policy/switches.h"
+#include "services/network/public/cpp/request_mode.h"
 #include "services/network/public/mojom/network_service.mojom.h"
 #include "third_party/blink/public/common/switches.h"
 #include "ui/base/ui_base_neva_switches.h"
@@ -187,26 +189,55 @@ bool AppRuntimeContentBrowserClient::IsFileAccessAllowedFromNetwork() const {
 
 bool AppRuntimeContentBrowserClient::IsFileAccessAllowedForRequest(
     const base::FilePath& path,
-    const base::FilePath& absolute_path,
-    const base::FilePath& profile_path,
-    const network::ResourceRequest& request) {
+    const network::ResourceRequest& request,
+    uint32_t process_id) {
+  VLOG(3) << __func__ << " mode:" << request.mode << " path:" << path
+          << " process:" << process_id
+          << " routing:" << request.render_frame_id;
   if (!file_access_delegate_)
     return base::CommandLine::ForCurrentProcess()->HasSwitch(kAllowFileAccess);
 
-  if (request.process_id != network::ResourceRequest::kBrowserProcessId)
-    return true;
-  // If ResourceRequest was created by the browser process, then process_id
-  // should be kBrowserProcessId and render_frame_id corresponds to the
-  // frame_tree_node_id
-  content::FrameTreeNode* frame_tree_node =
-      content::FrameTreeNode::GloballyFindByID(request.render_frame_id);
-  int process_id = frame_tree_node->current_frame_host()->GetProcess()->GetID();
-  int route_id = frame_tree_node->current_frame_host()
+  DCHECK_CURRENTLY_ON(BrowserThread::UI);
+  int route_id = -1;
+  int frame_tree_node_id = -1;
+  if (network::RequestModeToString(request.mode) == "navigate") {
+    content::FrameTreeNode* frame_tree_node =
+        content::FrameTreeNode::GloballyFindByID(request.render_frame_id);
+    if (frame_tree_node) {
+      while (!frame_tree_node->IsMainFrame() && frame_tree_node->parent())
+        frame_tree_node = frame_tree_node->parent()->frame_tree_node();
+      process_id = frame_tree_node->current_frame_host()->GetProcess()->GetID();
+      route_id = frame_tree_node->current_frame_host()
                      ->GetRenderViewHost()
                      ->GetRoutingID();
+      frame_tree_node_id = frame_tree_node->frame_tree_node_id();
+    } else {
+      LOG(WARNING) << __func__ << ": " << path
+                   << " rejected (no frame tree node)";
+      return false;
+    }
+  } else {
+    content::RenderFrameHost* rfh =
+        content::RenderFrameHost::FromID(process_id, request.render_frame_id);
+    content::RenderViewHost* rvh = rfh ? rfh->GetRenderViewHost() : nullptr;
+    if (rvh) {
+      route_id = rvh->GetRoutingID();
+    } else {
+      LOG(WARNING) << __func__ << ": " << path
+                   << " rejected (no render frame host)";
+      return false;
+    }
+  }
+
+  if (process_id == network::mojom::kInvalidProcessId) {
+    // Path not supported by file check, dump warning and continue
+    VLOG(1) << " file " << path
+            << " accepted (resource request without process)";
+    return true;
+  }
 
   return file_access_delegate_->IsAccessAllowed(path, process_id, route_id,
-                                                request.render_frame_id);
+                                                frame_tree_node_id);
 }
 
 bool AppRuntimeContentBrowserClient::ShouldIsolateErrorPage(

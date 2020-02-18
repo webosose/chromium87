@@ -216,7 +216,7 @@ std::unique_ptr<network::ResourceRequest> CreateResourceRequest(
 
   new_request->render_frame_id = frame_tree_node_id;
 #if defined(USE_NEVA_APPRUNTIME)
-  new_request->process_id = network::ResourceRequest::kBrowserProcessId;
+  new_request->process_id = network::mojom::kBrowserProcessId;
 #endif
 
   new_request->request_initiator =
@@ -1232,10 +1232,11 @@ NavigationURLLoaderImpl::NavigationURLLoaderImpl(
   // Loading and rendering a web page after the user clicks a link.
   base::TaskPriority file_factory_priority = base::TaskPriority::USER_BLOCKING;
   non_network_url_loader_factories_.emplace(
-      url::kFileScheme, FileURLLoaderFactory::Create(
-                            browser_context_->GetPath(),
-                            browser_context_->GetSharedCorsOriginAccessList(),
-                            file_factory_priority));
+      url::kFileScheme,
+      FileURLLoaderFactory::Create(
+          network::mojom::kBrowserProcessId, browser_context_->GetPath(),
+          browser_context_->GetSharedCorsOriginAccessList(),
+          file_factory_priority));
 
 #if defined(OS_ANDROID)
   non_network_url_loader_factories_.emplace(url::kContentScheme,

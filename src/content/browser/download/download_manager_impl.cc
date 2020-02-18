@@ -1294,6 +1294,8 @@ void DownloadManagerImpl::BeginResourceDownloadOnChecksComplete(
     pending_url_loader_factory =
         std::make_unique<network::WrapperPendingSharedURLLoaderFactory>(
             FileURLLoaderFactory::Create(
+                rfh ? rfh->GetProcess()->GetID()
+                    : network::mojom::kInvalidProcessId,
                 browser_context_->GetPath(),
                 browser_context_->GetSharedCorsOriginAccessList(),
                 // USER_VISIBLE because download should progress

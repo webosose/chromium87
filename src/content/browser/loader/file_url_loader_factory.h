@@ -14,6 +14,7 @@
 #include "content/public/browser/non_network_url_loader_factory_base.h"
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
+#include "services/network/public/mojom/network_context.mojom.h"
 
 namespace content {
 
@@ -37,12 +38,14 @@ class CONTENT_EXPORT FileURLLoaderFactory
   // Thread pool tasks posted by the constructed FileURLLoaderFactory use
   // |task_priority|.
   static mojo::PendingRemote<network::mojom::URLLoaderFactory> Create(
+      uint32_t process_id,
       const base::FilePath& profile_path,
       scoped_refptr<SharedCorsOriginAccessList> shared_cors_origin_access_list,
       base::TaskPriority task_priority);
 
  private:
   FileURLLoaderFactory(
+      uint32_t process_id,
       const base::FilePath& profile_path,
       scoped_refptr<SharedCorsOriginAccessList> shared_cors_origin_access_list,
       base::TaskPriority task_priority,
@@ -66,6 +69,7 @@ class CONTENT_EXPORT FileURLLoaderFactory
       mojo::PendingReceiver<network::mojom::URLLoader> loader,
       mojo::PendingRemote<network::mojom::URLLoaderClient> client);
 
+  uint32_t process_id_ = network::mojom::kInvalidProcessId;
   const base::FilePath profile_path_;
   const scoped_refptr<SharedCorsOriginAccessList>
       shared_cors_origin_access_list_;

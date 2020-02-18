@@ -89,6 +89,8 @@ class WEBOS_EXPORT WebViewBase
   static const std::string kSecurityOriginPostfix;
 
   static void SetFileAccessBlocked(bool blocked);
+  static WebViewBase* FromID(int render_process_id, int render_view_id);
+  static WebViewBase* FromFrameTreeNodeId(int frame_tree_node_id);
 
   WebViewBase(bool alt_storage_path = false,
               int width = 1920,
@@ -226,7 +228,9 @@ class WEBOS_EXPORT WebViewBase
 
   void SetAudioGuidanceOn(bool on);
   void SetTrustLevel(const std::string& trust_level);
+  std::string GetTrustLevel() const { return trust_level_; }
   void SetAppPath(const std::string& app_path);
+  std::string GetAppPath() const { return app_path_; }
   void SetBackHistoryAPIDisabled(const bool on);
   void SetV8SnapshotPath(const std::string& v8_snapshot_path);
   void SetV8ExtraFlags(const std::string& v8_extra_flags);
@@ -262,8 +266,6 @@ class WEBOS_EXPORT WebViewBase
  private:
   static neva_app_runtime::WebPageVisibilityState FromNativeVisibilityState(
     WebPageVisibilityState visibility_state);
-  void PushStateToIOThread();
-  void RemoveStateFromIOThread(content::WebContents* web_contents);
   void CallLoadVisuallyCommitted();
 
   neva_app_runtime::WebView* webview_;

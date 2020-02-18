@@ -20,7 +20,7 @@
 #include "net/base/net_errors.h"
 #include "net/url_request/url_request.h"
 #include "neva/app_runtime/app/app_runtime_main_delegate.h"
-#include "webos/browser/webos_webview_renderer_state.h"
+#include "webos/webview_base.h"
 
 namespace webos {
 
@@ -62,17 +62,25 @@ bool WebOSFileAccessDelegate::IsAccessAllowed(const base::FilePath& path,
                                               int process_id,
                                               int route_id,
                                               int frame_tree_node_id) const {
-  if (allow_all_access_)
+  VLOG(3) << __func__ << ": " << path << " process:" << process_id
+          << " route:" << route_id << " frame_tree_node:" << frame_tree_node_id;
+  if (allow_all_access_) {
+    VLOG(3) << __func__ << ": " << path << " accepted (allow all access)";
     return true;
+  }
 
   base::File::Info file_info;
   // Deny access if cannot get file information
-  if (!base::GetFileInfo(path, &file_info))
+  if (!base::GetFileInfo(path, &file_info)) {
+    LOG(WARNING) << __func__ << ": " << path << " rejected (no file info)";
     return false;
+  }
 
   // Deny directory access
-  if (file_info.is_directory || path.EndsWithSeparator())
+  if (file_info.is_directory || path.EndsWithSeparator()) {
+    LOG(WARNING) << __func__ << ": " << path << " rejected (directory)";
     return false;
+  }
 
   const base::FilePath stripped_path(path.StripTrailingSeparators());
 
@@ -80,24 +88,34 @@ bool WebOSFileAccessDelegate::IsAccessAllowed(const base::FilePath& path,
   for (const auto& target_path : allowed_target_paths_) {
     const base::FilePath white_listed_path(target_path);
     // base::FilePath::operator== should probably handle trailing separators.
-    if (white_listed_path == stripped_path || white_listed_path.IsParent(path))
+    if (white_listed_path == stripped_path ||
+        white_listed_path.IsParent(path)) {
+      VLOG(3) << __func__ << ": " << path << " accepted (global whitelist)";
       return true;
+    }
   }
 
   // PlzNavigate: navigation requests are created with a valid FrameTreeNode ID
   // and invalid RenderProcessHost and RenderFrameHost IDs.
-  WebOSWebViewRendererState::WebViewInfo web_view_info;
+  WebViewBase* web_view_base;
   if (frame_tree_node_id != -1) {
-    if (!WebOSWebViewRendererState::GetInstance()->GetInfoForFrameTreeNodeId(
-            frame_tree_node_id, &web_view_info))
-      return true;  // not a webview call, allow access???
-  } else if (!WebOSWebViewRendererState::GetInstance()->GetInfo(
-                 process_id, route_id, &web_view_info)) {
-    return true;  // not a webview call, allow access???
+    web_view_base = WebViewBase::FromFrameTreeNodeId(frame_tree_node_id);
+    if (!web_view_base) {
+      LOG(WARNING) << __func__ << ": " << path
+                   << " rejected (no renderer state for frame tree node)";
+      return false;
+    }
+  } else {
+    web_view_base = WebViewBase::FromID(process_id, route_id);
+    if (!web_view_base) {
+      LOG(WARNING) << __func__ << ": " << path
+                   << " rejected (no renderer state for process and route)";
+      return false;
+    }
   }
 
-  std::string caller_path = web_view_info.app_path;
-  std::string trust_level = web_view_info.trust_level;
+  std::string caller_path = web_view_base->GetAppPath();
+  std::string trust_level = web_view_base->GetTrustLevel();
 
   // in following we handle schemes set by AppRuntime applications
   // strip leading separators until only one is left
@@ -107,8 +125,10 @@ bool WebOSFileAccessDelegate::IsAccessAllowed(const base::FilePath& path,
   // 2. Resources in app folder path
   const base::FilePath white_listed_path =
       base::FilePath(caller_path).StripTrailingSeparators();
-  if (white_listed_path == stripped_path || white_listed_path.IsParent(path))
+  if (white_listed_path == stripped_path || white_listed_path.IsParent(path)) {
+    VLOG(3) << __func__ << ": " << path << " accepted (app folder path)";
     return true;
+  }
 
   // 3. Resources for trusted app
   if (trust_level == "trusted") {
@@ -119,11 +139,14 @@ bool WebOSFileAccessDelegate::IsAccessAllowed(const base::FilePath& path,
           base::FilePath(trusted_target_path).StripTrailingSeparators();
       // base::FilePath::operator== should probably handle trailing separators.
       if (white_listed_path == stripped_path ||
-          white_listed_path.IsParent(path))
+          white_listed_path.IsParent(path)) {
+        VLOG(3) << __func__ << ": " << path << " accepted (trusted app)";
         return true;
+      }
     }
   }
 
+  LOG(WARNING) << __func__ << ": " << path << " rejected (forbidden path)";
   return false;
 }
 

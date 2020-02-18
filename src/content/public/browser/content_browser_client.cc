@@ -292,9 +292,8 @@ bool ContentBrowserClient::IsFileAccessAllowed(
 #if defined(USE_NEVA_APPRUNTIME)
 bool ContentBrowserClient::IsFileAccessAllowedForRequest(
     const base::FilePath& path,
-    const base::FilePath& absolute_path,
-    const base::FilePath& profile_path,
-    const network::ResourceRequest& request) {
+    const network::ResourceRequest& request,
+    uint32_t process_id) {
   return true;
 }
 #endif

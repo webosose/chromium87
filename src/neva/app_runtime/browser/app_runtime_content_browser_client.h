@@ -67,11 +67,9 @@ class AppRuntimeContentBrowserClient : public content::ContentBrowserClient {
   bool ShouldIsolateErrorPage(bool is_main_frame) override;
 
   bool IsFileAccessAllowedFromNetwork() const override;
-  bool IsFileAccessAllowedForRequest(
-      const base::FilePath& path,
-      const base::FilePath& absolute_path,
-      const base::FilePath& profile_path,
-      const network::ResourceRequest& request) override;
+  bool IsFileAccessAllowedForRequest(const base::FilePath& path,
+                                     const network::ResourceRequest& request,
+                                     uint32_t process_id) override;
 
   void AppendExtraCommandLineSwitches(base::CommandLine* command_line,
                                       int child_process_id) override;

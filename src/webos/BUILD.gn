@@ -57,8 +57,6 @@ source_set("webos_impl") {
     "browser/webos_data_deleter.h",
     "browser/webos_file_access_delegate.cc",
     "browser/webos_file_access_delegate.h",
-    "browser/webos_webview_renderer_state.cc",
-    "browser/webos_webview_renderer_state.h",
     "common/webos_constants.h",
     "common/webos_content_client.cc",
     "common/webos_content_client.h",

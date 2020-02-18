@@ -598,9 +598,8 @@ class CONTENT_EXPORT ContentBrowserClient {
   // process_id and frame_tree_node_id are added to passed parameters.
   virtual bool IsFileAccessAllowedForRequest(
       const base::FilePath& path,
-      const base::FilePath& absolute_path,
-      const base::FilePath& profile_path,
-      const network::ResourceRequest& request);
+      const network::ResourceRequest& request,
+      uint32_t process_id);
 #endif
 
   // Indicates whether to force the MIME sniffer to sniff file URLs for HTML.

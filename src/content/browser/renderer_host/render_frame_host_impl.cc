@@ -6354,7 +6354,7 @@ void RenderFrameHostImpl::CommitNavigation(
       non_network_factories.emplace(
           url::kFileScheme,
           FileURLLoaderFactory::Create(
-              browser_context->GetPath(),
+              GetProcess()->GetID(), browser_context->GetPath(),
               browser_context->GetSharedCorsOriginAccessList(),
               file_factory_priority));
     }

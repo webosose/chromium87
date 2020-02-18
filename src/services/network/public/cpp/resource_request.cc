@@ -7,6 +7,7 @@
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "net/base/load_flags.h"
 #include "services/network/public/mojom/cookie_access_observer.mojom.h"
+#include "services/network/public/mojom/network_context.mojom.h"
 
 namespace network {
 
@@ -63,7 +64,11 @@ bool ResourceRequest::TrustedParams::EqualsForTesting(
          client_security_state == trusted_params.client_security_state;
 }
 
-ResourceRequest::ResourceRequest() {}
+ResourceRequest::ResourceRequest() {
+#if defined(USE_NEVA_APPRUNTIME) || defined(CROW_BROWSER)
+  process_id = mojom::kInvalidProcessId;
+#endif
+}
 ResourceRequest::ResourceRequest(const ResourceRequest& request) = default;
 ResourceRequest::~ResourceRequest() {}
 
