@@ -301,6 +301,7 @@ bool IsItemLike(const ax::mojom::Role role) {
     case ax::mojom::Role::kRadioButton:
     case ax::mojom::Role::kDescriptionListTerm:
     case ax::mojom::Role::kTerm:
+    case ax::mojom::Role::kCheckBox:
       return true;
     default:
       return false;
