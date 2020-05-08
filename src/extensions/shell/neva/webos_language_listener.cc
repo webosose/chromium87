@@ -83,6 +83,20 @@ void LanguageListener::OnResponse(pal::luna::Client::ResponseStatus,
   if (!rendererPrefs->accept_languages.compare(language->GetString()))
     return;
 
+  if (!rendererPrefs->accept_languages.empty()) {
+    // when the locale setting is changed
+    content::RenderFrameHost* render_frame_host = contents->GetMainFrame();
+    if (render_frame_host) {
+      std::string js_code =
+          R"JS(
+          var event_locale_change = new CustomEvent("webOSLocaleChange", {detail: {locale: ")JS" +
+          language->GetString() + R"JS("}});
+          document.dispatchEvent(event_locale_change);)JS";
+      render_frame_host->ExecuteJavaScript(base::UTF8ToUTF16(js_code),
+                                           base::NullCallback());
+    }
+  }
+
   rendererPrefs->accept_languages = language->GetString();
   contents->SyncRendererPrefs();
 }
