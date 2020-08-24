@@ -274,7 +274,8 @@ void GpuHostImpl::SendOutstandingReplies() {
 
 void GpuHostImpl::BindInterface(const std::string& interface_name,
                                 mojo::ScopedMessagePipeHandle interface_pipe) {
-  delegate_->BindInterface(interface_name, std::move(interface_pipe));
+  if (delegate_)
+    delegate_->BindInterface(interface_name, std::move(interface_pipe));
 }
 
 void GpuHostImpl::RunService(
