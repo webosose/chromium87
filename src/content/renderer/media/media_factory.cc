@@ -30,6 +30,7 @@
 #include "content/renderer/render_frame_impl.h"
 #include "content/renderer/render_thread_impl.h"
 #include "content/renderer/render_view_impl.h"
+#include "media/audio/null_audio_sink.h"
 #include "media/base/bind_to_current_loop.h"
 #include "media/base/cdm_factory.h"
 #include "media/base/decoder_factory.h"
@@ -562,13 +563,16 @@ blink::WebMediaPlayer* MediaFactory::CreateMediaPlayer(
         base::BindRepeating(&media::CreateMojoMediaPlatformAPI));
   }
 
-  if (use_neva_media && media::WebMediaPlayerNevaFactory::Playable(client))
+  if (use_neva_media && media::WebMediaPlayerNevaFactory::Playable(client)) {
+    params->set_audio_renderer_sink(
+        new media::NullAudioSink(media_task_runner));
     return media::WebMediaPlayerNevaFactory::CreateWebMediaPlayerNeva(
         web_frame, client, encrypted_client, GetWebMediaPlayerDelegate(),
         std::move(factory_selector), url_index_.get(), std::move(vfc),
         base::Bind(&RenderThreadImpl::GetStreamTextureFactory,
                    base::Unretained(content::RenderThreadImpl::current())),
         std::move(params), std::move(params_neva));
+  }
 #endif
 
   media::WebMediaPlayerImpl* media_player = new media::WebMediaPlayerImpl(
