@@ -1364,6 +1364,34 @@ void CaretColor::ApplyValue(StyleResolverState& state,
       StyleBuilderConverter::ConvertStyleAutoColor(state, value));
 }
 
+const CSSValue* CaretWidth::ParseSingleValue(
+    CSSParserTokenRange& range,
+    const CSSParserContext& context,
+    const CSSParserLocalContext&) const {
+  return css_parsing_utils::ConsumeCaretWidth(range, context);
+}
+
+const CSSValue* CaretWidth::CSSValueFromComputedStyleInternal(
+    const ComputedStyle& style,
+    const SVGComputedStyle&,
+    const LayoutObject*,
+    bool allow_visited_style) const {
+  if (style.HasAutoCaretWidth())
+    return CSSIdentifierValue::Create(CSSValueID::kAuto);
+  return ZoomAdjustedPixelValue(style.CaretWidth(), style);
+}
+
+void CaretWidth::ApplyValue(StyleResolverState& state,
+                            const CSSValue& value) const {
+  const CSSIdentifierValue& identifier_value = To<CSSIdentifierValue>(value);
+
+  if (identifier_value.GetValueID() == CSSValueID::kAuto)
+    state.Style()->SetHasAutoCaretWidth();
+  else
+    state.Style()->SetCaretWidth(
+        StyleBuilderConverter::ConvertComputedLength<float>(state, value));
+}
+
 const CSSValue* Clear::CSSValueFromComputedStyleInternal(
     const ComputedStyle& style,
     const SVGComputedStyle&,

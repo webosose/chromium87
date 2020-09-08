@@ -123,6 +123,10 @@ void CaretDisplayItemClient::LayoutBlockWillBeDestroyed(
 
 void CaretDisplayItemClient::UpdateStyleAndLayoutIfNeeded(
     const PositionWithAffinity& caret_position) {
+  if (caret_position.AnchorNode())
+    caret_width_ =
+        caret_position.AnchorNode()->GetLayoutObject()->StyleRef().CaretWidth();
+
   // This method may be called multiple times (e.g. in partial lifecycle
   // updates) before a paint invalidation. We should save previous_layout_block_
   // if it has not been saved since the last paint invalidation to ensure the

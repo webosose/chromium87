@@ -133,6 +133,8 @@ bool CSSPropertyEquality::PropertiesEqual(const PropertyHandle& property,
     case CSSPropertyID::kCaretColor:
       return a.CaretColor() == b.CaretColor() &&
              a.InternalVisitedCaretColor() == b.InternalVisitedCaretColor();
+    case CSSPropertyID::kCaretWidth:
+      return a.CaretWidth() == b.CaretWidth();
     case CSSPropertyID::kClip:
       return a.Clip() == b.Clip();
     case CSSPropertyID::kColor:

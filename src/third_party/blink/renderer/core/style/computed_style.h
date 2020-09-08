@@ -958,6 +958,22 @@ class ComputedStyle : public ComputedStyleBase,
   const AtomicString& TextEmphasisMarkString() const;
   LineLogicalSide GetTextEmphasisLineLogicalSide() const;
 
+  // caret-width
+  float CaretWidth() const {
+    return CaretWidthInternal();
+  }
+  void SetCaretWidth(float f) {
+    SetCaretWidthIsAutoInternal(false);
+    SetCaretWidthInternal(f);
+  }
+  bool HasAutoCaretWidth() const {
+    return CaretWidthIsAutoInternal();
+  }
+  void SetHasAutoCaretWidth() {
+    SetCaretWidthIsAutoInternal(true);
+    SetCaretWidthInternal(1.f);
+  }
+
   // Font properties.
   CORE_EXPORT const Font& GetFont() const { return FontInternal(); }
   CORE_EXPORT void SetFont(const Font& font) { SetFontInternal(font); }

@@ -569,6 +569,10 @@ void FrameSelection::InvalidatePaint(const LayoutBlock& block,
   frame_caret_->InvalidatePaint(block, context);
 }
 
+float FrameSelection::GetFrameCaretWidth() const {
+  return frame_caret_->GetCaretWidth();
+}
+
 bool FrameSelection::ShouldPaintCaret(const LayoutBlock& block) const {
   DCHECK_GE(GetDocument().Lifecycle().GetState(),
             DocumentLifecycle::kLayoutClean);
