@@ -170,7 +170,7 @@ bool TtsControllerImpl::StopCurrentUtteranceIfMatches(const GURL& source_url) {
   if (current_utterance_ && !current_utterance_->GetEngineId().empty()) {
     if (engine_delegate_)
       engine_delegate_->Stop(current_utterance_.get());
-  } else if (GetTtsPlatform()->PlatformImplAvailable()) {
+  } else if (GetTtsPlatform() && GetTtsPlatform()->PlatformImplAvailable()) {
     GetTtsPlatform()->ClearError();
     GetTtsPlatform()->StopSpeaking();
   }
@@ -189,7 +189,7 @@ void TtsControllerImpl::Pause() {
   if (current_utterance_ && !current_utterance_->GetEngineId().empty()) {
     if (engine_delegate_)
       engine_delegate_->Pause(current_utterance_.get());
-  } else if (current_utterance_) {
+  } else if (current_utterance_ && GetTtsPlatform()) {
     GetTtsPlatform()->ClearError();
     GetTtsPlatform()->Pause();
   }
@@ -202,7 +202,7 @@ void TtsControllerImpl::Resume() {
   if (current_utterance_ && !current_utterance_->GetEngineId().empty()) {
     if (engine_delegate_)
       engine_delegate_->Resume(current_utterance_.get());
-  } else if (current_utterance_) {
+  } else if (current_utterance_ && GetTtsPlatform()) {
     GetTtsPlatform()->ClearError();
     GetTtsPlatform()->Resume();
   } else {
@@ -284,7 +284,8 @@ void TtsControllerImpl::GetVoices(BrowserContext* browser_context,
 }
 
 bool TtsControllerImpl::IsSpeaking() {
-  return current_utterance_ != nullptr || GetTtsPlatform()->IsSpeaking();
+  return current_utterance_ != nullptr ||
+         (GetTtsPlatform() && GetTtsPlatform()->IsSpeaking());
 }
 
 void TtsControllerImpl::VoicesChanged() {
@@ -322,7 +323,7 @@ void TtsControllerImpl::RemoveUtteranceEventDelegate(
     if (!current_utterance_->GetEngineId().empty()) {
       if (engine_delegate_)
         engine_delegate_->Stop(current_utterance_.get());
-    } else {
+    } else if (GetTtsPlatform()) {
       GetTtsPlatform()->ClearError();
       GetTtsPlatform()->StopSpeaking();
     }
@@ -403,7 +404,8 @@ void TtsControllerImpl::SpeakNow(std::unique_ptr<TtsUtterance> utterance) {
 
   UpdateUtteranceDefaults(utterance.get());
 
-  GetTtsPlatform()->WillSpeakUtteranceWithVoice(utterance.get(), voice);
+  if (GetTtsPlatform())
+    GetTtsPlatform()->WillSpeakUtteranceWithVoice(utterance.get(), voice);
 
   base::RecordAction(base::UserMetricsAction("TextToSpeech.Speak"));
   UMA_HISTOGRAM_COUNTS_100000("TextToSpeech.Utterance.TextLength",
@@ -441,13 +443,15 @@ void TtsControllerImpl::SpeakNow(std::unique_ptr<TtsUtterance> utterance) {
     // It's possible for certain platforms to send start events immediately
     // during |speak|.
     SetCurrentUtterance(std::move(utterance));
-    GetTtsPlatform()->ClearError();
-    GetTtsPlatform()->Speak(
-        current_utterance_->GetId(), current_utterance_->GetText(),
-        current_utterance_->GetLang(), voice,
-        current_utterance_->GetContinuousParameters(),
-        base::BindOnce(&TtsControllerImpl::OnSpeakFinished,
-                       base::Unretained(this), current_utterance_->GetId()));
+    if (GetTtsPlatform()) {
+      GetTtsPlatform()->ClearError();
+      GetTtsPlatform()->Speak(
+          current_utterance_->GetId(), current_utterance_->GetText(),
+          current_utterance_->GetLang(), voice,
+          current_utterance_->GetContinuousParameters(),
+          base::BindOnce(&TtsControllerImpl::OnSpeakFinished,
+                         base::Unretained(this), current_utterance_->GetId()));
+    }
   }
 }
 
@@ -462,13 +466,14 @@ void TtsControllerImpl::OnSpeakFinished(int utterance_id, bool success) {
 
   // If the native voice wasn't able to process this speech, see if
   // the browser has built-in TTS that isn't loaded yet.
-  if (GetTtsPlatform()->LoadBuiltInTtsEngine(
+  if (GetTtsPlatform() && GetTtsPlatform()->LoadBuiltInTtsEngine(
           current_utterance_->GetBrowserContext())) {
     utterance_list_.emplace_back(std::move(current_utterance_));
     return;
   }
 
-  current_utterance_->OnTtsEvent(TTS_EVENT_ERROR, kInvalidCharIndex,
+  if (GetTtsPlatform())
+    current_utterance_->OnTtsEvent(TTS_EVENT_ERROR, kInvalidCharIndex,
                                  kInvalidLength, GetTtsPlatform()->GetError());
   SetCurrentUtterance(nullptr);
 }
