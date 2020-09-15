@@ -1110,13 +1110,17 @@ void SQLitePersistentCookieStore::Backend::BatchOperation(
     const CanonicalCookie& cc) {
   // Commit every 30 seconds.
   static const int kCommitIntervalMs = 30 * 1000;
+  // Aggressive commit is done every second.
+  static const int kCommitAggressiveIntervalMs = 1000;
   // Commit right away if we have more than 512 outstanding operations.
   static const size_t kCommitAfterBatchSize = 512;
   DCHECK(!background_task_runner()->RunsTasksInCurrentSequence());
 
   // We do a full copy of the cookie here, and hopefully just here.
   std::unique_ptr<PendingOperation> po(new PendingOperation(op, cc));
-
+  int commit_interval_ms = cookie_util::IsAggressiveFlushingEnabled()
+                               ? kCommitAggressiveIntervalMs
+                               : kCommitIntervalMs;
   PendingOperationsMap::size_type num_pending;
   {
     base::AutoLock locked(lock_);
@@ -1158,7 +1162,7 @@ void SQLitePersistentCookieStore::Backend::BatchOperation(
     // We've gotten our first entry for this batch, fire off the timer.
     if (!background_task_runner()->PostDelayedTask(
             FROM_HERE, base::BindOnce(&Backend::Commit, this),
-            base::TimeDelta::FromMilliseconds(kCommitIntervalMs))) {
+            base::TimeDelta::FromMilliseconds(commit_interval_ms))) {
       NOTREACHED() << "background_task_runner() is not running.";
     }
   } else if (num_pending == kCommitAfterBatchSize) {

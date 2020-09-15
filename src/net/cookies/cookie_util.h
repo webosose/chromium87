@@ -233,6 +233,9 @@ NET_EXPORT bool IsSchemefulSameSiteEnabled();
 bool IsRecentHttpSameSiteAccessGrantsLegacyCookieSemanticsEnabled();
 bool IsRecentCreationTimeGrantsLegacyCookieSemanticsEnabled();
 
+// Returns whether aggressive flushing is enabled.
+NET_EXPORT bool IsAggressiveFlushingEnabled();
+
 // Determines whether the last same-site access to a cookie should grant legacy
 // access semantics to the current attempted cookies access, based on the state
 // of the feature kRecentSameSiteAccessGrantsLegacyCookieSemantics, the value of

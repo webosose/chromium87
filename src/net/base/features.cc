@@ -115,6 +115,9 @@ const base::Feature kSameSiteByDefaultCookies{"SameSiteByDefaultCookies",
 const base::Feature kCookiesWithoutSameSiteMustBeSecure{
     "CookiesWithoutSameSiteMustBeSecure", base::FEATURE_ENABLED_BY_DEFAULT};
 
+const base::Feature kAggressiveFlushing{"AggressiveFlushing",
+                                        base::FEATURE_DISABLED_BY_DEFAULT};
+
 const base::Feature kShortLaxAllowUnsafeThreshold{
     "ShortLaxAllowUnsafeThreshold", base::FEATURE_DISABLED_BY_DEFAULT};
 

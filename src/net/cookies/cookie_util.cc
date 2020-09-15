@@ -647,6 +647,10 @@ bool IsRecentCreationTimeGrantsLegacyCookieSemanticsEnabled() {
                  .Get() > 0;
 }
 
+bool IsAggressiveFlushingEnabled() {
+  return base::FeatureList::IsEnabled(features::kAggressiveFlushing);
+}
+
 bool DoesLastHttpSameSiteAccessGrantLegacySemantics(
     base::TimeTicks last_http_same_site_access) {
   if (last_http_same_site_access.is_null())

@@ -81,6 +81,11 @@ GetSwitchDependentFeatureOverrides(const base::CommandLine& command_line) {
       {switches::kEnableExperimentalCookieFeatures,
        std::cref(net::features::kSchemefulSameSite),
        base::FeatureList::OVERRIDE_ENABLE_FEATURE},
+
+      // Aggressive flushing of DOM storage also affects cookies.
+      {switches::kEnableAggressiveDOMStorageFlushing,
+       std::cref(net::features::kAggressiveFlushing),
+       base::FeatureList::OVERRIDE_ENABLE_FEATURE},
   };
 
   std::vector<base::FeatureList::FeatureOverrideInfo> overrides;
