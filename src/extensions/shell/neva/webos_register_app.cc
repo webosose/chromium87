@@ -26,7 +26,15 @@
 
 namespace {
 
-const char kMessage[] = "message";
+const char kEvent[] = "event";
+const char kRelaunchEvent[] = "relaunch";
+const char kParameters[] = "parameters";
+const char kTarget[] = "target";
+const char kReason[] = "reason";
+const char kAction[] = "action";
+const char kUri[] = "uri";
+const char kIntentService[] = "com.webos.service.intent";
+
 const char kRegisterAppMethod[] =
     "palm://com.webos.applicationManager/registerNativeApp";
 const char kRegisterAppRequest[] =
@@ -75,30 +83,45 @@ void RegisterApp::OnResponse(pal::luna::Client::ResponseStatus,
   if (!root || !root->is_dict())
     return;
 
-  const std::string* message = root->FindStringKey(kMessage);
-  if (message && *message == "relaunch") {
+  const std::string* event = root->FindStringKey(kEvent);
+  if (event && *event == kRelaunchEvent) {
     aura::Window* top_window = contents->GetTopLevelNativeWindow();
     if (top_window && top_window->GetHost())
       top_window->GetHost()->ToggleFullscreen();
 
-    base::Value* params = root->FindDictKey("parameters");
-    if (params) {
-      const std::string* target = params->FindStringKey("target");
-      if (target) {
-        VLOG(1) << __func__ << ": target url = " << *target;
+    base::Value* params = root->FindDictKey(kParameters);
 
-        content::RenderFrameHost* r = contents->GetMainFrame();
-        std::string js_line =
+    if (!params) {
+      LOG(ERROR) << "Parameters field is absent in relaunch event.";
+      return;
+    }
+
+    const std::string* reason = root->FindStringKey(kReason);
+    std::string js_line;
+    if (reason && *reason == kIntentService) {
+      const std::string* action = params->FindStringKey(kAction);
+      const std::string* uri = params->FindStringKey(kUri);
+      if (action && uri) {
+        js_line =
             R"JS(
-                var e_tab_open = new CustomEvent("webOSRelaunch", {detail: {url: ")JS" +
+                var relaunch_event = new CustomEvent("webOSRelaunch", {detail: {action: ")JS" +
+            *action + R"JS(", uri: ")JS" + *uri + R"JS("}});
+                document.dispatchEvent(relaunch_event);)JS";
+      }
+    } else {
+      const std::string* target = params->FindStringKey(kTarget);
+      if (target) {
+        js_line =
+            R"JS(
+                var relaunch_event = new CustomEvent("webOSRelaunch", {detail: {url: ")JS" +
             *target + R"JS("}});
-                document.dispatchEvent(e_tab_open);)JS";
-
-        if (r)
-          r->ExecuteJavaScript(base::UTF8ToUTF16(js_line),
-                               base::NullCallback());
+                document.dispatchEvent(relaunch_event);)JS";
       }
     }
+
+    content::RenderFrameHost* rfh = contents->GetMainFrame();
+    if (rfh && !js_line.empty())
+      rfh->ExecuteJavaScript(base::UTF8ToUTF16(js_line), base::NullCallback());
   }
 }
 
