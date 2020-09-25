@@ -109,6 +109,7 @@ class COMPONENT_EXPORT(NEVA_MEDIA_SERVICE) MojoMediaPlayer
   void SetDisableAudio(bool) override;
   void SetMediaLayerId(const std::string& media_layer_id) override;
   media::Ranges<base::TimeDelta> GetBufferedTimeRanges() const override;
+  bool Send(const std::string& message) const override;
 
   // neva_media::mojom::MediaPlayerListener
   void OnMediaPlayerPlay() override;

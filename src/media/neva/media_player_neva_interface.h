@@ -133,6 +133,8 @@ class MediaPlayerNeva {
   virtual void SetMediaLayerId(const std::string& media_layer_id) {}
   virtual media::Ranges<base::TimeDelta> GetBufferedTimeRanges() const;
 
+  virtual bool Send(const std::string& message) const { return false; }
+
   virtual ~MediaPlayerNeva() {}
 };
 

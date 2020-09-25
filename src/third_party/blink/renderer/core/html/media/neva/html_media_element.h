@@ -65,6 +65,8 @@ class HTMLMediaElement {
   bool webosMediaFocus() const;
   void setWebosMediaFocus(bool focus);
 
+  bool send(const String& message);
+
  protected:
   void ScheduleEvent(const AtomicString& event_name, const String& detail);
   void ParseContentType(const ContentType& contentType);
@@ -245,6 +247,17 @@ void HTMLMediaElement<original_t>::SetMaxTimeupdateEventFrequency() {
           settings->GetMaxTimeupdateEventFrequency());
     }
   }
+}
+
+template <typename original_t>
+bool HTMLMediaElement<original_t>::send(const String& message) {
+  const original_t* self(static_cast<const original_t*>(this));
+  DCHECK(RuntimeEnabledFeatures::SendMethodEnabled());
+
+  if (self->GetWebMediaPlayer())
+    return self->GetWebMediaPlayer()->Send(std::string(message.Utf8().data()));
+
+  return false;
 }
 
 template <typename original_t>

@@ -380,4 +380,12 @@ void MojoMediaPlayer::OnConnected(
   client_receiver_.Bind(std::move(receiver));
 }
 
+bool MojoMediaPlayer::Send(const std::string& message) const {
+  DVLOG(1) << __func__ << " , message: " << message;
+  bool result;
+  if (media_player_ && media_player_->Send(message, &result))
+    return result;
+  return false;
+}
+
 }  // namespace neva_media

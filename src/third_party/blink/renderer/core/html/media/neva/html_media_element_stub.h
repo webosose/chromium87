@@ -38,6 +38,8 @@ class HTMLMediaElement {
   // Neva audio focus extensions
   bool webosMediaFocus() const;
   void setWebosMediaFocus(bool focus);
+
+  bool send(const String& message);
 };
 
 template <typename original_t>
@@ -65,6 +67,11 @@ bool HTMLMediaElement<original_t>::webosMediaFocus() const {
 
 template <typename original_t>
 void HTMLMediaElement<original_t>::setWebosMediaFocus(bool focus) {
+}
+
+template <typename original_t>
+bool HTMLMediaElement<original_t>::send(const String& message) {
+  return false;
 }
 
 }  // namespace neva

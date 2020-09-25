@@ -91,6 +91,7 @@ class MojoMediaPlayerService : public mojom::MediaPlayer,
   void SetDisableAudio(bool disable) override;
   void SetMediaLayerId(const std::string& media_layer_id) override;
   void GetBufferedTimeRanges(GetBufferedTimeRangesCallback callback) override;
+  void Send(const std::string& message, SendCallback callback) override;
 
   //-----------------------------------------------------------------
   // media::MediaPlayerNevaClient implementations

@@ -448,4 +448,10 @@ void MediaPlayerUMS::OnTimeUpdated(base::TimeDelta current_time) {
     client_->OnTimeUpdate(current_time_, base::TimeTicks::Now());
 }
 
+bool MediaPlayerUMS::Send(const std::string& message) const {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  FUNC_LOG(1);
+  return umedia_client_->Send(message);
+}
+
 }  // namespace media

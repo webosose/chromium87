@@ -2235,6 +2235,10 @@
       name: "VideoTexture",
       status: "experimental",
     },
+    {
+      name: "SendMethod",
+      status: "experimental",
+    },
 ///@}
   ],
 }

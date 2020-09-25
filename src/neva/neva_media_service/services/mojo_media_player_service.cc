@@ -303,4 +303,9 @@ void MojoMediaPlayerService::OnAudioFocusChanged() {
   });
 }
 
+void MojoMediaPlayerService::Send(const std::string& message,
+                                  SendCallback callback) {
+  std::move(callback).Run(media_player_neva_->Send(message));
+}
+
 }  // namespace neva_media

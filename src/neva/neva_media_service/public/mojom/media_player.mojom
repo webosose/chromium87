@@ -86,4 +86,5 @@ interface MediaPlayer {
   SetDisableAudio(bool disable);
   SetMediaLayerId(string media_layer_id);
   [Sync] GetBufferedTimeRanges() => (array<TimeDeltaPair> result);
+  [Sync] Send(string message) => (bool result);
 };

@@ -59,6 +59,12 @@ class WebMediaPlayer {
   virtual void SetAudioFocus(bool focus) {}
   virtual void SetRenderMode(RenderMode mode) {}
   virtual void SetDisableAudio(bool disable) {}
+  // Send custom commands to platform pipeline or player. For example we can
+  // send now subtitle related message to UMediaServer. Command are in JSON
+  // format of 'command' and 'Parameter' pair. Command describes type of
+  // message like 'SetInternalSubtitle' and Parameter describes value of
+  // attributes like 'index'.
+  virtual bool Send(const std::string& message) { return false; }
 };
 
 }  // namespace neva

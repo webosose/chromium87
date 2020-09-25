@@ -256,6 +256,8 @@ void UMediaClientImpl::Suspend(SuspendReason reason) {
     uMediaServer::uMediaClient::notifyBackground();
   }
 
+  system_media_manager_->SuspendSubtitleIfNeeded();
+
   system_media_manager_->AppStateChanged(
       SystemMediaManager::AppState::kBackground);
 }
@@ -275,11 +277,16 @@ void UMediaClientImpl::Resume() {
     }
     updated_payload_ = UpdateMediaOption(updated_payload_, current_time_);
     LoadInternal();
+
+    system_media_manager_->UpdateSubtitleIfNeeded();
+
     return;
   }
 
   if (use_pipeline_preload_ && !is_loaded())
     return;
+
+  system_media_manager_->ResumeSubtitleIfNeeded();
 
   NotifyForeground();
   system_media_manager_->AppStateChanged(
