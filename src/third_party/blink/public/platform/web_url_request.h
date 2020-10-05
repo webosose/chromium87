@@ -365,6 +365,11 @@ class WebURLRequest {
   BLINK_PLATFORM_EXPORT network::OptionalTrustTokenParams TrustTokenParams()
       const;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  BLINK_PLATFORM_EXPORT bool IsAccessTrusted() const;
+  BLINK_PLATFORM_EXPORT void SetAccessTrusted(bool trusted);
+#endif
+
 #if INSIDE_BLINK
   BLINK_PLATFORM_EXPORT ResourceRequest& ToMutableResourceRequest();
   BLINK_PLATFORM_EXPORT const ResourceRequest& ToResourceRequest() const;

@@ -548,6 +548,16 @@ network::OptionalTrustTokenParams WebURLRequest::TrustTokenParams() const {
   return ConvertTrustTokenParams(resource_request_->TrustTokenParams());
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+bool WebURLRequest::IsAccessTrusted() const {
+  return resource_request_->IsAccessTrusted();
+}
+
+void WebURLRequest::SetAccessTrusted(bool trusted) {
+  resource_request_->SetAccessTrusted(trusted);
+}
+#endif
+
 WebURLRequest::WebURLRequest(ResourceRequest& r) : resource_request_(&r) {}
 
 }  // namespace blink

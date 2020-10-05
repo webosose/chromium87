@@ -880,6 +880,9 @@ void FileURLLoaderFactory::CreateLoaderAndStartInternal(
           ? process_id_
           : request.process_id;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  if (!request.allow_local_resources)
+#endif
   if (response_type == network::mojom::FetchResponseType::kCors) {
     // FileURLLoader doesn't support CORS and it's not covered by CorsURLLoader,
     // so we need to reject requests that need CORS manually.

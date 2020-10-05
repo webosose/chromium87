@@ -125,6 +125,9 @@ struct COMPONENT_EXPORT(NETWORK_CPP_BASE) ResourceRequest {
   // field trivially copyable; see OptionalTrustTokenParams's definition for
   // more context.
   OptionalTrustTokenParams trust_token_params;
+#if defined(USE_NEVA_APPRUNTIME)
+  bool allow_local_resources = false;
+#endif
 };
 
 // This does not accept |kDefault| referrer policy.

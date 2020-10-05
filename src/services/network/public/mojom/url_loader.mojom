@@ -407,6 +407,12 @@ struct URLRequest {
   // and the request has set the trustToken Fetch parameter, denoting that it
   // wishes to execute a Trust Tokens protocol operation.
   TrustTokenParams? trust_token_params;
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // Allows local resource load to avoid CORS lock
+  bool allow_local_resources;
+  ///@}
 };
 
 // URLRequestBody represents body (i.e. upload data) of a HTTP request.

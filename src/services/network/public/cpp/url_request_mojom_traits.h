@@ -265,6 +265,11 @@ struct COMPONENT_EXPORT(NETWORK_CPP_BASE)
       const network::ResourceRequest& request) {
     return request.trust_token_params.as_ptr();
   }
+#if defined(USE_NEVA_APPRUNTIME)
+  static bool allow_local_resources(const network::ResourceRequest& request) {
+    return request.allow_local_resources;
+  }
+#endif
 
   static bool Read(network::mojom::URLRequestDataView data,
                    network::ResourceRequest* out);

@@ -130,6 +130,9 @@ bool ResourceRequest::EqualsForTesting(const ResourceRequest& request) const {
          recursive_prefetch_token == request.recursive_prefetch_token &&
          OptionalTrustedParamsEqualsForTesting(trusted_params,
                                                request.trusted_params) &&
+#if defined(USE_NEVA_APPRUNTIME)
+         allow_local_resources == request.allow_local_resources &&
+#endif
          trust_token_params == request.trust_token_params;
 }
 

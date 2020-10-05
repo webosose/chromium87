@@ -245,6 +245,9 @@ bool StructTraits<
   out->is_signed_exchange_prefetch_cache_enabled =
       data.is_signed_exchange_prefetch_cache_enabled();
   out->obey_origin_policy = data.obey_origin_policy();
+#if defined(USE_NEVA_APPRUNTIME)
+  out->allow_local_resources = data.allow_local_resources();
+#endif
   return true;
 }
 
