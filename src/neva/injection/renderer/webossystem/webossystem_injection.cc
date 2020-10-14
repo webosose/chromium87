@@ -611,8 +611,9 @@ void WebOSSystemInjection::Install(blink::WebLocalFrame* frame) {
     return;
 
   WebOSSystemInjection* webossystem_injection = nullptr;
-  gin::Converter<WebOSSystemInjection*>::FromV8(
-      isolate, local_webossystem, &webossystem_injection);
+  if (!gin::Converter<WebOSSystemInjection*>::FromV8(
+        isolate, local_webossystem, &webossystem_injection))
+    return;
   webossystem_injection->BuildExtraObjects(local_webossystem, isolate, context);
 }
 
