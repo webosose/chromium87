@@ -1444,6 +1444,8 @@ bool NativeViewGLSurfaceEGL::Initialize(GLSurfaceFormat format) {
                << GetLastEGLErrorString();
     Destroy();
     return false;
+  } else {
+    VLOG(1) << __func__ << " eglCreateWindowSurface successful";
   }
 
   if (g_driver_egl.ext.b_EGL_NV_post_sub_buffer) {
@@ -1562,6 +1564,8 @@ void NativeViewGLSurfaceEGL::Destroy() {
     if (!eglDestroySurface(GetDisplay(), surface_)) {
       LOG(ERROR) << "eglDestroySurface failed with error "
                  << GetLastEGLErrorString();
+    } else {
+      VLOG(1) << __func__ << " eglDestroySurface was successful";
     }
     surface_ = NULL;
   }

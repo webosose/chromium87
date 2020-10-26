@@ -332,8 +332,8 @@ void GLContextEGL::ReleaseYUVToRGBConvertersAndBackpressureFences() {
       // allocated in GLImageIOSurfaceEGL::CopyTexImage, which is only on
       // MacOS, where surfaceless EGL contexts are always supported.
       if (!eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, context_)) {
-        DVLOG(1) << "eglMakeCurrent failed with error "
-                 << GetLastEGLErrorString();
+        LOG(ERROR) << __func__ << ": eglMakeCurrent failed with error="
+                   << GetLastEGLErrorString();
       }
     }
 
@@ -389,7 +389,8 @@ bool GLContextEGL::MakeCurrentImpl(GLSurface* surface) {
   InitializeDynamicBindings();
 
   if (!surface->OnMakeCurrent(this)) {
-    LOG(ERROR) << "Could not make current.";
+    LOG(ERROR) << __func__ << " Could not make current with error="
+               << GetLastEGLErrorString();
     return false;
   }
 
