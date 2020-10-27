@@ -16,6 +16,7 @@
 
 #include "ozone/wayland/shell/webos_shell_surface.h"
 
+#include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
 #include "ozone/wayland/display.h"
 #include "ozone/wayland/seat.h"
@@ -179,8 +180,13 @@ void WebosShellSurface::HandleStateChanged(
 
     WebosShellSurface* shell_surface =
         static_cast<WebosShellSurface*>(window->ShellSurface());
-    if (shell_surface)
+    if (shell_surface) {
+      VLOG(1) << __PRETTY_FUNCTION__ << ": state=" << state;
       shell_surface->OnStateChanged(ToWidgetState(state));
+    } else {
+      LOG(INFO) << __PRETTY_FUNCTION__ << ": state=" << state
+                << ", but no shell surface";
+    }
 #if defined(USE_NEVA_MEDIA)
     ui::VideoWindowControllerImpl* video_window_controller =
         WaylandDisplay::GetInstance()->GetVideoWindowControllerImpl();
@@ -189,6 +195,8 @@ void WebosShellSurface::HandleStateChanged(
                                                        ToWidgetState(state));
     }
 #endif  // defined(USE_NEVA_MEDIA)
+  } else {
+    LOG(INFO) << __PRETTY_FUNCTION__ << ": window is 0";
   }
 }
 

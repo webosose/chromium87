@@ -16,6 +16,7 @@
 
 #include "webos/webapp_window_base.h"
 
+#include "base/logging.h"
 #include "neva/app_runtime/public/app_runtime_constants.h"
 #include "neva/app_runtime/public/window_group_configuration.h"
 #include "ui/display/display.h"
@@ -170,8 +171,12 @@ NativeWindowState WebAppWindowBase::GetWindowHostStateAboutToChange() const {
 }
 
 void WebAppWindowBase::SetWindowHostState(NativeWindowState state) {
-  if (webapp_window_)
+  if (webapp_window_) {
+    VLOG(1) << __PRETTY_FUNCTION__ << ": state=" << state;
     webapp_window_->SetWindowHostState(ToWidgetState(state));
+  } else {
+    LOG(INFO) << __PRETTY_FUNCTION__ << ": no webapp_window_";
+  }
 }
 
 void WebAppWindowBase::SetInputRegion(const std::vector<gfx::Rect>& region) {

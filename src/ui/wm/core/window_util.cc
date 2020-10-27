@@ -5,6 +5,7 @@
 #include "ui/wm/core/window_util.h"
 
 #include "base/bind.h"
+#include "base/logging.h"
 #include "ui/aura/client/aura_constants.h"
 #include "ui/aura/window.h"
 #include "ui/compositor/layer.h"
@@ -90,8 +91,11 @@ void SetWindowFullscreen(aura::Window* window, bool fullscreen) {
   ui::WindowShowState current_show_state =
       window->GetProperty(aura::client::kShowStateKey);
   bool is_fullscreen = current_show_state == ui::SHOW_STATE_FULLSCREEN;
-  if (fullscreen == is_fullscreen)
+  if (fullscreen == is_fullscreen) {
+    LOG(INFO) << __PRETTY_FUNCTION__ << ": skip";
     return;
+  }
+  VLOG(1) << __PRETTY_FUNCTION__ << ": fullscreen=" << fullscreen;
   if (fullscreen) {
     // Save the previous show state so that we can correctly restore it after
     // exiting the fullscreen mode.
