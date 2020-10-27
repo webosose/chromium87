@@ -183,8 +183,24 @@ int SystemHostResolverCall(const std::string& host,
       should_retry = true;
     }
   }
+  if (err) {
+    LOG(WARNING) << "getaddrinfo (host:" << host << "), error (code:" << err
+                 << ", str:" << gai_strerror(err) << "), system error (code:"
+                 << ((err == EAI_SYSTEM) ? errno : 0)
+                 << ", str:" << ((err == EAI_SYSTEM) ? strerror(errno) : "")
+                 << ")";
+    should_retry = true;
+  }
   if (should_retry) {
     std::tie(ai, err, os_error) = AddressInfo::Get(host, hints);
+  }
+  if (err) {
+    LOG(WARNING) << "retry getaddrinfo (host:" << host
+                 << "), error (code:" << err << ", str:" << gai_strerror(err)
+                 << "), system error (code:"
+                 << ((err == EAI_SYSTEM) ? errno : 0)
+                 << ", str:" << ((err == EAI_SYSTEM) ? strerror(errno) : "")
+                 << ")";
   }
 
   if (os_error_opt)
