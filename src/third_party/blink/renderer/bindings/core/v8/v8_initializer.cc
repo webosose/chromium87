@@ -90,9 +90,15 @@
 
 namespace blink {
 
+#if defined(USE_NEVA_APPRUNTIME)
+#define FATAL_LOG LOG(ERROR)
+#else
+#define FATAL_LOG DVLOG(1)
+#endif
+
 static void ReportFatalErrorInMainThread(const char* location,
                                          const char* message) {
-  DVLOG(1) << "V8 error: " << message << " (" << location << ").";
+  FATAL_LOG << "V8 error: " << message << " (" << location << ").";
   LOG(FATAL);
 }
 
