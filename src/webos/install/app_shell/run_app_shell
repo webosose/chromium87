@@ -73,15 +73,12 @@ fi
 
 CHROME_CACHE="${CACHE_DIR}/app_shell"
 
-EXTRA_PARAMS_JSON=$(echo "${EXTRA_PARAMS_JSON}" | python -c "
-import sys, json
-params = json.load(sys.stdin)
-
-params['override_user_agent_string'] = '${OVERRIDE_USER_AGENT_STRING}'
-params['hide_exit_button'] = False
-
-print json.dumps(params)
-")
+# Add 'override_user_agent_string' key-value to EXTRA_PARAMS_JSON
+if [ -z ${EXTRA_PARAMS_JSON} ]; then
+    EXTRA_PARAMS_JSON="{\"override_user_agent_string\":\"${OVERRIDE_USER_AGENT_STRING}\"}"
+else
+    EXTRA_PARAMS_JSON=$(echo ${EXTRA_PARAMS_JSON}|sed "s#^{\(.*\)}#{\1,\"override_user_agent_string\":\"${OVERRIDE_USER_AGENT_STRING}\"}#g")
+fi
 
 ######################################################################
                 #      Target Environment          #
