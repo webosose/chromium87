@@ -133,7 +133,11 @@ class AppRuntimeContentBrowserClient : public content::ContentBrowserClient {
   void AppendExtraWebSocketHeader(const std::string& key,
                                   const std::string& value);
 
+  void PushCorsCorbDisabledToIOThread(int process_id, bool disabled);
+
  private:
+  void SetCorsCorbDisabledOnIOThread(int process_id, bool disabled);
+
   AppRuntimeBrowserMainExtraParts* browser_extra_parts_ = nullptr;
   AppRuntimeBrowserMainParts* main_parts_ = nullptr;
 

@@ -163,13 +163,14 @@ base::Optional<network::CorsErrorStatus> CheckAccess(
     const KURL& response_url,
     const HTTPHeaderMap& response_header,
     network::mojom::CredentialsMode credentials_mode,
-    const SecurityOrigin& origin) {
+    const SecurityOrigin& origin,
+    bool non_strict_mode) {
   return network::cors::CheckAccess(
       response_url,
       GetHeaderValue(response_header, http_names::kAccessControlAllowOrigin),
       GetHeaderValue(response_header,
                      http_names::kAccessControlAllowCredentials),
-      credentials_mode, AsUrlOrigin(origin));
+      credentials_mode, AsUrlOrigin(origin), non_strict_mode);
 }
 
 base::Optional<network::CorsErrorStatus> CheckPreflightAccess(
@@ -177,13 +178,14 @@ base::Optional<network::CorsErrorStatus> CheckPreflightAccess(
     const int response_status_code,
     const HTTPHeaderMap& response_header,
     network::mojom::CredentialsMode actual_credentials_mode,
-    const SecurityOrigin& origin) {
+    const SecurityOrigin& origin,
+    bool non_strict_mode) {
   return network::cors::CheckPreflightAccess(
       response_url, response_status_code,
       GetHeaderValue(response_header, http_names::kAccessControlAllowOrigin),
       GetHeaderValue(response_header,
                      http_names::kAccessControlAllowCredentials),
-      actual_credentials_mode, AsUrlOrigin(origin));
+      actual_credentials_mode, AsUrlOrigin(origin), non_strict_mode);
 }
 
 base::Optional<network::CorsErrorStatus> CheckRedirectLocation(

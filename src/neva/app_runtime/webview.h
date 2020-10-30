@@ -271,6 +271,7 @@ class WebView : public content::WebContentsDelegate,
   void UpdateViewportScaleFactor();
   void SetDisallowScrollbarsInMainFrame(bool disallow);
   void GrantLoadLocalResources();
+  void PushCorsCorbDisabledToIOThread(bool disabled);
   void FinishLoadCallback(const std::string& url);
 #if defined(USE_NEVA_EXTENSIONS)
   void LoadExtensionFromUrl(const GURL& url);

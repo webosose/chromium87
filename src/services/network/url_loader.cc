@@ -57,6 +57,7 @@
 #include "services/network/public/cpp/ip_address_space_util.h"
 #include "services/network/public/cpp/net_adapters.h"
 #include "services/network/public/cpp/network_switches.h"
+#include "services/network/public/cpp/neva/cors_corb_exception.h"
 #include "services/network/public/cpp/origin_policy.h"
 #include "services/network/public/cpp/parsed_headers.h"
 #include "services/network/public/cpp/resource_request.h"
@@ -588,6 +589,11 @@ URLLoader::URLLoader(
       request.corb_excluded && request.mode == mojom::RequestMode::kNoCors &&
       CrossOriginReadBlockingExceptionForPlugin::ShouldAllowForPlugin(
           factory_params_->process_id);
+
+  if (neva::CorsCorbException::ShouldAllowExceptionForProcess(GetProcessId())) {
+    is_nocors_corb_excluded_request_ = true;
+  }
+
   request_mode_ = request.mode;
 
   if (request.trusted_params) {

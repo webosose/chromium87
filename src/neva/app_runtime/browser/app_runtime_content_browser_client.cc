@@ -534,4 +534,31 @@ void AppRuntimeContentBrowserClient::RenderProcessWillLaunch(
       new ExtensionsGuestViewMessageFilter(render_process_id, browser_context));
 }
 #endif
+
+void AppRuntimeContentBrowserClient::PushCorsCorbDisabledToIOThread(
+    int process_id,
+    bool disabled) {
+  DCHECK_CURRENTLY_ON(BrowserThread::UI);
+  content::GetIOThreadTaskRunner({})->PostTask(
+      FROM_HERE,
+      base::BindOnce(
+          &AppRuntimeContentBrowserClient::SetCorsCorbDisabledOnIOThread,
+          base::Unretained(this), process_id, disabled));
+}
+
+void AppRuntimeContentBrowserClient::SetCorsCorbDisabledOnIOThread(
+    int process_id,
+    bool disabled) {
+  if (!GetNetworkService()) {
+    DCHECK_CURRENTLY_ON(BrowserThread::UI);
+    return;
+  }
+
+  if (disabled) {
+    GetNetworkService()->AddCorsCorbExceptionForProcess(process_id);
+  } else {
+    GetNetworkService()->RemoveCorsCorbExceptionForProcess(process_id);
+  }
+}
+
 }  // namespace neva_app_runtime

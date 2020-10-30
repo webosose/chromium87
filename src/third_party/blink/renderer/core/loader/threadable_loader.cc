@@ -570,9 +570,15 @@ bool ThreadableLoader::RedirectReceived(
     }
 
     if (cors_flag_) {
+      bool non_strict_mode = false;
+      LocalFrame* frame = GetFrame();
+      if (frame)
+        non_strict_mode = !frame->GetSettings()->GetWebSecurityEnabled();
+
       if (const auto error_status = cors::CheckAccess(
               original_url, redirect_response.HttpHeaderFields(),
-              new_request.GetCredentialsMode(), *GetSecurityOrigin())) {
+              new_request.GetCredentialsMode(), *GetSecurityOrigin(),
+              non_strict_mode)) {
         DispatchDidFail(ResourceError(original_url, *error_status));
         return false;
       }
@@ -743,11 +749,16 @@ void ThreadableLoader::DidDownloadToBlob(Resource* resource,
 
 void ThreadableLoader::HandlePreflightResponse(
     const ResourceResponse& response) {
+  bool non_strict_mode = false;
+  LocalFrame* frame = GetFrame();
+  if (frame)
+    non_strict_mode = !frame->GetSettings()->GetWebSecurityEnabled();
+
   base::Optional<network::CorsErrorStatus> cors_error_status =
       cors::CheckPreflightAccess(
           response.CurrentRequestUrl(), response.HttpStatusCode(),
           response.HttpHeaderFields(), actual_request_.GetCredentialsMode(),
-          *GetSecurityOrigin());
+          *GetSecurityOrigin(), non_strict_mode);
   if (cors_error_status) {
     HandlePreflightFailure(response.CurrentRequestUrl(), *cors_error_status);
     return;
@@ -853,9 +864,14 @@ void ThreadableLoader::ResponseReceived(Resource* resource,
   fallback_request_for_service_worker_ = ResourceRequest();
 
   if (cors_flag_) {
+    bool non_strict_mode = false;
+    LocalFrame* frame = GetFrame();
+    if (frame)
+      non_strict_mode = !frame->GetSettings()->GetWebSecurityEnabled();
+
     base::Optional<network::CorsErrorStatus> access_error = cors::CheckAccess(
         response.CurrentRequestUrl(), response.HttpHeaderFields(),
-        credentials_mode_, *GetSecurityOrigin());
+        credentials_mode_, *GetSecurityOrigin(), non_strict_mode);
     if (access_error) {
       ReportResponseReceived(resource->InspectorId(), response);
       DispatchDidFail(

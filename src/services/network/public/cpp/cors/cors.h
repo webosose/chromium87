@@ -56,7 +56,8 @@ base::Optional<CorsErrorStatus> CheckAccess(
     const base::Optional<std::string>& allow_origin_header,
     const base::Optional<std::string>& allow_credentials_header,
     mojom::CredentialsMode credentials_mode,
-    const url::Origin& origin);
+    const url::Origin& origin,
+    bool non_strict_mode = false);
 
 // Returns true if |request_mode| is not kNavigate nor kNoCors, and the
 // |request_initiator| is not same as the origin of |request_url|. The
@@ -78,7 +79,8 @@ base::Optional<CorsErrorStatus> CheckPreflightAccess(
     const base::Optional<std::string>& allow_origin_header,
     const base::Optional<std::string>& allow_credentials_header,
     mojom::CredentialsMode actual_credentials_mode,
-    const url::Origin& origin);
+    const url::Origin& origin,
+    bool non_strict_mode = false);
 
 // Given a redirected-to URL, checks if the location is allowed
 // according to CORS. That is:

@@ -18,6 +18,7 @@
 #include "services/network/public/cpp/cors/origin_access_list.h"
 #include "services/network/public/cpp/features.h"
 #include "services/network/public/cpp/header_util.h"
+#include "services/network/public/cpp/neva/cors_corb_exception.h"
 #include "services/network/public/cpp/request_mode.h"
 #include "services/network/trust_tokens/trust_token_operation_metrics_recorder.h"
 #include "services/network/url_loader.h"
@@ -271,7 +272,8 @@ void CorsURLLoader::OnReceiveResponse(mojom::URLResponseHeadPtr response_head) {
         GetHeaderString(*response_head,
                         header_names::kAccessControlAllowCredentials),
         request_.credentials_mode,
-        tainted_ ? url::Origin() : *request_.request_initiator);
+        tainted_ ? url::Origin() : *request_.request_initiator,
+        neva::CorsCorbException::ShouldAllowExceptionForProcess(process_id_));
     if (error_status) {
       HandleComplete(URLLoaderCompletionStatus(*error_status));
       return;

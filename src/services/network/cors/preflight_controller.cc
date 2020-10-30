@@ -20,6 +20,7 @@
 #include "services/network/public/cpp/constants.h"
 #include "services/network/public/cpp/cors/cors.h"
 #include "services/network/public/cpp/cors/cors_error_status.h"
+#include "services/network/public/cpp/neva/cors_corb_exception.h"
 #include "services/network/public/cpp/resource_request.h"
 #include "services/network/public/cpp/simple_url_loader.h"
 #include "services/network/public/mojom/network_service.mojom.h"
@@ -152,7 +153,8 @@ std::unique_ptr<PreflightResult> CreatePreflightResult(
     const mojom::URLResponseHead& head,
     const ResourceRequest& original_request,
     bool tainted,
-    base::Optional<CorsErrorStatus>* detected_error_status) {
+    base::Optional<CorsErrorStatus>* detected_error_status,
+    bool non_strict_mode = false) {
   DCHECK(detected_error_status);
 
   *detected_error_status = CheckPreflightAccess(
@@ -161,7 +163,8 @@ std::unique_ptr<PreflightResult> CreatePreflightResult(
       GetHeaderString(head.headers,
                       header_names::kAccessControlAllowCredentials),
       original_request.credentials_mode,
-      tainted ? url::Origin() : *original_request.request_initiator);
+      tainted ? url::Origin() : *original_request.request_initiator,
+      non_strict_mode);
   if (*detected_error_status)
     return nullptr;
 
@@ -291,7 +294,8 @@ class PreflightController::PreflightLoader final {
 
     base::Optional<CorsErrorStatus> detected_error_status;
     std::unique_ptr<PreflightResult> result = CreatePreflightResult(
-        final_url, head, original_request_, tainted_, &detected_error_status);
+        final_url, head, original_request_, tainted_, &detected_error_status,
+        neva::CorsCorbException::ShouldAllowExceptionForProcess(process_id_));
 
     if (result) {
       // Preflight succeeded. Check |original_request_| with |result|.

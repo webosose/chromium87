@@ -37,14 +37,16 @@ PLATFORM_EXPORT base::Optional<network::CorsErrorStatus> CheckAccess(
     const KURL&,
     const HTTPHeaderMap&,
     network::mojom::CredentialsMode,
-    const SecurityOrigin&);
+    const SecurityOrigin&,
+    bool non_strict_mode = false);
 
 PLATFORM_EXPORT base::Optional<network::CorsErrorStatus> CheckPreflightAccess(
     const KURL&,
     const int response_status_code,
     const HTTPHeaderMap&,
     network::mojom::CredentialsMode,
-    const SecurityOrigin&);
+    const SecurityOrigin&,
+    bool non_strict_mode = false);
 
 PLATFORM_EXPORT base::Optional<network::CorsErrorStatus> CheckRedirectLocation(
     const KURL&,

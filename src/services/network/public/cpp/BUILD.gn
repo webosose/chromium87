@@ -4,6 +4,7 @@
 
 import("//build/buildflag_header.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
+import("//neva/neva.gni")
 import("//services/network/public/cpp/features.gni")
 import("//testing/libfuzzer/fuzzer_test.gni")
 
@@ -126,6 +127,13 @@ component("cpp") {
       "server/web_socket.h",
       "server/web_socket_encoder.cc",
       "server/web_socket_encoder.h",
+    ]
+  }
+
+  if (is_webos) {
+    sources += [
+      "neva/cors_corb_exception.cc",
+      "neva/cors_corb_exception.h"
     ]
   }
 

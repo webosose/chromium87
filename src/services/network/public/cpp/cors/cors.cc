@@ -17,6 +17,7 @@
 #include "net/base/mime_util.h"
 #include "net/http/http_request_headers.h"
 #include "net/http/http_util.h"
+#include "services/network/public/cpp/neva/cors_corb_exception.h"
 #include "services/network/public/cpp/request_mode.h"
 #include "url/gurl.h"
 #include "url/origin.h"
@@ -140,8 +141,9 @@ base::Optional<CorsErrorStatus> CheckAccessInternal(
     // TODO(https://crbug.com/736308): Once the callers exist only in the
     // browser process or network service, this check won't be needed any more
     // because it is always for network requests there.
-    if (response_url.SchemeIsHTTPOrHTTPS())
+    if (response_url.SchemeIsHTTPOrHTTPS()) {
       return CorsErrorStatus(mojom::CorsError::kWildcardOriginNotAllowed);
+    }
   } else if (!allow_origin_header) {
     return CorsErrorStatus(mojom::CorsError::kMissingAllowOriginHeader);
   } else if (*allow_origin_header != origin.Serialize()) {
@@ -237,10 +239,17 @@ base::Optional<CorsErrorStatus> CheckAccess(
     const base::Optional<std::string>& allow_origin_header,
     const base::Optional<std::string>& allow_credentials_header,
     mojom::CredentialsMode credentials_mode,
-    const url::Origin& origin) {
-  const auto error_status =
+    const url::Origin& origin,
+    bool non_strict_mode) {
+  auto error_status =
       CheckAccessInternal(response_url, allow_origin_header,
                           allow_credentials_header, credentials_mode, origin);
+
+  // Replace error_status with nullopt for the cases that we want to allow cors
+  // in non_strict_mode
+  if (non_strict_mode && error_status)
+    neva::CorsCorbException::ApplyException(error_status);
+
   ReportAccessCheckResultMetric(error_status ? AccessCheckResult::kNotPermitted
                                              : AccessCheckResult::kPermitted);
   if (error_status) {
@@ -277,11 +286,18 @@ base::Optional<CorsErrorStatus> CheckPreflightAccess(
     const base::Optional<std::string>& allow_origin_header,
     const base::Optional<std::string>& allow_credentials_header,
     mojom::CredentialsMode actual_credentials_mode,
-    const url::Origin& origin) {
+    const url::Origin& origin,
+    bool non_strict_mode) {
   // Step 7 of https://fetch.spec.whatwg.org/#cors-preflight-fetch
   auto error_status = CheckAccessInternal(response_url, allow_origin_header,
                                           allow_credentials_header,
                                           actual_credentials_mode, origin);
+
+  // Replace error_status with nullopt for the cases that we want to allow cors
+  // in non_strict_mode
+  if (non_strict_mode && error_status)
+    neva::CorsCorbException::ApplyException(error_status);
+
   const bool has_ok_status = IsOkStatus(response_status_code);
 
   ReportAccessCheckResultMetric(

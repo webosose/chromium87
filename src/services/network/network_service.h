@@ -207,6 +207,8 @@ class COMPONENT_EXPORT(NETWORK_SERVICE) NetworkService
       int32_t process_id,
       const url::Origin& allowed_request_initiator) override;
   void RemoveSecurityExceptionsForPlugin(int32_t process_id) override;
+  void AddCorsCorbExceptionForProcess(uint32_t process_id) override;
+  void RemoveCorsCorbExceptionForProcess(uint32_t process_id) override;
   void OnMemoryPressure(base::MemoryPressureListener::MemoryPressureLevel
                             memory_pressure_level) override;
   void OnPeerToPeerConnectionsCountChange(uint32_t count) override;
