@@ -38,6 +38,7 @@ BASE_EXPORT extern const char
     kTileManagerLowMemPolicyBytesLimitReductionFactor[];
 
 BASE_EXPORT extern const char kLocalStorageLimitPerSecondLevelDomain[];
+BASE_EXPORT extern const char kNevaCertificatesPath[];
 
 }  // namespace switches
 

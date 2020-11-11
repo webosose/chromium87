@@ -48,4 +48,6 @@ const char kTileManagerLowMemPolicyBytesLimitReductionFactor[] =
 const char kLocalStorageLimitPerSecondLevelDomain[] =
     "local-storage-limit-per-second-level-domain";
 
+const char kNevaCertificatesPath[] = "neva-certificates-path";
+
 }  // namespace switches

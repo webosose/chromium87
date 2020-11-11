@@ -134,6 +134,9 @@ SECMODModule* LoadNSSModule(const char* name,
 // Returns the current NSS error message.
 std::string GetNSSErrorMessage();
 
+// Load Neva extra certificates database from path
+void LoadNSSNevaCertificatesPath();
+
 }  // namespace crypto
 
 #endif  // CRYPTO_NSS_UTIL_INTERNAL_H_

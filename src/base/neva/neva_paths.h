@@ -30,6 +30,7 @@ enum {
 #if defined(OS_WEBOS)
   FILE_MEDIA_CODEC_CAPABILITIES,
 #endif
+  DIR_NEVA_CERTIFICATES,  // Path to store trusted certificates.
   PATH_NEVA_END
 };
 

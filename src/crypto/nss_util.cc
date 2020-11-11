@@ -21,6 +21,7 @@
 #include "base/files/file_util.h"
 #include "base/lazy_instance.h"
 #include "base/logging.h"
+#include "base/neva/neva_paths.h"
 #include "base/path_service.h"
 #include "base/strings/stringprintf.h"
 #include "base/task/post_task.h"
@@ -33,6 +34,8 @@
 namespace crypto {
 
 namespace {
+
+static const char kNevaCertificateTokenDescription[] = "NevaCertificates";
 
 #if defined(OS_CHROMEOS)
 // Fake certificate authority database used for testing.
@@ -205,6 +208,8 @@ class NSSInitSingleton {
     NSS_SetAlgorithmPolicy(SEC_OID_MD5, 0, NSS_USE_ALG_IN_CERT_SIGNATURE);
     NSS_SetAlgorithmPolicy(SEC_OID_PKCS1_MD5_WITH_RSA_ENCRYPTION,
                            0, NSS_USE_ALG_IN_CERT_SIGNATURE);
+
+    LoadNSSNevaCertificatesPath();
   }
 
   // NOTE(willchan): We don't actually cleanup on destruction since we leak NSS
@@ -301,6 +306,29 @@ std::string GetNSSErrorMessage() {
     result = base::StringPrintf("NSS error code: %d", PR_GetError());
   }
   return result;
+}
+
+void LoadNSSNevaCertificatesPath() {
+  base::FilePath neva_certificates_path;
+  base::PathService::Get(base::DIR_NEVA_CERTIFICATES, &neva_certificates_path);
+  if (neva_certificates_path.empty()) {
+    VLOG(2) << "Neva certificates path is empty";
+    return;
+  }
+
+  const std::string modspec = base::StringPrintf(
+      "configDir='sql:%s' tokenDescription='%s'",
+      neva_certificates_path.value().c_str(), kNevaCertificateTokenDescription);
+  PK11SlotInfo* db_slot = SECMOD_OpenUserDB(modspec.c_str());
+  if (db_slot) {
+    if (PK11_NeedUserInit(db_slot))
+      PK11_InitPin(db_slot, nullptr, nullptr);
+    VLOG(2) << "Neva certificates database (" << modspec
+            << ") loaded successfully";
+  } else {
+    LOG(ERROR) << "Error opening persistent database (" << modspec
+               << "): " << GetNSSErrorMessage();
+  }
 }
 
 }  // namespace crypto
