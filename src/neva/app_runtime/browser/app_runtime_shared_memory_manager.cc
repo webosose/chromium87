@@ -17,8 +17,10 @@
 #include "neva/app_runtime/browser/app_runtime_shared_memory_manager.h"
 
 #include "base/command_line.h"
+#include "base/files/file_util.h"
 #include "base/process/process_metrics.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/system/sys_info.h"
 #include "components/discardable_memory/service/discardable_shared_memory_manager.h"
 #include "content/browser/browser_main_loop.h"
 #include "neva/app_runtime/browser/app_runtime_browser_switches.h"
@@ -31,27 +33,36 @@ AppRuntimeSharedMemoryManager::AppRuntimeSharedMemoryManager()
                               base::Unretained(this)))),
       discardable_shared_memory_manager_(
           discardable_memory::DiscardableSharedMemoryManager::Get()) {
-  // (jani) Should this be based on shmem dir space?
-  base::SystemMemoryInfoKB info;
-  int64_t system_memory_mb =
-      base::GetSystemMemoryInfo(&info) ? info.total / 1024 : 1024;
+  const int kMegabyte = 1024 * 1024;
 
-  // The reduction factor to be applied to overall system memory when
-  // calculating the default memory limit to use for discardable memory.
-  size_t system_mem_reduction_factor = 10;
-  base::CommandLine& cmd_line = *base::CommandLine::ForCurrentProcess();
-  if (cmd_line.HasSwitch(
-          kSharedMemSystemMemReductionFactor)) {
-    size_t reduction_factor;
-    if (base::StringToSizeT(cmd_line.GetSwitchValueASCII(
-                                kSharedMemSystemMemReductionFactor),
-                            &reduction_factor))
-      system_mem_reduction_factor = reduction_factor;
+  base::FilePath shmem_dir;
+  int64_t shmem_dir_amount_of_total_space = 0;
+  if (base::GetShmemTempDir(false, &shmem_dir)) {
+    shmem_dir_amount_of_total_space =
+        base::SysInfo::AmountOfTotalDiskSpace(shmem_dir);
   }
 
-  system_memory_mb = system_memory_mb / system_mem_reduction_factor;
-  memory_limit_ = system_memory_mb * 1024 * 1024;
+  int64_t shared_memory_mb = shmem_dir_amount_of_total_space > 0
+                                 ? shmem_dir_amount_of_total_space / kMegabyte
+                                 : 1024;
+
+  // The reduction factor to be applied to overall shared memory when
+  // calculating the default memory limit to use for discardable memory.
+  size_t reduction_factor = 10;
+  base::CommandLine& cmd_line = *base::CommandLine::ForCurrentProcess();
+  if (cmd_line.HasSwitch(kSharedMemSystemMemReductionFactor)) {
+    size_t shmem_reduction_factor;
+    if (base::StringToSizeT(
+            cmd_line.GetSwitchValueASCII(kSharedMemSystemMemReductionFactor),
+            &shmem_reduction_factor))
+      reduction_factor = shmem_reduction_factor;
+  }
+
+  shared_memory_mb = shared_memory_mb / reduction_factor;
+  memory_limit_ = shared_memory_mb * kMegabyte;
   discardable_shared_memory_manager_->SetMemoryLimit(memory_limit_);
+  VLOG(1) << "The limit of discardable shared memory is " << shared_memory_mb
+          << "MB";
 
   if (cmd_line.HasSwitch(kSharedMemPressureDivider)) {
     size_t pressure_divider;
@@ -69,8 +80,7 @@ AppRuntimeSharedMemoryManager::AppRuntimeSharedMemoryManager()
   }
 }
 
-AppRuntimeSharedMemoryManager::~AppRuntimeSharedMemoryManager() {
-}
+AppRuntimeSharedMemoryManager::~AppRuntimeSharedMemoryManager() = default;
 
 void AppRuntimeSharedMemoryManager::OnMemoryPressure(
     base::MemoryPressureListener::MemoryPressureLevel memory_pressure_level) {
