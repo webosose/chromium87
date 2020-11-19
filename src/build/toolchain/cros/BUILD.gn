@@ -171,3 +171,25 @@ cros_toolchain("v8_snapshot") {
     sysroot = cros_v8_snapshot_sysroot
   }
 }
+
+clang_toolchain("v8_snapshot_clang_${target_cpu}") {
+  extra_cflags = cros_v8_snapshot_extra_cflags
+  extra_cppflags = cros_v8_snapshot_extra_cppflags
+  extra_cxxflags = cros_v8_snapshot_extra_cxxflags
+  extra_ldflags = cros_v8_snapshot_extra_ldflags
+
+  toolchain_args = {
+    cc_wrapper = ""
+    is_clang = true
+    use_custom_libcxx = true
+    if (target_cpu == "x86" || target_cpu == "arm" || target_cpu == "mipsel") {
+      current_cpu = "x86"
+    } else {
+      current_cpu = "x64"
+    }
+    v8_current_cpu = v8_target_cpu
+    current_os = "linux"
+    use_sysroot = use_sysroot
+    target_sysroot = ""
+  }
+}
