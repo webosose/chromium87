@@ -586,6 +586,13 @@ class CONTENT_EXPORT ContentBrowserClient {
                                    const base::FilePath& profile_path);
 
 #if defined(USE_NEVA_APPRUNTIME)
+  // NEVA app runtime provides the FileAccess delegate API that filters file
+  // access as subresources of network requests. By default Chromium forbids
+  // that, but this virtual allows NEVA app runtime to still allow fetching
+  // files subresources from network if true (so validation happens on
+  // delegate).
+  virtual bool IsFileAccessAllowedFromNetwork() const { return false; }
+
   // Indicates whether a file path should be accessible via file URL given a
   // request from a browser context which lives within |profile_path|. Request,
   // process_id and frame_tree_node_id are added to passed parameters.

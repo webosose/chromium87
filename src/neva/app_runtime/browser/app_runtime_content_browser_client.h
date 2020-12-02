@@ -66,6 +66,7 @@ class AppRuntimeContentBrowserClient : public content::ContentBrowserClient {
   bool ShouldEnableStrictSiteIsolation() override;
   bool ShouldIsolateErrorPage(bool is_main_frame) override;
 
+  bool IsFileAccessAllowedFromNetwork() const override;
   bool IsFileAccessAllowedForRequest(
       const base::FilePath& path,
       const base::FilePath& absolute_path,
