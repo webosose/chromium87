@@ -33,10 +33,6 @@ BASE_EXPORT extern const char kTraceMemoryByteUnit[];
 #endif
 
 BASE_EXPORT extern const char kDecodedImageWorkingSetBudgetMB[];
-BASE_EXPORT extern const char kMemPressureGPUCacheSizeReductionFactor[];
-BASE_EXPORT extern const char
-    kTileManagerLowMemPolicyBytesLimitReductionFactor[];
-
 BASE_EXPORT extern const char kLocalStorageLimitPerSecondLevelDomain[];
 BASE_EXPORT extern const char kNevaCertificatesPath[];
 

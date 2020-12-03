@@ -26,6 +26,9 @@ CC_BASE_EXPORT extern const char
     kCustomMouseWheelGestureScrollDeltaOnWebOSNativeScroll[];
 CC_BASE_EXPORT extern const char kEnableAggressiveReleasePolicy[];
 CC_BASE_EXPORT extern const char kEnableWebOSNativeScroll[];
+CC_BASE_EXPORT extern const char kMemPressureGPUCacheSizeReductionFactor[];
+CC_BASE_EXPORT extern const char
+    kTileManagerLowMemPolicyBytesLimitReductionFactor[];
 
 }  // namespace switches
 }  // namespace cc

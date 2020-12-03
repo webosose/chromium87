@@ -105,7 +105,9 @@ void MemoryPressureListener::SyncNotify(
 // static
 void MemoryPressureListener::NotifyMemoryPressure(
     MemoryPressureLevel memory_pressure_level) {
+#if !defined(USE_NEVA_APPRUNTIME)
   DCHECK_NE(memory_pressure_level, MEMORY_PRESSURE_LEVEL_NONE);
+#endif
   TRACE_EVENT_INSTANT1(TRACE_DISABLED_BY_DEFAULT("memory-infra"),
                        "MemoryPressureListener::NotifyMemoryPressure",
                        TRACE_EVENT_SCOPE_THREAD, "level",
@@ -135,7 +137,9 @@ void MemoryPressureListener::SimulatePressureNotification(
 // static
 void MemoryPressureListener::DoNotifyMemoryPressure(
     MemoryPressureLevel memory_pressure_level) {
+#if !defined(USE_NEVA_APPRUNTIME)
   DCHECK_NE(memory_pressure_level, MEMORY_PRESSURE_LEVEL_NONE);
+#endif
 
   GetMemoryPressureObserver()->Notify(memory_pressure_level);
 }

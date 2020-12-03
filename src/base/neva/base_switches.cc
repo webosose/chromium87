@@ -34,16 +34,6 @@ const char kTraceMemoryByteUnit[]  = "trace-memory-byte-unit";
 const char kDecodedImageWorkingSetBudgetMB[] =
     "decoded-image-working-set-budget-mb";
 
-// The factor by which to reduce the GPU memory size of the cache when under
-// memory pressure.
-const char kMemPressureGPUCacheSizeReductionFactor[] =
-    "mem-pressure-gpu-cache-size-reduction-factor";
-
-// The factor by which to reduce the tile manager low memory policy bytes
-// limit when under memory pressure.
-const char kTileManagerLowMemPolicyBytesLimitReductionFactor[] =
-    "tile-manager-low-mem-policy-bytes-limit-reduction-factor";
-
 // Limits size of local storage for the second level domain in MB
 const char kLocalStorageLimitPerSecondLevelDomain[] =
     "local-storage-limit-per-second-level-domain";

@@ -744,6 +744,7 @@ class CC_EXPORT GpuImageDecodeCache
       std::unordered_map<InUseCacheKey, InUseCacheEntry, InUseCacheKeyHash>;
   InUseCache in_use_cache_;
 
+  size_t mem_pressure_cache_size_reduction_factor_ = 1;
   size_t max_working_set_bytes_ = 0;
   size_t max_working_set_items_ = 0;
   size_t working_set_bytes_ = 0;
@@ -765,6 +766,10 @@ class CC_EXPORT GpuImageDecodeCache
   std::vector<uint32_t> ids_pending_unlock_;
   std::vector<uint32_t> ids_pending_deletion_;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  base::MemoryPressureListener::MemoryPressureLevel memory_pressure_level_ =
+      base::MemoryPressureListener::MEMORY_PRESSURE_LEVEL_NONE;
+#endif
   std::unique_ptr<base::MemoryPressureListener> memory_pressure_listener_;
 };
 
