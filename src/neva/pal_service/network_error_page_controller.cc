@@ -32,9 +32,10 @@ void NetworkErrorPageControllerImpl::AddBinding(
   receivers_.Add(this, std::move(receiver));
 }
 
-void NetworkErrorPageControllerImpl::LaunchNetworkSettings(int target_id) {
+void NetworkErrorPageControllerImpl::LaunchNetworkSettings(int target_id,
+                                                           int display_id) {
   if (delegate_)
-    delegate_->LaunchNetworkSettings(target_id);
+    delegate_->LaunchNetworkSettings(target_id, display_id);
 }
 
 }  // namespace pal

@@ -38,7 +38,7 @@ class NetworkErrorPageControllerImpl
       mojo::PendingReceiver<mojom::NetworkErrorPageController> receiver);
 
   // mojom::NetworkErrorPageController
-  void LaunchNetworkSettings(int target_id) override;
+  void LaunchNetworkSettings(int target_id, int display_id) override;
 
  private:
   std::unique_ptr<NetworkErrorPageControllerDelegate> delegate_;

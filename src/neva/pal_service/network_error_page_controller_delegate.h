@@ -23,7 +23,7 @@ class NetworkErrorPageControllerDelegate {
  public:
   virtual ~NetworkErrorPageControllerDelegate() {}
 
-  virtual void LaunchNetworkSettings(int target_id) = 0;
+  virtual void LaunchNetworkSettings(int target_id, int display_id) = 0;
 };
 
 }  // namespace pal

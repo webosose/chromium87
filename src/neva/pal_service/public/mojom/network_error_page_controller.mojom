@@ -17,5 +17,5 @@
 module pal.mojom;
 
 interface NetworkErrorPageController {
-  LaunchNetworkSettings(int32 target_id);
+  LaunchNetworkSettings(int32 target_id, int32 display_id);
 };

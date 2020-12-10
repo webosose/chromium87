@@ -37,7 +37,7 @@ class NetworkErrorPageControllerDelegateWebOS
   NetworkErrorPageControllerDelegateWebOS& operator=(
       const NetworkErrorPageControllerDelegateWebOS&) = delete;
 
-  void LaunchNetworkSettings(int target_id) override;
+  void LaunchNetworkSettings(int target_id, int display_id) override;
 
  private:
   void OnLaunchNetworkSettings(luna::Client::ResponseStatus,

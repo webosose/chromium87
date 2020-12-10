@@ -41,7 +41,7 @@ class NetworkErrorPageControllerInjection
   ~NetworkErrorPageControllerInjection() override;
 
   // Execute a "NETWORK SETTINGS"/"SETTINGS" button click.
-  bool SettingsButtonClick(int target_id);
+  bool SettingsButtonClick(gin::Arguments* args);
 
  private:
   gin::ObjectTemplateBuilder GetObjectTemplateBuilder(

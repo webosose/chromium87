@@ -188,10 +188,13 @@ function onMouseOutBtn() {
 var onExitApp = function() {
   window.close();
 }
+function getDisplayId() {
+  return JSON.parse(window.webOSSystem.launchParams).displayAffinity;
+}
 
 var onLaunchSetting = function(button_type, target) {
   if (window.errorPageController) {
-    errorPageController.settingsButtonClick(target);
+    errorPageController.settingsButtonClick(target, getDisplayId());
   }
 }
 
