@@ -902,6 +902,10 @@ void DesktopWindowTreeHostOzone::OnCursorVisibilityChangedNative(bool show) {
 // ui::PlatformWindowDelegate implementation:
 void DesktopWindowTreeHostOzone::OnBoundsChanged(
     const gfx::Rect& new_bounds) {
+  // The member evaluated below is passed to OzoneWaylandWindow::SetBounds()
+  // routine, which (implicitly) affects on correct Wayland surface scaling
+  // when the screen is rotated. Thus, it also has to be maintained properly.
+  previous_bounds_ = new_bounds;
   // TODO(kalyan): Add support to check if origin has really changed.
   native_widget_delegate_->AsWidget()->OnNativeWidgetMove();
   OnHostResizedInPixels(new_bounds.size());
