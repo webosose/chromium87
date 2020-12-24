@@ -1,0 +1,14 @@
+include_rules = [
+  "+components/keyed_service/content",
+  "+components/network_session_configurator/common",
+  "+services/device/public/cpp",
+  "+services/network/public",
+  "+services/service_manager/public/cpp",
+  "+ui/ozone/public",
+]
+
+specific_include_rules = {
+  "shell_browser_main_parts\.cc": [
+    "+ui/gtk",
+  ],
+}
