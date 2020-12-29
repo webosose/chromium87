@@ -1,0 +1,36 @@
+git clean
+===========
+To remove the "leftover" submodules after checking out a different branch, you can run the following. This command will recursively clean the main repository and all submodules. Warning: this will remove all untracked files as well.
+
+git clean -xffd && git submodule foreach --recursive git clean -xffd
+To see which files will be deleted without actually deleting yet, add the -n flag.
+
+git clean -nxffd && git submodule foreach --recursive git clean -nxffd
+
+git log
+=========
+List changes in third_party directories
+cd src/third_party
+ls -l | awk '{print $9}' > abc
+for i in `cat abc`; do echo "Check $i"; git hist $i | wc -l; done
+
+Copy directory
+===============
+To fully copy directory
+cp origin/. dest/ -a
+
+git status
+============
+Always use with --ignored
+git status --ignored
+
+git add
+=======
+To add all files in dir to git
+git add -Af src/
+
+du - Check dir size
+====================
+du -sh . --> Prints total
+du -sh * --> Prints individual child file/dir sizes
+du -sh * | grep [0-9][0-9]M --> Prints all children with size >=10MB
