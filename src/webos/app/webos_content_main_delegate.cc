@@ -28,6 +28,10 @@
 #include "webos/common/webos_resource_delegate.h"
 #include "webos/renderer/webos_content_renderer_client.h"
 
+#if defined(USE_PMLOG)
+#include "base/logging_pmlog_provider.h"
+#endif
+
 using base::CommandLine;
 
 namespace {
@@ -55,6 +59,9 @@ bool WebOSContentMainDelegate::BasicStartupComplete(int* exit_code) {
   if (process_type.empty()) {
     startup_callback_.Run();
   }
+#if defined(USE_PMLOG)
+  logging::PmLogProvider::Initialize("wam.log");
+#endif
   return false;
 }
 

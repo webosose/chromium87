@@ -1962,6 +1962,16 @@ component("base") {
     }
   }
 
+  if (use_pmlog && current_toolchain == default_toolchain) {
+    configs += [ "//build/config/linux/pmlog:pmloglib" ]
+    sources += [
+      "logging_pmlog.cc",
+      "logging_pmlog.h",
+      "logging_pmlog_provider.cc",
+      "logging_pmlog_provider.h",
+    ]
+  }
+
   # iOS
   if (is_ios) {
     sources -= [

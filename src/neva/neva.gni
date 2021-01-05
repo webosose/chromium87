@@ -67,6 +67,9 @@ declare_args() {
   # If CBE is use, include wam_demo in it
   is_wam_demo_cbe = false
 
+  # Use webOS PmLog logging library
+  use_pmlog = false
+
   # Use LTTng tracing library
   use_lttng = false
 
