@@ -1,0 +1,49 @@
+Open Source Software Package:
+- name: Chromium
+  version: 87.0.4280.88
+  source: https://chromium.googlesource.com/
+  license :
+  - BSD
+  - Apache 2.0
+  - Apple Public Source License 2.0
+  - MPL 2.0
+  - MIT
+  - BSDish
+  - New BSD
+  - BSD 2-Clause License
+  - LGPL 2.1
+  - BSD 3-Clause
+  - BSL (v 1.0)
+  - GPL 2.0
+  - Custom license "inspired by the BSD, Artistic, and IJG (Independent JPEG Group) licenses"
+  - GNU Lesser Public License
+  - Unicode License
+  - Unicode Data License
+  - custom notice license
+  - custom permissive license
+  - Zlib
+  - Android Software Development Kit License
+  - MPL 1.1
+  - EPL 1.0
+  - Common Public License 1.0
+  - X11
+  - SGI Free Software License B
+  - University of Illinois
+  - NCSA Open Source
+  - GPL
+  - LGPL3
+  - GPL3
+  - OCULUS SDK LICENSE
+  - libpng license
+  - Public Domain
+  - SGI Free Software B License Version 2.0
+  - NodeJS
+  - BSD-like (FFTPACKv5 license)
+  - Public Domain
+  - Creative Commons Attribution-ShareAlike 3.0 Unported
+  - University of Illinois
+  - SIL OPEN FONT LICENSE
+  - Bitstream Vera Fonts Copyright
+  - MIT "Expat"
+  - Microsoft Permissive License
+  - 2020 The Chromium Authors
