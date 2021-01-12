@@ -132,6 +132,7 @@ static_library("app_runtime") {
     "//components/network_session_configurator/common",
     "//components/os_crypt",
     "//components/version_info",
+    "//components/watchdog:watchdog",
     "//components/web_cache/browser",
     "//components/web_cache/public/mojom",
     "//content",
