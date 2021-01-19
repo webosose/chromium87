@@ -24,5 +24,8 @@ namespace switches {
 const char kEnableAggressiveReleasePolicy[] =
     "enable-aggressive-release-policy";
 
+// Enable native-scroll feature
+const char kEnableWebOSNativeScroll[] = "enable-native-scroll";
+
 }  // namespace switches
 }  // namespace cc

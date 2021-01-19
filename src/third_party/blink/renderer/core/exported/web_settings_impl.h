@@ -202,6 +202,7 @@ class CORE_EXPORT WebSettingsImpl final : public WebSettings {
 #endif
 #if defined(USE_NEVA_APPRUNTIME)
   void SetDisallowScrollbarsInMainFrame(bool) override;
+  void SetWebOSNativeScrollEnabled(bool) override;
 #endif
   void SetLowPriorityIframesThreshold(WebEffectiveConnectionType) override;
 

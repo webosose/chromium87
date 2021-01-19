@@ -99,6 +99,7 @@ void WebViewBase::Initialize(const std::string& app_id,
   SetAppId(app_id);
   SetV8SnapshotPath(v8_snapshot_path);
   SetV8ExtraFlags(v8_extra_flags);
+  SetUseNativeScroll(use_native_scroll);
 
   webview_->CreateRenderView();
 
@@ -744,6 +745,10 @@ void WebViewBase::CallLoadVisuallyCommitted() {
 
   LoadVisuallyCommitted();
   load_visually_committed_called_ = true;
+}
+
+void WebViewBase::SetUseNativeScroll(bool use_native_scroll) {
+  webview_->SetUseNativeScroll(use_native_scroll);
 }
 
 }  // namespace webos

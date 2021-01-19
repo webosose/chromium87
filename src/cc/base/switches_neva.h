@@ -23,6 +23,7 @@ namespace cc {
 namespace switches {
 
 CC_BASE_EXPORT extern const char kEnableAggressiveReleasePolicy[];
+CC_BASE_EXPORT extern const char kEnableWebOSNativeScroll[];
 
 }  // namespace switches
 }  // namespace cc

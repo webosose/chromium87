@@ -177,6 +177,10 @@
 #include "components/viz/common/features.h"
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "cc/base/switches_neva.h"
+#endif
+
 // Get rid of WTF's pow define so we can use std::pow.
 #undef pow
 #include <cmath>  // for std::pow
@@ -368,6 +372,13 @@ void ApplyCommandLineToSettings(WebSettings* settings) {
           WebString(pos == kNotFound ? "" : setting.Substring(pos + 1)));
     }
   }
+#if defined(USE_NEVA_APPRUNTIME)
+  // This is for checking condition whether native scroll is enabled
+  // on blink side. In initial phase of this feature, all related changes
+  // are blocked inside this condition.
+  settings->SetWebOSNativeScrollEnabled(
+      command_line.HasSwitch(cc::switches::kEnableWebOSNativeScroll));
+#endif
 }
 
 WebMediaPlayer::SurfaceLayerMode GetVideoSurfaceLayerMode() {

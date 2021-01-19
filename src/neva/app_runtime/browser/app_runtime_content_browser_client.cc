@@ -22,6 +22,7 @@
 #include "base/rand_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/system/sys_info.h"
+#include "cc/base/switches_neva.h"
 #include "content/browser/web_contents/web_contents_impl.h"
 #include "content/public/browser/devtools_manager_delegate.h"
 #include "content/public/browser/login_delegate.h"
@@ -42,6 +43,7 @@
 #include "neva/app_runtime/webview.h"
 #include "sandbox/policy/switches.h"
 #include "services/network/public/mojom/network_service.mojom.h"
+#include "third_party/blink/public/common/switches.h"
 #include "ui/base/ui_base_neva_switches.h"
 
 #if defined(USE_NEVA_EXTENSIONS)
@@ -223,6 +225,32 @@ void AppRuntimeContentBrowserClient::AppendExtraCommandLineSwitches(
     v8_extra_flags_.erase(iter);
   }
 
+  // Append native scroll related flags if native scroll is on by appinfo.json
+  auto iter_ns = use_native_scroll_map_.find(child_process_id);
+  if (iter_ns != use_native_scroll_map_.end()) {
+    bool use_native_scroll = iter_ns->second;
+    if (use_native_scroll) {
+      // Enables EnableNativeScroll, which is only enabled when there is
+      // 'useNativeScroll': true in appinfo.json. If this flag is enabled,
+      if (!command_line->HasSwitch(cc::switches::kEnableWebOSNativeScroll))
+        command_line->AppendSwitch(cc::switches::kEnableWebOSNativeScroll);
+
+      // Enables SmoothScrolling, which is mandatory to enable
+      // CSSOMSmoothScroll.
+      if (!command_line->HasSwitch(switches::kEnableSmoothScrolling))
+        command_line->AppendSwitch(switches::kEnableSmoothScrolling);
+
+      // Enables PreferCompositingToLCDText. If this flag is enabled, Compositor
+      // thread handles scrolling and disable LCD-text(AntiAliasing) in the
+      // scroll area.
+      // See PaintLayerScrollableArea.cpp::layerNeedsCompositingScrolling()
+      if (!command_line->HasSwitch(blink::switches::kEnablePreferCompositingToLCDText))
+        command_line->AppendSwitch(blink::switches::kEnablePreferCompositingToLCDText);
+    }
+
+    use_native_scroll_map_.erase(iter_ns);
+  }
+
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
           switches::kUseOzoneWaylandVkb))
     command_line->AppendSwitch(switches::kUseOzoneWaylandVkb);
@@ -230,6 +258,13 @@ void AppRuntimeContentBrowserClient::AppendExtraCommandLineSwitches(
   if (base::CommandLine::ForCurrentProcess()->HasSwitch(
           switches::kOzoneWaylandUseXDGShell))
     command_line->AppendSwitch(switches::kOzoneWaylandUseXDGShell);
+}
+
+void AppRuntimeContentBrowserClient::SetUseNativeScroll(
+    int child_process_id,
+    bool use_native_scroll) {
+  use_native_scroll_map_.insert(
+      std::pair<int, bool>(child_process_id, use_native_scroll));
 }
 
 void AppRuntimeContentBrowserClient::AppendExtraWebSocketHeader(

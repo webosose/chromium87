@@ -910,6 +910,10 @@
       name: "allowLocalResourceLoad",
       initial: "false",
     },
+    {
+      name: "webOSNativeScrollEnabled",
+      initial: "false",
+    },
     ///@}
     {
       name: "lowPriorityIframesThreshold",
