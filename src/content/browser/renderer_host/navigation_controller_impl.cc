@@ -3437,11 +3437,14 @@ NavigationControllerImpl::CreateNavigationRequestFromEntry(
     return nullptr;
   }
 
+#if !defined(OS_WEBOS)
+// This is workaround for some WebOS apps like enyo based applications.
   if (!DoesURLMatchOriginForNavigation(dest_url, origin_to_commit)) {
     DCHECK(false) << " url:" << dest_url
                   << " origin:" << origin_to_commit.value();
     return nullptr;
   }
+#endif
 
   // Determine if Previews should be used for the navigation.
   blink::PreviewsState previews_state =
