@@ -95,6 +95,7 @@
 #include "net/cookies/cookie_util.h"
 #include "net/http/http_auth_preferences.h"
 #include "net/ssl/client_cert_store.h"
+#include "neva/pal_service/os_crypt.h"
 #include "ppapi/buildflags/buildflags.h"
 #include "services/cert_verifier/public/mojom/cert_verifier_service_factory.mojom.h"
 #include "services/metrics/public/cpp/ukm_builders.h"
@@ -2474,6 +2475,15 @@ void StoragePartitionImpl::InitNetworkContext() {
       network_context_client_receiver_.BindNewPipeAndPassRemote());
   network_context_.set_disconnect_handler(base::BindOnce(
       &StoragePartitionImpl::InitNetworkContext, weak_factory_.GetWeakPtr()));
+
+  auto os_crypt_impl = std::make_unique<pal::OSCryptImpl>();
+  if (os_crypt_impl->IsEncryptionAvailable()) {
+    mojo::PendingRemote<pal::mojom::OSCrypt> os_crypt_remote;
+    mojo::MakeSelfOwnedReceiver(
+        std::move(os_crypt_impl),
+        os_crypt_remote.InitWithNewPipeAndPassReceiver());
+    network_context_->SetOSCrypt(std::move(os_crypt_remote));
+  }
 }
 
 network::mojom::URLLoaderFactory*

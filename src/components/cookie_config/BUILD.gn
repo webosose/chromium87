@@ -6,11 +6,14 @@ static_library("cookie_config") {
   sources = [
     "cookie_store_util.cc",
     "cookie_store_util.h",
+    "cookie_store_util_neva.cc",
+    "cookie_store_util_neva.h",
   ]
 
   deps = [
     "//base",
     "//components/os_crypt",
+    "//neva/pal_service/public/mojom",
     "//net",
     "//net:extras",
   ]

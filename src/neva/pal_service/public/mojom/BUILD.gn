@@ -21,6 +21,7 @@ mojom("mojom") {
     "constants.mojom",
     "memorymanager.mojom",
     "network_error_page_controller.mojom",
+    "os_crypt.mojom",
     "pal_service.mojom",
     "sample.mojom",
     "system_servicebridge.mojom",

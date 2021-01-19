@@ -10,6 +10,7 @@ import "mojo/public/mojom/base/file_path.mojom";
 import "mojo/public/mojom/base/time.mojom";
 import "mojo/public/mojom/base/unguessable_token.mojom";
 import "mojo/public/mojom/base/values.mojom";
+import "neva/pal_service/public/mojom/os_crypt.mojom";
 import "services/network/public/mojom/address_list.mojom";
 import "services/network/public/mojom/cert_verifier_service.mojom";
 import "services/network/public/mojom/client_security_state.mojom";
@@ -1435,4 +1436,6 @@ interface NetworkContext {
   // Set whether SCT auditing is enabled for this NetworkContext.
   [EnableIf=is_ct_supported]
   SetSCTAuditingEnabled(bool enabled);
+
+  SetOSCrypt(pending_remote<pal.mojom.OSCrypt> os_crypt);
 };

@@ -462,6 +462,8 @@ void AppRuntimeContentBrowserClient::OnNetworkServiceCreated(
 #if defined(OS_WEBOS)
   network_service->DisableQuic();
 #endif
+  network::mojom::CryptConfigPtr config = network::mojom::CryptConfig::New();
+  content::GetNetworkService()->SetCryptConfig(std::move(config));
 }
 
 void AppRuntimeContentBrowserClient::ConfigureNetworkContextParams(
@@ -479,7 +481,7 @@ void AppRuntimeContentBrowserClient::ConfigureNetworkContextParams(
                       &disk_cache_size);
   network_context_params->cookie_path =
       context->GetPath().Append(kCookieStoreFile);
-  network_context_params->enable_encrypted_cookies = false;
+  network_context_params->enable_encrypted_cookies = true;
   network_context_params->custom_proxy_config_client_receiver =
       custom_proxy_config_client_.BindNewPipeAndPassReceiver();
   network_context_params->network_delegate_request =

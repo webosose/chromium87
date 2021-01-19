@@ -115,6 +115,7 @@
   X("omnibox")                                                           \
   X("oobe")                                                              \
   X("ozone")                                                             \
+  X("pal")                                                               \
   X("passwords")                                                         \
   X("p2p")                                                               \
   X("page-serialization")                                                \

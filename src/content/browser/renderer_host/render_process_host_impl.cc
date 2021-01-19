@@ -276,6 +276,7 @@
 #include "content/public/common/content_neva_switches.h"
 #include "neva/pal_service/pal_service.h"
 #include "neva/pal_service/public/mojom/memorymanager.mojom.h"
+#include "neva/pal_service/public/mojom/os_crypt.mojom.h"
 #include "neva/pal_service/public/mojom/sample.mojom.h"
 #include "neva/pal_service/public/mojom/system_servicebridge.mojom.h"
 #if defined(ENABLE_NETWORK_ERROR_PAGE_CONTROLLER_WEBAPI)
@@ -2295,6 +2296,7 @@ void RenderProcessHostImpl::OverrideBatteryMonitorBinderForTesting(
 
 void RenderProcessHostImpl::RegisterMojoInterfaces() {
   auto registry = std::make_unique<service_manager::BinderRegistry>();
+  VLOG(1) << __func__;
 
 #if defined(USE_NEVA_APPRUNTIME)
   AddUIThreadInterface(

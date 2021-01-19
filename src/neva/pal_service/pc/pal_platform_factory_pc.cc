@@ -20,6 +20,7 @@
 
 #include "neva/pal_service/memorymanager_delegate.h"
 #include "neva/pal_service/network_error_page_controller_delegate.h"
+#include "neva/pal_service/os_crypt_delegate.h"
 #include "neva/pal_service/pc/platform_system_delegate_pc.h"
 #include "neva/pal_service/system_servicebridge_delegate.h"
 
@@ -28,6 +29,10 @@ namespace pal {
 std::unique_ptr<MemoryManagerDelegate>
 PlatformFactory::CreateMemoryManagerDelegate() {
   return std::unique_ptr<MemoryManagerDelegate>();
+}
+
+std::unique_ptr<OSCryptDelegate> PlatformFactory::CreateOSCryptDelegate() {
+  return std::unique_ptr<OSCryptDelegate>();
 }
 
 std::unique_ptr<SystemServiceBridgeDelegate>
