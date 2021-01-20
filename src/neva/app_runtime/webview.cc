@@ -150,10 +150,20 @@ WebView::WebView(int width, int height, WebViewProfile* profile)
       new blink::web_pref::WebPreferences(
           web_contents_->GetOrCreateWebPreferences()));
 
+  web_contents_->SetInspectablePage(false);
+}
+
+WebView::~WebView() {
+  web_contents_->SetDelegate(nullptr);
+}
+
+void WebView::CreateRenderView()
+{
   if (web_contents_) {
     // This code ensures that renderer proccess will be created before the first
     // neva_app_runtime::WebView API call which relies on fact that
     // renderer process has been already created and initialized
+    content::RenderViewHost* rvh = web_contents_->GetRenderViewHost();
     if (!rvh->IsRenderViewLive()) {
       content::WebContentsImpl* webcontents_impl =
           static_cast<content::WebContentsImpl*>(web_contents_.get());
@@ -161,12 +171,6 @@ WebView::WebView(int width, int height, WebViewProfile* profile)
           rvh, base::nullopt, MSG_ROUTING_NONE);
     }
   }
-
-  web_contents_->SetInspectablePage(false);
-}
-
-WebView::~WebView() {
-  web_contents_->SetDelegate(nullptr);
 }
 
 void WebView::SetDelegate(WebViewDelegate* delegate) {
