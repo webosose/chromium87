@@ -1,6 +1,7 @@
 {
     "exeName": "/usr/bin/app-shell/app_shell",
     "type": "privileged",
+    "trustLevel" : "oem",
     "allowedNames": [
         "com.webos.app.enactbrowser",
         "com.webos.chromium.memory.*",
