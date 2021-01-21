@@ -43,6 +43,12 @@
 #include "ui/gfx/geometry/point_conversions.h"
 #include "ui/latency/latency_info.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "base/strings/string_number_conversions.h"
+#include "cc/base/switches_neva.h"
+#include "ui/events/event.h"
+#endif
+
 using perfetto::protos::pbzero::ChromeLatencyInfo;
 using perfetto::protos::pbzero::TrackEvent;
 
@@ -618,6 +624,45 @@ bool HasScrollbarJumpKeyModifier(const WebInputEvent& event) {
 #endif
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+WebGestureEvent InputHandlerProxy::MaybeAdjustGestureScrollUpdate(
+    const WebGestureEvent& scroll_update_event) {
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          cc::switches::
+              kCustomMouseWheelGestureScrollDeltaOnWebOSNativeScroll)) {
+    WebGestureEvent gesture_event(scroll_update_event);
+    if (gesture_event.data.scroll_update.generated_from_mouse_wheel_event) {
+      std::string custom_delta_str(
+          base::CommandLine::ForCurrentProcess()->GetSwitchValueASCII(
+              cc::switches::
+                  kCustomMouseWheelGestureScrollDeltaOnWebOSNativeScroll));
+
+      int custom_delta;
+      if (custom_delta_str.empty() ||
+          !base::StringToInt(custom_delta_str, &custom_delta))
+        return scroll_update_event;
+
+      // If some events are coalesced, scroll delta can be multiple of
+      // kWheelDelta. So first, we need to calculate how many ticks are
+      // accumultated in this delta value. After that, converted scroll
+      // delta can be calculated by multiplication ticks and custom delta.
+      int converted_scroll_delta_x = (gesture_event.data.scroll_update.delta_x /
+                                      ui::MouseWheelEvent::kWheelDelta) *
+                                     custom_delta;
+      int converted_scroll_delta_y = (gesture_event.data.scroll_update.delta_y /
+                                      ui::MouseWheelEvent::kWheelDelta) *
+                                     custom_delta;
+
+      gesture_event.data.scroll_update.delta_x = converted_scroll_delta_x;
+      gesture_event.data.scroll_update.delta_y = converted_scroll_delta_y;
+    }
+    return gesture_event;
+  } else {
+    return scroll_update_event;
+  }
+}
+#endif
+
 InputHandlerProxy::EventDisposition
 InputHandlerProxy::RouteToTypeSpecificHandler(
     EventWithCallback* event_with_callback,
@@ -643,8 +688,13 @@ InputHandlerProxy::RouteToTypeSpecificHandler(
           static_cast<const WebGestureEvent&>(event));
 
     case WebInputEvent::Type::kGestureScrollUpdate:
+#if defined(USE_NEVA_APPRUNTIME)
+      return HandleGestureScrollUpdate(MaybeAdjustGestureScrollUpdate(
+          static_cast<const WebGestureEvent&>(event)), original_attribution);
+#else
       return HandleGestureScrollUpdate(
           static_cast<const WebGestureEvent&>(event), original_attribution);
+#endif
 
     case WebInputEvent::Type::kGestureScrollEnd:
       return HandleGestureScrollEnd(static_cast<const WebGestureEvent&>(event));

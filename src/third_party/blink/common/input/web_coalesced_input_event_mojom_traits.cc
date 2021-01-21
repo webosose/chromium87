@@ -211,6 +211,11 @@ bool StructTraits<blink::mojom::EventDataView,
                 gesture_data->scroll_data->update_details->velocity_x;
             gesture_event->data.scroll_update.velocity_y =
                 gesture_data->scroll_data->update_details->velocity_y;
+#if defined(USE_NEVA_APPRUNTIME)
+            gesture_event->data.scroll_update.generated_from_mouse_wheel_event =
+                gesture_data->scroll_data->update_details
+                    ->generated_from_mouse_wheel_event;
+#endif
           }
           break;
       }
@@ -482,7 +487,12 @@ StructTraits<blink::mojom::EventDataView,
           gesture_event->data.scroll_update.inertial_phase, false, 0,
           blink::mojom::ScrollUpdate::New(
               gesture_event->data.scroll_update.velocity_x,
-              gesture_event->data.scroll_update.velocity_y));
+              gesture_event->data.scroll_update.velocity_y
+#if defined(USE_NEVA_APPRUNTIME)
+              ,
+              gesture_event->data.scroll_update.generated_from_mouse_wheel_event
+#endif
+          ));
       break;
     case blink::WebInputEvent::Type::kGestureFlingStart:
       gesture_data->fling_data = blink::mojom::FlingData::New(

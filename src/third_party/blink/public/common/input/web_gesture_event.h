@@ -113,6 +113,12 @@ class BLINK_COMMON_EXPORT WebGestureEvent : public WebInputEvent {
       float delta_y;
       float velocity_x;
       float velocity_y;
+#if defined(USE_NEVA_APPRUNTIME)
+      // True if this event was created in mouse wheel event queue.
+      // This property is used only if native scroll is enabled.
+      // See InputEventFilter.
+      bool generated_from_mouse_wheel_event;
+#endif
       InertialPhaseState inertial_phase;
       // Default initialized to kScrollByPrecisePixel.
       ui::ScrollGranularity delta_units;

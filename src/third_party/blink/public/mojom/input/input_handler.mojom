@@ -82,6 +82,9 @@ struct MouseData {
 struct ScrollUpdate {
   float velocity_x;
   float velocity_y;
+
+  [EnableIf=neva_appruntime]
+  bool generated_from_mouse_wheel_event;
 };
 
 struct ScrollData {
