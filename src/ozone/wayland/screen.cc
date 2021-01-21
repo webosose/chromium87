@@ -58,6 +58,7 @@ WaylandScreen::WaylandScreen(wl_registry* registry, uint32_t id)
     WaylandScreen::OutputHandleMode,
 #if defined(OS_WEBOS)
     WaylandScreen::OutputDone,
+    WaylandScreen::OutputScale,
 #endif
   };
 
@@ -182,6 +183,11 @@ void WaylandScreen::OutputDone(void* data, struct wl_output* wl_output) {
           screen->display_id_, screen->display_name_, screen->rect_.width(),
           screen->rect_.height(), screen->GetOutputTransformDegrees());
   }
+}
+
+// static
+void WaylandScreen::OutputScale(void* data, struct wl_output* wl_output, int32_t factor) {
+  NOTIMPLEMENTED();
 }
 #endif
 

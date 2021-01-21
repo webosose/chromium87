@@ -76,6 +76,7 @@ class WaylandScreen {
 
 #if defined(OS_WEBOS)
   static void OutputDone(void* data, struct wl_output* wl_output);
+  static void OutputScale(void* data, struct wl_output* wl_output, int32_t factor);
 #endif
 
   // The Wayland output this object wraps
