@@ -811,15 +811,11 @@ gfx::Point DesktopWindowTreeHostOzone::GetLocationOnScreenInPixels() const {
 }
 
 void DesktopWindowTreeHostOzone::SetCursorNative(gfx::NativeCursor cursor) {
-  // Pointer cursor is considered as default system cursor.
-  // So, for pointer cursor, method SetCustomCursor with kNotUse argument
-  // is called instead of SetCursor to substitute default pointer cursor
-  // (black arrow) to default wayland cursor (pink plectrum).
 #if defined(OS_WEBOS)
   ui::mojom::CursorType native_type = cursor.type();
   if (native_type == ui::mojom::CursorType::kPointer) {
-    platform_window_->SetCustomCursor(neva_app_runtime::CustomCursorType::kNotUse,
-                                      "", 0, 0, false);
+    platform_window_->SetCustomCursor(
+        neva_app_runtime::CustomCursorType::kNotUse, "", 0, 0, false);
     return;
   } else if (native_type == ui::mojom::CursorType::kNone) {
     // Hiding of the cursor after some time is handled by LSM, but some sites
@@ -827,6 +823,13 @@ void DesktopWindowTreeHostOzone::SetCursorNative(gfx::NativeCursor cursor) {
     // And in case when cursor was hidden firstly by LSM and then by
     // JavaScript, it no longer could be restored.
     // To fix such situations hiding cursor by JavaScript is ignored.
+    return;
+  } else if (native_type != ui::mojom::CursorType::kCustom) {
+    // For any cursor except cursor:url, SetCustomCursor method with kNotUse
+    // argument is called instead of SetCursor to substitute default theme
+    // cursor to webOS Wayland cursor (pink plectrum).
+    platform_window_->SetCustomCursor(
+        neva_app_runtime::CustomCursorType::kNotUse, "", 0, 0, false);
     return;
   }
 #endif
