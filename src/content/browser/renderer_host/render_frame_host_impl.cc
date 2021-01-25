@@ -2432,12 +2432,17 @@ void RenderFrameHostImpl::DidAddMessageToConsole(
     return;
   }
 
+#if defined(OS_WEBOS) && defined(USE_PMLOG)
+  // In webOS we keep always the original debug level to forward to LOG
+  const bool is_builtin_component = true;
+#else
   // Pass through log severity only on builtin components pages to limit console
   // spew.
   const bool is_builtin_component =
       HasWebUIScheme(delegate_->GetMainFrameLastCommittedURL()) ||
       GetContentClient()->browser()->IsBuiltinComponent(
           GetProcess()->GetBrowserContext(), GetLastCommittedOrigin());
+#endif
   const bool is_off_the_record =
       GetSiteInstance()->GetBrowserContext()->IsOffTheRecord();
 
