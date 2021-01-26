@@ -359,15 +359,16 @@ bool MediaSource::isTypeSupported(ExecutionContext* context,
   int width = content_type.Parameter("width").ToInt();
   int height = content_type.Parameter("height").ToInt();
   int frame_rate = content_type.Parameter("framerate").ToInt();
-  int bit_rate = content_type.Parameter("bitrate").ToInt();
+  int64_t bit_rate = content_type.Parameter("bitrate").ToInt();
   int channels = content_type.Parameter("channels").ToInt();
+  String features = content_type.Parameter("features");
 
   if (RuntimeEnabledFeatures::MediaSourceIsSupportedExtensionEnabled()) {
     base::Optional<WebMediaCodecCapability> capability;
     if (width > 0 || height > 0 || frame_rate > 0 || bit_rate > 0 ||
-        channels > 0) {
+        channels > 0 || !features.IsEmpty()) {
       WebMediaCodecCapability web_media_type_capability(
-          width, height, frame_rate, bit_rate, channels);
+          width, height, frame_rate, bit_rate, channels, features);
       capability = web_media_type_capability;
     }
     bool result = MIMETypeRegistry::kIsSupported ==

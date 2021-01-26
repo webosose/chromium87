@@ -195,7 +195,8 @@ MIMETypeRegistry::SupportsType MIMETypeRegistry::IsSupportedMediaSourceMIMEType(
   if (capability.has_value()) {
     casted_capability = media::MediaCodecCapability(
         capability->width, capability->height, capability->frame_rate,
-        capability->bit_rate, capability->channels);
+        capability->bit_rate, capability->channels,
+        ToASCIIOrEmpty(capability->features));
   }
 
   return static_cast<MIMETypeRegistry::SupportsType>(

@@ -43,6 +43,9 @@
 
 namespace media {
 
+// Below types "struct CodecInfo" and CodecIDValidatorFunction is
+// moved to src/media/neva/media_codec_capability.h file
+#if !defined(USE_NEVA_MEDIA)
 typedef bool (*CodecIDValidatorFunction)(const std::string& codecs_id,
                                          MediaLog* media_log);
 
@@ -76,6 +79,7 @@ struct CodecInfo {
   CodecIDValidatorFunction validator;
   HistogramTag tag;
 };
+#endif
 
 typedef StreamParser* (*ParserFactoryFunction)(
     const std::vector<std::string>& codecs,
@@ -503,7 +507,9 @@ static SupportsType CheckTypeAndCodecs(
       base::Optional<MediaCodecCapability> platform_capability =
           media::MediaPreferences::Get()->GetMediaCodecCapabilityForType(type);
       if (platform_capability.has_value() && capability.has_value() &&
-          !platform_capability->IsSatisfied(capability.value()))
+          !platform_capability->IsSatisfied(type_info.codecs[0]->type,
+                                            type_info.codecs[0]->tag,
+                                            capability.value()))
         return IsNotSupported;
 #endif
 

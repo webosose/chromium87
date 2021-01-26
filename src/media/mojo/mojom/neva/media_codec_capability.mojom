@@ -24,4 +24,5 @@ struct MediaCodecCapability {
   int32 frame_rate;
   int64 bit_rate;
   int32 channels;
+  string features;
 };

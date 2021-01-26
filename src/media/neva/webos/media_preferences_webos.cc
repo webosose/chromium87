@@ -53,6 +53,16 @@ void MediaPreferences::Update(const std::string& media_preferences) {
         preferences["mse"]["enableAV1"].asBool();
   }
 
+  if(preferences.isMember("supportDolbyHDR")) {
+    media_prefs_info_.is_supported_dolby_hdr =
+        preferences["supportDolbyHDR"].asBool();
+  }
+
+  if(preferences.isMember("supportDolbyAtmos")) {
+    media_prefs_info_.is_supported_dolby_atmos =
+        preferences["supportDolbyAtmos"].asBool();
+  }
+
   VLOG(1) << __func__ << " info: " << media_prefs_info_.ToString();
 }
 
@@ -163,6 +173,20 @@ bool MediaPreferences::IsSupportedAudioType(const media::AudioType& type) {
 bool MediaPreferences::IsSupportedVideoType(const media::VideoType& type) {
   // Defer to media's default support.
   return media::IsDefaultSupportedVideoType(type);
+}
+
+bool MediaPreferences::IsSupportedVideoCodec(
+    const MediaCodecCapability& capability) {
+  return true;
+}
+
+bool MediaPreferences::IsSupportedAudioCodec(
+    const MediaCodecCapability& capability) {
+  return true;
+}
+
+bool MediaPreferences::IsSupportedUHD() {
+  return is_supported_uhd.has_value() ? is_supported_uhd.value() : false;
 }
 
 }  // namespace media

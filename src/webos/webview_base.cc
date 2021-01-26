@@ -233,10 +233,6 @@ void WebViewBase::SetSearchKeywordForCustomPlayer(bool enabled) {
   webview_->SetSearchKeywordForCustomPlayer(enabled);
 }
 
-void WebViewBase::SetSupportDolbyHDRContents(bool support) {
-  webview_->SetSupportDolbyHDRContents(support);
-}
-
 void WebViewBase::SetUseUnlimitedMediaPolicy(bool enabled) {
   webview_->SetUseUnlimitedMediaPolicy(enabled);
 }

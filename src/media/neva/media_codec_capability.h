@@ -25,6 +25,44 @@
 
 namespace media {
 
+class MediaLog;
+
+// Below types, CodecIDValidatorFunction and CodecInfo are upstream types
+// moved to here from stream_parser_factory.cc file
+typedef bool (*CodecIDValidatorFunction)(const std::string& codecs_id,
+                                         MediaLog* media_log);
+
+struct CodecInfo {
+  enum Type { UNKNOWN, AUDIO, VIDEO };
+
+  // Update tools/metrics/histograms/histograms.xml if new values are added.
+  enum HistogramTag {
+    HISTOGRAM_UNKNOWN,
+    HISTOGRAM_VP8,
+    HISTOGRAM_VP9,
+    HISTOGRAM_VORBIS,
+    HISTOGRAM_H264,
+    HISTOGRAM_MPEG2AAC,
+    HISTOGRAM_MPEG4AAC,
+    HISTOGRAM_EAC3,
+    HISTOGRAM_MP3,
+    HISTOGRAM_OPUS,
+    HISTOGRAM_HEVC,
+    HISTOGRAM_AC3,
+    HISTOGRAM_DOLBYVISION,
+    HISTOGRAM_FLAC,
+    HISTOGRAM_AV1,
+    HISTOGRAM_MPEG_H_AUDIO,
+    HISTOGRAM_MAX =
+        HISTOGRAM_MPEG_H_AUDIO  // Must be equal to largest logged entry.
+  };
+
+  const char* pattern;
+  Type type;
+  CodecIDValidatorFunction validator;
+  HistogramTag tag;
+};
+
 struct MEDIA_EXPORT MediaCodecCapability {
   std::string type;
   std::string codec;
@@ -33,6 +71,7 @@ struct MEDIA_EXPORT MediaCodecCapability {
   int frame_rate = 0;
   int64_t bit_rate = 0;
   int channels = 0;
+  std::string features;
 
   MediaCodecCapability();
 
@@ -41,13 +80,16 @@ struct MEDIA_EXPORT MediaCodecCapability {
   MediaCodecCapability(int width,
                        int height,
                        int frame_rate,
-                       int bit_rate,
-                       int channels);
+                       int64_t bit_rate,
+                       int channels,
+                       const std::string& features);
 
   ~MediaCodecCapability();
 
   // Checks to see if the specified |capability| is supported.
-  bool IsSatisfied(const MediaCodecCapability& capability) const;
+  bool IsSatisfied(CodecInfo::Type type,
+                   CodecInfo::HistogramTag tag,
+                   const MediaCodecCapability& capability) const;
 };
 
 }  // namespace media

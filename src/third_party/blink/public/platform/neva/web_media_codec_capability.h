@@ -17,25 +17,30 @@
 #ifndef THIRD_PARTY_BLINK_PUBLIC_PLATFORM_NEVA_WEB_MEDIA_CODEC_CAPABILITY_H_
 #define THIRD_PARTY_BLINK_PUBLIC_PLATFORM_NEVA_WEB_MEDIA_CODEC_CAPABILITY_H_
 
+#include "third_party/blink/public/platform/web_string.h"
+
 namespace blink {
 
 struct WebMediaCodecCapability {
   int width;
   int height;
   int frame_rate;
-  int bit_rate;
+  int64_t bit_rate;
   int channels;
+  WebString features;
 
   WebMediaCodecCapability(int width,
                           int height,
                           int frame_rate,
-                          int bit_rate,
-                          int channels)
+                          int64_t bit_rate,
+                          int channels,
+                          const WebString& features)
       : width(width),
         height(height),
         frame_rate(frame_rate),
         bit_rate(bit_rate),
-        channels(channels) {}
+        channels(channels),
+        features(features) {}
 };
 
 }  // namespace blink

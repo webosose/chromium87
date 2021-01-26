@@ -33,7 +33,11 @@ MediaPrefsInfo::~MediaPrefsInfo() = default;
 std::string MediaPrefsInfo::ToString() const {
   std::ostringstream s;
   s << "mse_use_intrinsic_size: " << (mse_use_intrinsic_size ? "true" : "false")
-    << " / is_av1_codec_enabled: " << (is_av1_codec_enabled ? "true" : "false");
+    << " / is_av1_codec_enabled: " << (is_av1_codec_enabled ? "true" : "false")
+    << " / is_supported_dolby_hdr: "
+    << (is_supported_dolby_hdr ? "true" : "false")
+    << " / is_supported_dolby_atmos: "
+    << (is_supported_dolby_atmos  ? "true" : "false");
   return s.str();
 }
 
@@ -64,11 +68,6 @@ void MediaPreferences::SetUseIntrinsicSizeForMSE(bool use_intrinsic_size) {
 bool MediaPreferences::IsAV1CodecEnabled() {
   base::AutoLock auto_lock(lock_);
   return media_prefs_info_.is_av1_codec_enabled;
-}
-
-void MediaPreferences::SetIsAV1CodecEnabled(bool is_av1_codec_enabled) {
-  base::AutoLock auto_lock(lock_);
-  media_prefs_info_.is_av1_codec_enabled = is_av1_codec_enabled;
 }
 
 std::vector<MediaCodecCapability>
@@ -104,5 +103,15 @@ MediaPreferences::GetMediaCodecCapabilityForCodec(const std::string& codec) {
   return base::nullopt;
 }
 #endif
+
+bool MediaPreferences::IsSupportedDolbyHdr() {
+  base::AutoLock auto_lock(lock_);
+  return media_prefs_info_.is_supported_dolby_hdr;
+}
+
+bool MediaPreferences::IsSupportedDolbyAtmos() {
+  base::AutoLock auto_lock(lock_);
+  return media_prefs_info_.is_supported_dolby_atmos;
+}
 
 }  // namespace media

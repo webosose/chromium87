@@ -128,7 +128,6 @@ class APP_RUNTIME_EXPORT WebViewBase : public WebViewDelegate,
   void SetMediaCodecCapability(const std::string& capability);
   void SetMediaPreferences(const std::string& preferences);
   void SetSearchKeywordForCustomPlayer(bool enabled);
-  void SetSupportDolbyHDRContents(bool support);
   void SetUseUnlimitedMediaPolicy(bool enabled);
 
   // WebPreferences

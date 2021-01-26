@@ -37,4 +37,18 @@ bool MediaPreferences::IsSupportedVideoType(const media::VideoType& type) {
   return media::IsDefaultSupportedVideoType(type);
 }
 
+bool MediaPreferences::IsSupportedVideoCodec(
+    const MediaCodecCapability& capability) {
+  return true;
+}
+
+bool MediaPreferences::IsSupportedAudioCodec(
+    const MediaCodecCapability& capability) {
+  return true;
+}
+
+bool MediaPreferences::IsSupportedUHD() {
+  return false;
+}
+
 }  // namespace media

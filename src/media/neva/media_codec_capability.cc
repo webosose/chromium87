@@ -16,7 +16,31 @@
 
 #include "media/neva/media_codec_capability.h"
 
+#include <vector>
+
+#include "media/neva/media_preferences.h"
+
 namespace media {
+
+/* The order of the Codec strings should be same as CodecInfo::HistogramTag */
+std::vector<std::string> kTagCodecMap = {
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_UNKNOWN
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_VP8
+    "VP9",   // For CodecInfo::HistogramTag::HISTOGRAM_VP9
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_VORBIS
+    "H264",  // For CodecInfo::HistogramTag::HISTOGRAM_H264
+    "AAC",   // For CodecInfo::HistogramTag::HISTOGRAM_MPEG2AAC
+    "AAC",   // For CodecInfo::HistogramTag::HISTOGRAM_MPEG4AAC
+    "EAC3",  // For CodecInfo::HistogramTag::HISTOGRAM_EAC3
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_MP3
+    "OPUS",  // For CodecInfo::HistogramTag::HISTOGRAM_OPUS
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_HEVC
+    "AC3",   // For CodecInfo::HistogramTag::HISTOGRAM_AC3
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_DOLBYVISION
+    "",      // For CodecInfo::HistogramTag::HISTOGRAM_FLAC
+    "AV1",   // For CodecInfo::HistogramTag::HISTOGRAM_AV1
+    ""       // For CodecInfo::HistogramTag::HISTOGRAM_MPEG_H_AUDIO
+};
 
 MediaCodecCapability::MediaCodecCapability() = default;
 
@@ -26,18 +50,22 @@ MediaCodecCapability::MediaCodecCapability(const MediaCodecCapability& other) =
 MediaCodecCapability::MediaCodecCapability(int width,
                                            int height,
                                            int frame_rate,
-                                           int bit_rate,
-                                           int channels)
+                                           int64_t bit_rate,
+                                           int channels,
+                                           const std::string& features)
     : width(width),
       height(height),
       frame_rate(frame_rate),
       bit_rate(bit_rate),
-      channels(channels) {}
+      channels(channels),
+      features(features) {}
 
 MediaCodecCapability::~MediaCodecCapability() = default;
 
 // Checks to see if the specified |capability| is supported.
 bool MediaCodecCapability::IsSatisfied(
+    CodecInfo::Type type,
+    CodecInfo::HistogramTag tag,
     const MediaCodecCapability& capability) const {
   if (width && width < capability.width)
     return false;
@@ -49,6 +77,28 @@ bool MediaCodecCapability::IsSatisfied(
     return false;
   if (channels && channels < capability.channels)
     return false;
+
+  const std::string& codec_string = kTagCodecMap[tag];
+  MediaCodecCapability codec_capability = capability;
+  codec_capability.codec = codec_string;
+
+  if (type == CodecInfo::Type::AUDIO) {
+    if (tag == CodecInfo::HistogramTag::HISTOGRAM_VORBIS)
+      return false;
+
+    int channels = capability.channels;
+    if (!codec_string.empty() && channels != -1 &&
+        !MediaPreferences::Get()->IsSupportedAudioCodec(codec_capability)) {
+      return false;
+    }
+  }
+
+  if (type == CodecInfo::Type::VIDEO) {
+    if (!codec_string.empty() &&
+        !MediaPreferences::Get()->IsSupportedVideoCodec(codec_capability)) {
+      return false;
+    }
+  }
   return true;
 }
 

@@ -17,6 +17,7 @@
 #ifndef MEDIA_NEVA_MEDIA_PREFERENCES_H_
 #define MEDIA_NEVA_MEDIA_PREFERENCES_H_
 
+#include "base/optional.h"
 #include "base/memory/singleton.h"
 #include "base/synchronization/lock.h"
 #include "media/base/media_export.h"
@@ -52,6 +53,15 @@ struct MEDIA_EXPORT MediaPrefsInfo {
   //  - URL video without content type attribute.
   //    Because HTMLMediaElement tries to load anyway if no content mime type.
   bool is_av1_codec_enabled = true;
+
+  // Used to check whether DOLBY_VISION codec type is supported by platform.
+  // This preference is set based on the value of getconfig from configd
+  // service.
+  bool is_supported_dolby_hdr = true;
+  // Used to check whether Dolby Atmos feature is supported by platform.
+  // This preference is set based on the value of getconfig from configd
+  // service.
+  bool is_supported_dolby_atmos = true;
 };
 
 class MEDIA_EXPORT MediaPreferences {
@@ -69,8 +79,6 @@ class MEDIA_EXPORT MediaPreferences {
   void SetUseIntrinsicSizeForMSE(bool use_intrinsic_size);
 
   bool IsAV1CodecEnabled();
-
-  void SetIsAV1CodecEnabled(bool is_av1_decoder_enabled);
 
   // Platform dependent method.
   void SetMediaCodecCapabilities(const std::string& capabilities);
@@ -93,6 +101,14 @@ class MEDIA_EXPORT MediaPreferences {
       const std::string& codec);
 #endif
 
+  bool IsSupportedDolbyHdr();
+  bool IsSupportedDolbyAtmos();
+
+  bool IsSupportedVideoCodec(const MediaCodecCapability& capability);
+  bool IsSupportedAudioCodec(const MediaCodecCapability& capability);
+
+  bool IsSupportedUHD();
+
  private:
   friend struct base::DefaultSingletonTraits<MediaPreferences>;
   MediaPreferences();
@@ -106,6 +122,8 @@ class MEDIA_EXPORT MediaPreferences {
 
   // Used to access |media_prefs_info_|.
   base::Lock lock_;
+
+  base::Optional<bool> is_supported_uhd;
 };
 
 }  // namespace media

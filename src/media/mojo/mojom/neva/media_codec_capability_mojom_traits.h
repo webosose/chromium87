@@ -58,6 +58,10 @@ struct StructTraits<media::mojom::MediaCodecCapabilityDataView,
     return input.channels;
   }
 
+  static std::string features(const media::MediaCodecCapability& input) {
+    return input.features;
+  }
+
   static bool Read(media::mojom::MediaCodecCapabilityDataView input,
                    media::MediaCodecCapability* output);
 };
