@@ -104,6 +104,9 @@ class AppRuntimeContentBrowserClient : public content::ContentBrowserClient {
 
   std::string GetUserAgent() override;
 
+  void OnNetworkServiceCreated(
+      network::mojom::NetworkService* network_service) override;
+
   void ConfigureNetworkContextParams(
       content::BrowserContext* context,
       bool in_memory,
