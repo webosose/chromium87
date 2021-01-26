@@ -79,6 +79,13 @@ std::unique_ptr<blink::WebCoalescedInputEvent> ScaleEvent(
       std::vector<std::unique_ptr<WebInputEvent>>(), latency_info);
 }
 
+bool IsKeyEventThrottlingEnabled() {
+  const base::CommandLine& command_line =
+      *base::CommandLine::ForCurrentProcess();
+
+  return command_line.HasSwitch(switches::kEnableKeyEventThrottling);
+}
+
 }  // namespace
 
 InputRouterImpl::InputRouterImpl(
@@ -89,6 +96,7 @@ InputRouterImpl::InputRouterImpl(
     : client_(client),
       disposition_handler_(disposition_handler),
       frame_tree_node_id_(-1),
+      throttle_key_events_(IsKeyEventThrottlingEnabled()),
       touch_scroll_started_sent_(false),
       wheel_event_queue_(this),
       touch_event_queue_(this, config.touch_config),
@@ -134,7 +142,36 @@ void InputRouterImpl::SendWheelEvent(
 void InputRouterImpl::SendKeyboardEvent(
     const NativeWebKeyboardEventWithLatencyInfo& key_event,
     KeyboardEventCallback event_result_callback) {
+  if (throttle_key_events_) {
+    // Clear pending repeated key downs.
+    // Following code block is adapted from WEBOS WebKit implementation
+    if (key_event.event.GetType() == WebInputEvent::Type::kKeyUp &&
+        key_queue_.size() > 1) {
+      KeyQueue new_key_queue;
+      // preserve last sent event. (if not crash occurs)
+      new_key_queue.push_back(key_queue_.front());
+      key_queue_.pop_front();
+
+      int key = key_event.event.windows_key_code;
+      while (!key_queue_.empty()) {
+        NativeWebKeyboardEventWithLatencyInfo q = key_queue_.front();
+        key_queue_.pop_front();
+        if ((q.event.GetType() == WebInputEvent::Type::kKeyDown ||
+             q.event.GetType() == WebInputEvent::Type::kRawKeyDown) &&
+            q.event.windows_key_code == key)
+          continue;
+        new_key_queue.push_back(q);
+      }
+      key_queue_.swap(new_key_queue);
+    }
+    key_queue_.push_back(key_event);
+  }
+
   gesture_event_queue_.StopFling();
+
+  if (throttle_key_events_ && key_queue_.size() > 1)
+    return;
+
   blink::mojom::WidgetInputHandler::DispatchEventCallback callback =
       base::BindOnce(&InputRouterImpl::KeyboardEventHandled, weak_this_,
                      key_event, std::move(event_result_callback));
@@ -595,6 +632,21 @@ void InputRouterImpl::KeyboardEventHandled(
   if (source != blink::mojom::InputEventResultSource::kBrowser)
     client_->DecrementInFlightEventCount(source);
   event.latency.AddNewLatencyFrom(latency);
+
+  if (throttle_key_events_) {
+    key_queue_.pop_front();
+    if (!key_queue_.empty()) {
+      NativeWebKeyboardEventWithLatencyInfo key_event = key_queue_.front();
+      key_event.latency.AddNewLatencyFrom(latency);
+      blink::mojom::WidgetInputHandler::DispatchEventCallback callback =
+          base::BindOnce(&InputRouterImpl::KeyboardEventHandled, weak_this_,
+                         key_event, std::move(event_result_callback));
+      FilterAndSendWebInputEvent(key_event.event, key_event.latency,
+                                 std::move(callback));
+      return;
+    }
+  }
+
   std::move(event_result_callback).Run(event, source, state);
 
   // WARNING: This InputRouterImpl can be deallocated at this point

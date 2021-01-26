@@ -352,6 +352,11 @@ const char kDisableOriginTrialControlledBlinkFeatures[] =
 const char kEnableGpuMemoryBufferVideoFrames[] =
     "enable-gpu-memory-buffer-video-frames";
 
+// Enable key event throttling, which sends next key event to renderer
+// only after receiving ack from previous event to avoid spamming renderer
+// with excessive key events that may cause application to choke on heavy
+// tasks which are triggered by key pressed.
+const char kEnableKeyEventThrottling[] = "enable-key-event-throttling";
 // Force logging to be enabled.  Logging is disabled by default in release
 // builds.
 const char kEnableLogging[]                 = "enable-logging";
