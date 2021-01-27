@@ -159,9 +159,12 @@ class WebAppWindow : public views::NativeEventDelegate,
   static views::Widget* CreateWebAppWindow(const WebAppWindowBase::CreateParams& create_params);
   void InitWindow();
   void ComputeScaleFactor();
-  bool IsTextInputOverlapped();
-  void UpdateViewportY();
+  int CalculateTextInputOverlappedHeight(const gfx::Rect& rect);
+  bool CanShiftContent(int shift_height);
+  void CheckShiftContent();
+  void ShiftContentByY(int shift_height);
   void UpdateViewportYCallback();
+  void RestoreContentByY();
 
   views::Widget* widget_ = nullptr;
   views::WebView* webview_ = nullptr;
@@ -174,7 +177,10 @@ class WebAppWindow : public views::NativeEventDelegate,
   bool widget_closed_ = false;
   base::OneShotTimer viewport_timer_;
   gfx::Rect input_panel_rect_;
-  int viewport_shift_height_ = 0;
+  gfx::Rect native_view_bounds_for_restoring_;
+  bool is_shifted_content_ = false;
+  int shift_y_ = 0;
+
   bool input_panel_visible_ = false;
   WebAppWindowBase::CreateParams params_;
   gfx::Rect rect_;

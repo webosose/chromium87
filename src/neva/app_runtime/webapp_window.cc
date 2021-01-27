@@ -437,7 +437,27 @@ void WebAppWindow::CursorVisibilityChanged(bool visible) {
     delegate_->CursorVisibilityChanged(visible);
 }
 
-bool WebAppWindow::IsTextInputOverlapped() {
+int WebAppWindow::CalculateTextInputOverlappedHeight(const gfx::Rect& rect) {
+  int shift_height = 0;
+  if (!host_)
+    return shift_height;
+
+  ui::InputMethod* ime = host_->AsWindowTreeHost()->GetInputMethod();
+  if (!ime || !ime->GetTextInputClient())
+    return shift_height;
+
+  gfx::Rect input_bounds = ime->GetTextInputClient()->GetTextInputBounds();
+  gfx::Rect scaled_rect =
+      gfx::Rect(rect.x() / scale_factor_, rect.y() / scale_factor_,
+                rect.width() / scale_factor_, rect.height() / scale_factor_);
+
+  if (input_bounds.Intersects(scaled_rect))
+    shift_height = input_bounds.bottom() - scaled_rect.y();
+
+  return shift_height;
+}
+
+bool WebAppWindow::CanShiftContent(int shift_height) {
   if (!host_)
     return false;
 
@@ -446,25 +466,17 @@ bool WebAppWindow::IsTextInputOverlapped() {
     return false;
 
   gfx::Rect input_bounds = ime->GetTextInputClient()->GetTextInputBounds();
-  int input_bottom = input_bounds.y() + input_bounds.height() -
-                     web_contents_->GetContentNativeView()->bounds().y();
 
-  int viewport_height = rect_.height();
-  return viewport_height - input_bottom <
-         input_panel_height() + kKeyboardHeightMargin;
+  return input_bounds.y() - rect_.y() >= shift_height;
 }
 
 void WebAppWindow::InputPanelVisibilityChanged(bool visible) {
   if (visible) {
     web_app_scroll_observer_.reset(new WebAppScrollObserver(this));
-    if (input_panel_rect_.height() && IsTextInputOverlapped()) {
-      viewport_shift_height_ = -input_panel_height();
-      UpdateViewportY();
-    }
+    CheckShiftContent();
   } else {
     web_app_scroll_observer_.reset();
-    viewport_shift_height_ = 0;
-    UpdateViewportY();
+    RestoreContentByY();
   }
 
   input_panel_visible_ = visible;
@@ -475,21 +487,37 @@ void WebAppWindow::InputPanelRectChanged(int32_t x,
                                          uint32_t width,
                                          uint32_t height) {
   input_panel_rect_.SetRect(x, y, width, height);
-  if (input_panel_rect_.height() && input_panel_visible_) {
-    viewport_shift_height_ =
-        IsTextInputOverlapped() ? -input_panel_height() : 0;
-    UpdateViewportY();
+  if (input_panel_visible_)
+    CheckShiftContent();
+}
+
+void WebAppWindow::CheckShiftContent() {
+  if (input_panel_rect_.height()) {
+    gfx::Rect panel_rect_margin = gfx::Rect(
+        input_panel_rect_.x(), input_panel_rect_.y() - kKeyboardHeightMargin,
+        input_panel_rect_.width(),
+        input_panel_rect_.height() + kKeyboardHeightMargin);
+    int shift_height = CalculateTextInputOverlappedHeight(panel_rect_margin);
+    if (shift_height != 0 && CanShiftContent(shift_height))
+        ShiftContentByY(shift_height);
   }
 }
 
-void WebAppWindow::UpdateViewportY() {
+void WebAppWindow::ShiftContentByY(int shift_height) {
   if (!web_contents_ || web_contents_->IsBeingDestroyed() ||
       !web_contents_->GetContentNativeView())
     return;
 
-  gfx::Rect bounds = web_contents_->GetContentNativeView()->bounds();
-  if (bounds.y() == viewport_shift_height_)
+  if (shift_height == 0)
     return;
+
+  gfx::Rect bounds = web_contents_->GetContentNativeView()->bounds();
+  shift_y_ = bounds.y() - shift_height;
+
+  if (!is_shifted_content_) {
+    native_view_bounds_for_restoring_ = bounds;
+    is_shifted_content_ = true;
+  }
 
   if (bounds.y()) {
     UpdateViewportYCallback();
@@ -506,7 +534,15 @@ void WebAppWindow::UpdateViewportY() {
 void WebAppWindow::UpdateViewportYCallback() {
   gfx::Rect bounds = web_contents_->GetContentNativeView()->bounds();
   web_contents_->GetContentNativeView()->SetBounds(gfx::Rect(
-      bounds.x(), viewport_shift_height_, bounds.width(), bounds.height()));
+      bounds.x(), shift_y_, bounds.width(), bounds.height()));
+}
+
+void WebAppWindow::RestoreContentByY() {
+  if (is_shifted_content_) {
+    shift_y_ = native_view_bounds_for_restoring_.y();
+    UpdateViewportYCallback();
+    is_shifted_content_ = false;
+  }
 }
 
 void WebAppWindow::KeyboardEnter() {
