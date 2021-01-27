@@ -14,6 +14,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
+
 #include "ui/base/ime/neva/input_method_neva_observer.h"
 
 #include "base/strings/utf_string_conversions.h"
@@ -36,6 +38,7 @@ void InputMethodNevaObserver::OnBlur() {
 void InputMethodNevaObserver::OnCaretBoundsChanged(const TextInputClient* client) {
   gfx::Range text_range;
   gfx::Range selection_range;
+  gfx::Range composition_range;
   base::string16 surrounding_text;
   if (!client->GetTextRange(&text_range) ||
       !client->GetTextFromRange(text_range, &surrounding_text) ||
@@ -50,9 +53,19 @@ void InputMethodNevaObserver::OnCaretBoundsChanged(const TextInputClient* client
   // we have to convert |selection_range| from node coordinates to
   // |surrounding_text| coordinates.
 
+  // In the case of composition, we should exclude composition range from the selection range.
+  // This is required after upgrade to v79 chromium.
+  // Ime manager handles prediction without composition.
+  gfx::Range surround_range = selection_range;
+  if (client->GetCompositionTextRange(&composition_range) &&
+      selection_range.IsBoundedBy(composition_range)) {
+    surround_range.set_start(std::min(selection_range.GetMin(), composition_range.GetMin()));
+    surround_range.set_end(std::min(selection_range.GetMax(), composition_range.GetMin()));
+  }
+
   std::string text = base::UTF16ToUTF8(surrounding_text);
-  size_t anchor_position = selection_range.start() - text_range.start();
-  size_t cursor_position = selection_range.end() - text_range.start();
+  size_t anchor_position = surround_range.start() - text_range.start();
+  size_t cursor_position = surround_range.end() - text_range.start();
 
   // FIXME Retricts length of surround text to 4000 characters.
   //       Usually wayland can carry parameters which is less than 4096 bytes

@@ -36,8 +36,18 @@ void InputMethodAuraLinuxNeva::OnDeleteRange(int32_t index, uint32_t length) {
     if (length != std::numeric_limits<uint32_t>::max()) {
       res = client->GetEditableSelectionRange(&range);
       if (res) {
-        range.set_start(range.GetMax() + index);
-        range.set_end(range.start() + length);
+        // In the case of composition, we should exclude composition range from the selection range.
+        // This is required after upgrade to v79 chromium.
+        // Ime manager handles prediction without composition.
+        gfx::Range composition_range;
+        gfx::Range surround_range = range;
+        if (client->GetCompositionTextRange(&composition_range) &&
+            range.IsBoundedBy(composition_range)) {
+          surround_range.set_start(std::min(range.GetMin(), composition_range.GetMin()));
+          surround_range.set_end(std::min(range.GetMax(), composition_range.GetMin()));
+        }
+        range.set_start(surround_range.GetMax() + index);
+        range.set_end(surround_range.start() + length);
       }
     } else {
       res = client->GetTextRange(&range);
