@@ -18,6 +18,7 @@
 #define NEVA_APP_RUNTIME_BROWSER_APP_RUNTIME_BROWSER_CONTEXT_H_
 
 #include "base/files/file_path.h"
+#include "components/local_storage_manager/public/local_storage_manager.h"
 #include "content/public/browser/browser_context.h"
 
 namespace neva_app_runtime {
@@ -52,7 +53,10 @@ class AppRuntimeBrowserContext : public content::BrowserContext {
   content::BrowsingDataRemoverDelegate* GetBrowsingDataRemoverDelegate()
       override;
 
+  content::LocalStorageManager* GetLocalStorageManager();
+
   void FlushCookieStore();
+  void Initialize();
 
  private:
   void FlushCookieStoreIO();
@@ -61,6 +65,9 @@ class AppRuntimeBrowserContext : public content::BrowserContext {
   const BrowserContextAdapter* adapter_;
   std::unique_ptr<content::ResourceContext> resource_context_;
   const base::FilePath path_;
+#if defined(USE_LOCAL_STORAGE_MANAGER)
+  scoped_refptr<content::LocalStorageManager> local_storage_manager_;
+#endif
 };
 
 }  // namespace neva_app_runtime

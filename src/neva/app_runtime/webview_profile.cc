@@ -57,10 +57,20 @@ void WebViewProfile::AppendExtraWebSocketHeader(const std::string& key,
   GetAppRuntimeContentBrowserClient()->AppendExtraWebSocketHeader(key, value);
 }
 
+void WebViewProfile::RemoveBrowsingData(int remove_browsing_data_mask,
+                                        const GURL& origin,
+                                        base::OnceCallback<void()> callback) {
+  BrowsingDataRemover* remover = BrowsingDataRemover::GetForBrowserContext(
+      browser_context_adapter_->GetBrowserContext());
+  remover->Remove(BrowsingDataRemover::Unbounded(), remove_browsing_data_mask,
+                  origin, std::move(callback));
+}
+
 void WebViewProfile::RemoveBrowsingData(int remove_browsing_data_mask) {
   BrowsingDataRemover* remover = BrowsingDataRemover::GetForBrowserContext(
       browser_context_adapter_->GetBrowserContext());
-  remover->Remove(BrowsingDataRemover::Unbounded(), remove_browsing_data_mask);
+  remover->Remove(BrowsingDataRemover::Unbounded(), remove_browsing_data_mask,
+                  GURL(), base::DoNothing::Once());
 }
 
 void WebViewProfile::FlushCookieStore() {

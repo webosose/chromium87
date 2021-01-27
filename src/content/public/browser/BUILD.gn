@@ -126,6 +126,8 @@ source_set("browser_sources") {
     "color_chooser.h",
     "console_message.h",
     "contacts_picker_properties_requested.h",
+    "data_deleter.cc",
+    "data_deleter.h",
     "content_browser_client.cc",
     "content_browser_client.h",
     "content_index_context.h",

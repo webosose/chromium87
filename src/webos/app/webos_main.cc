@@ -19,6 +19,7 @@
 #include "content/public/app/content_main.h"
 #include "neva/app_runtime/app/app_runtime_main_delegate.h"
 #include "webos/app/webos_content_main_delegate.h"
+#include "webos/browser/webos_data_deleter.h"
 #include "webos/browser/webos_file_access_delegate.h"
 #include "webos/public/runtime.h"
 
@@ -37,6 +38,7 @@ int WebOSMain::Run(int argc, const char** argv) {
   params.argc = argc;
   params.argv = argv;
 
+  content::SetDataDeleter(new webos::WebOSDataDeleter());
   return content::ContentMain(params);
 }
 

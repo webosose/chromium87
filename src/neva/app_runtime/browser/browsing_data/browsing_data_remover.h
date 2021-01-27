@@ -17,8 +17,10 @@
 #ifndef NEVA_APP_RUNTIME_BROWSER_BROWSING_DATA_BROWSING_DATA_REMOVER_H_
 #define NEVA_APP_RUNTIME_BROWSER_BROWSING_DATA_BROWSING_DATA_REMOVER_H_
 
+#include "base/callback.h"
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
+#include "url/gurl.h"
 
 namespace neva_app_runtime {
 
@@ -100,7 +102,11 @@ class BrowsingDataRemover {
   ~BrowsingDataRemover();
 
   // Deletes itself when removing is complete
-  void Remove(const TimeRange& time_range, int remove_mask);
+  using CompleteCallback = base::OnceCallback<void()>;
+  void Remove(const TimeRange& time_range,
+              int remove_mask,
+              const GURL& origin,
+              CompleteCallback callback);
 
  private:
   BrowsingDataRemover(AppRuntimeBrowserContext* browser_context);
@@ -121,6 +127,11 @@ class BrowsingDataRemover {
   // Invokes NotifyAndDeleteIfDone.
   void OnClearedStoragePartitionData();
 
+  // Callback on UI thread when the storage partition domain cookies are
+  // cleared.
+  // Invokes NotifyAndDeleteIfDone.
+  void OnClearedStoragePartitionDomainCookies();
+
   // Callback for when the code cache has been deleted. Invokes
   // NotifyAndDeleteIfDone.
   void OnClearedCodeCache();
@@ -133,6 +144,8 @@ class BrowsingDataRemover {
   bool waiting_for_clear_cache_;
   bool waiting_for_clear_code_cache_;
   bool waiting_for_clear_storage_partition_data_;
+  bool waiting_for_clear_storage_partition_domain_cookies_;
+  CompleteCallback callback_;
 
   base::WeakPtrFactory<BrowsingDataRemover> weak_ptr_factory_;
 };

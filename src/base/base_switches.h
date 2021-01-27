@@ -59,6 +59,9 @@ extern const char kForceFieldTrialParams[];
 extern const char kEnableThreadInstructionCount[];
 #endif
 
+#if defined(USE_LOCAL_STORAGE_MANAGER)
+extern const char kLocalStorageManager[];
+#endif
 }  // namespace switches
 
 #endif  // BASE_BASE_SWITCHES_H_

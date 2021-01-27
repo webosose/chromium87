@@ -43,6 +43,10 @@ std::string BrowserContextAdapter::GetStorageName() const {
   return storage_name_;
 }
 
+void BrowserContextAdapter::Initialize() {
+  browser_context_->Initialize();
+}
+
 void BrowserContextAdapter::FlushCookieStore() {
   browser_context_->FlushCookieStore();
 }

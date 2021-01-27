@@ -1,4 +1,4 @@
-// Copyright 2020 LG Electronics, Inc.
+// Copyright (c) 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef WEBOS_APPLICATION_INSTALLATION_HANDLER_H_
-#define WEBOS_APPLICATION_INSTALLATION_HANDLER_H_
+#include "components/local_storage_manager/browser/local_storage_manager_mojo_impl.h"
 
-#include <string>
+namespace content {
 
-#include "webos/common/webos_export.h"
-
-namespace webos {
-
-class WEBOS_EXPORT ApplicationInstallationHandler {
- public:
-  void OnAppInstalled(const std::string& app_id);
-  void OnAppRemoved(const std::string& app_id);
-  static ApplicationInstallationHandler* GetInstance();
-};
-}  // namespace webos
-
-#endif  // WEBOS_APPLICATION_INSTALLATION_HANDLER_H_
+void RenderFrameHostImpl::GetLocalStorageManagerMojoImpl(
+    mojo::PendingReceiver<local_storage::mojom::LocalStorageManager> receiver) {
+  lsm_responder_ =
+      std::make_unique<LocalStorageManagerMojoImpl>(std::move(receiver));
+}
+}  // namespace content

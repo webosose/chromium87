@@ -81,6 +81,9 @@ declare_args() {
 
   # Use Neva WebRTC
   use_neva_webrtc = false
+
+  # Enable using local storage manager
+  use_local_storage_manager = false
 }
 
 declare_args() {

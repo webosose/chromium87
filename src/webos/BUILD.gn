@@ -53,6 +53,8 @@ source_set("webos_impl") {
     "app/webos_content_main_delegate.h",
     "app/webos_main.cc",
     "app/webos_main.h",
+    "browser/webos_data_deleter.cc",
+    "browser/webos_data_deleter.h",
     "browser/webos_file_access_delegate.cc",
     "browser/webos_file_access_delegate.h",
     "browser/webos_webview_renderer_state.cc",

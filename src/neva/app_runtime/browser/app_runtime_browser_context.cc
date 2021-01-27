@@ -43,7 +43,11 @@ AppRuntimeBrowserContext::AppRuntimeBrowserContext(
     const BrowserContextAdapter* adapter)
     : adapter_(adapter),
       resource_context_(new content::ResourceContext()),
-      path_(InitPath(adapter)) {}
+      path_(InitPath(adapter)) {
+#if defined(USE_LOCAL_STORAGE_MANAGER)
+  local_storage_manager_ = content::LocalStorageManager::Create().release();
+#endif
+}
 
 AppRuntimeBrowserContext::~AppRuntimeBrowserContext() {}
 
@@ -139,6 +143,21 @@ AppRuntimeBrowserContext::GetBackgroundSyncController() {
 content::BrowsingDataRemoverDelegate*
 AppRuntimeBrowserContext::GetBrowsingDataRemoverDelegate() {
   return nullptr;
+}
+
+void AppRuntimeBrowserContext::Initialize() {
+#if defined(USE_LOCAL_STORAGE_MANAGER)
+  local_storage_manager_->Initialize(GetPath());
+#endif
+}
+
+content::LocalStorageManager*
+AppRuntimeBrowserContext::GetLocalStorageManager() {
+#if defined(USE_LOCAL_STORAGE_MANAGER)
+  return local_storage_manager_.get();
+#else
+  return nullptr;
+#endif
 }
 
 void AppRuntimeBrowserContext::FlushCookieStore() {

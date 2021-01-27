@@ -724,6 +724,11 @@ void PopulateFrameBinders(RenderFrameHostImpl* host, mojo::BinderMap* map) {
         base::BindRepeating(&RenderFrameHostImpl::BindInputInjectorReceiver,
                             base::Unretained(host)));
   }
+#if defined(USE_LOCAL_STORAGE_MANAGER)
+  map->Add<local_storage::mojom::LocalStorageManager>(
+      base::BindRepeating(&RenderFrameHostImpl::GetLocalStorageManagerMojoImpl,
+                          base::Unretained(host)));
+#endif
 
 #if defined(OS_ANDROID)
   if (base::FeatureList::IsEnabled(features::kWebNfc)) {

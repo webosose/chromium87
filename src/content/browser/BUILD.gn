@@ -2855,6 +2855,13 @@ source_set("browser") {
       "//services/metrics/public/cpp:ukm_builders",
     ]
   }
+
+  if (use_local_storage_manager) {
+    deps += [
+      "//components/local_storage_manager/browser",
+    ]
+    defines += [ "USE_LOCAL_STORAGE_MANAGER" ]
+  }
 }
 
 buildflag_header("accessibility_buildflags") {

@@ -35,6 +35,7 @@ class BrowserContextAdapter {
   AppRuntimeBrowserContext* GetBrowserContext() const;
 
   std::string GetStorageName() const;
+  void Initialize();
 
   void FlushCookieStore();
 
