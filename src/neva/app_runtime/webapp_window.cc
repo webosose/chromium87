@@ -445,13 +445,13 @@ bool WebAppWindow::IsTextInputOverlapped() {
   if (!ime || !ime->GetTextInputClient())
     return false;
 
-  gfx::Rect caret_bounds = ime->GetTextInputClient()->GetCaretBounds();
-  int caret_bottom = caret_bounds.y() + caret_bounds.height() -
+  gfx::Rect input_bounds = ime->GetTextInputClient()->GetTextInputBounds();
+  int input_bottom = input_bounds.y() + input_bounds.height() -
                      web_contents_->GetContentNativeView()->bounds().y();
 
   int viewport_height = rect_.height();
-  return viewport_height - input_panel_height() <
-         caret_bottom + kKeyboardHeightMargin;
+  return viewport_height - input_bottom <
+         input_panel_height() + kKeyboardHeightMargin;
 }
 
 void WebAppWindow::InputPanelVisibilityChanged(bool visible) {

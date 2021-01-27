@@ -27,6 +27,7 @@
 #define THIRD_PARTY_BLINK_PUBLIC_PLATFORM_WEB_TEXT_INPUT_INFO_H_
 
 #include "third_party/blink/public/platform/web_common.h"
+#include "third_party/blink/public/platform/web_rect.h"
 #include "third_party/blink/public/platform/web_string.h"
 #include "third_party/blink/public/platform/web_text_input_mode.h"
 #include "third_party/blink/public/platform/web_text_input_type.h"
@@ -73,6 +74,8 @@ struct WebTextInputInfo {
   WebVector<ui::ImeTextSpan> ime_text_spans;
 
   BLINK_PLATFORM_EXPORT bool Equals(const WebTextInputInfo&) const;
+
+  WebRect bounds;
 
   WebTextInputInfo()
       : type(kWebTextInputTypeNone),

@@ -341,6 +341,7 @@ class CONTENT_EXPORT RenderWidgetHostViewAura
 #if defined(USE_NEVA_APPRUNTIME)
   void SetEnableHtmlSystemKeyboardAttr(bool enable);
   bool SystemKeyboardDisabled() const override;
+  gfx::Rect GetTextInputBounds() const override;
 #endif
 
 #if defined(USE_NEVA_MEDIA)

@@ -4,6 +4,8 @@
 
 #include "ui/base/ime/text_input_client.h"
 
+#include "ui/gfx/geometry/rect.h"
+
 namespace ui {
 
 TextInputClient::~TextInputClient() {
@@ -13,6 +15,10 @@ TextInputClient::~TextInputClient() {
 ///@{
 bool TextInputClient::SystemKeyboardDisabled() const {
   return false;
+}
+
+gfx::Rect TextInputClient::GetTextInputBounds() const {
+  return gfx::Rect();
 }
 ///@}
 

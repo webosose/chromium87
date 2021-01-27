@@ -687,6 +687,7 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
     params->show_ime_if_needed = show_virtual_keyboard;
     params->always_hide_ime = always_hide_ime;
     params->reply_to_request = reply_to_request;
+    params->bounds = static_cast<gfx::Rect>(new_info.bounds);
     widget_host_->TextInputStateChanged(std::move(params));
 
     text_input_info_ = new_info;

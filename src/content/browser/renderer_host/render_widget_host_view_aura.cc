@@ -2535,6 +2535,15 @@ bool RenderWidgetHostViewAura::SystemKeyboardDisabled() const {
 
   return false;
 }
+
+gfx::Rect RenderWidgetHostViewAura::GetTextInputBounds() const {
+  if (!text_input_manager_ || !text_input_manager_->GetActiveWidget())
+    return gfx::Rect();
+  const ui::mojom::TextInputState* state =
+      text_input_manager_->GetTextInputState();
+
+  return ConvertRectToScreen(state->bounds);
+}
 #endif
 
 #if defined(USE_NEVA_MEDIA)

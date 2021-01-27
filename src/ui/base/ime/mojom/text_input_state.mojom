@@ -73,5 +73,8 @@ struct TextInputState {
 
   // Information of ime text spans at the cursor position.
   array<ImeTextSpanInfo> ime_text_spans_info;
+
+  // Bounds for text input
+  gfx.mojom.Rect bounds;
 };
 
