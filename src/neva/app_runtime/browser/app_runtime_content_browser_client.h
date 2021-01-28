@@ -64,6 +64,7 @@ class AppRuntimeContentBrowserClient : public content::ContentBrowserClient {
   content::DevToolsManagerDelegate* GetDevToolsManagerDelegate() override;
 
   bool ShouldEnableStrictSiteIsolation() override;
+  bool ShouldIsolateErrorPage(bool is_main_frame) override;
 
   bool IsFileAccessAllowedForRequest(
       const base::FilePath& path,

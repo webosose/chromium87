@@ -200,6 +200,12 @@ bool AppRuntimeContentBrowserClient::IsFileAccessAllowedForRequest(
                                                 request.render_frame_id);
 }
 
+bool AppRuntimeContentBrowserClient::ShouldIsolateErrorPage(
+    bool /* in_main_frame */) {
+  // TODO(neva): Temporarily disabled until we support site isolation.
+  return false;
+}
+
 void AppRuntimeContentBrowserClient::AppendExtraCommandLineSwitches(
     base::CommandLine* command_line,
     int child_process_id) {
