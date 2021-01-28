@@ -497,6 +497,13 @@ source_set("buffer_types") {
   sources = [ "buffer_types.h" ]
 }
 
+# Depend on this to use location_hints.h without pulling in all of gfx.
+source_set("location_hint") {
+  sources = [
+    "location_hint.h",
+  ]
+}
+
 # The GPU memory buffer stuff is separate from "gfx" to allow GPU-related
 # things to use these files without pulling in all of gfx, which includes large
 # things like Skia.
@@ -549,7 +556,10 @@ source_set("memory_buffer_sources") {
 
   defines = [ "GFX_IMPLEMENTATION" ]
 
-  public_deps = [ ":buffer_types" ]
+  public_deps = [
+    ":buffer_types",
+    ":location_hint",
+  ]
 
   deps = [
     ":gfx_switches",

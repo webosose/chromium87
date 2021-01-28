@@ -57,54 +57,6 @@ const std::size_t kUInt32BitLength = sizeof(std::uint32_t) * CHAR_BIT;
 const int kKeyboardHeightMargin = 10;
 const int kKeyboardAnimationTime = 600;
 
-using WidgetType = neva_app_runtime::WebAppWindowBase::CreateParams::WidgetType;
-using WindowShowState =
-    neva_app_runtime::WebAppWindowBase::CreateParams::WindowShowState;
-
-views::Widget::InitParams::Type ToViewsWigetType(WidgetType type) {
-  switch (type) {
-    case WidgetType::kWindow :
-      return views::Widget::InitParams::TYPE_WINDOW;
-    case WidgetType::kWindowFrameless :
-      return views::Widget::InitParams::TYPE_WINDOW_FRAMELESS;
-    case WidgetType::kControl :
-      return views::Widget::InitParams::TYPE_CONTROL;
-    case WidgetType::kPopup :
-      return views::Widget::InitParams::TYPE_POPUP;
-    case WidgetType::kMenu :
-      return views::Widget::InitParams::TYPE_MENU;
-    case WidgetType::kTooltip :
-      return views::Widget::InitParams::TYPE_TOOLTIP;
-    case WidgetType::kBubble :
-      return views::Widget::InitParams::TYPE_BUBBLE;
-    case WidgetType::kDrag :
-      return views::Widget::InitParams::TYPE_DRAG;
-  }
-
-  NOTREACHED();
-}
-
-ui::WindowShowState ToUiWindowShowState(WindowShowState state) {
-  switch (state) {
-    case WindowShowState::kDefault :
-      return ui::SHOW_STATE_DEFAULT;
-    case WindowShowState::kNormal :
-      return ui::SHOW_STATE_NORMAL;
-    case WindowShowState::kMinimized :
-      return ui::SHOW_STATE_MINIMIZED;
-    case WindowShowState::kMaximized :
-      return ui::SHOW_STATE_MAXIMIZED;
-    case WindowShowState::kInactive :
-      return ui::SHOW_STATE_INACTIVE;
-    case WindowShowState::kFullscreen :
-      return ui::SHOW_STATE_FULLSCREEN;
-    case WindowShowState::kEnd :
-      return ui::SHOW_STATE_END;
-  }
-
-  NOTREACHED();
-}
-
 inline bool ExistsInUiKeyMaskType(std::uint32_t key_mask) {
   ui::KeyMask key_masks = static_cast<ui::KeyMask>(key_mask);
   switch (key_masks) {
@@ -197,11 +149,11 @@ class WebAppScrollObserver
   WebAppWindow* window_;
 };
 
-WebAppWindow::WebAppWindow(const WebAppWindowBase::CreateParams& params,
+WebAppWindow::WebAppWindow(const CreateParams& params,
                            WebAppWindowDelegate* delegate)
     : delegate_(delegate),
       params_(params),
-      rect_(gfx::Size(params.width, params.height)),
+      rect_(params.bounds),
       window_host_state_(ui::WidgetState::UNINITIALIZED),
       window_host_state_about_to_change_(ui::WidgetState::UNINITIALIZED) {
   InitWindow();
@@ -408,6 +360,16 @@ void WebAppWindow::SetWindowProperty(const std::string& name,
             << " Value: " << value.c_str();
 
   host_->AsWindowTreeHost()->SetWindowProperty(name, value);
+}
+
+void WebAppWindow::SetLocationHint(gfx::LocationHint value) {
+  if (!host_)
+    return;
+
+  aura::WindowTreeHost* wth = host_->AsWindowTreeHost();
+  DCHECK(wth) << "aura::WindowTreeHost is unavailable";
+
+  wth->SetLocationHint(value);
 }
 
 void WebAppWindow::Show() {
@@ -766,12 +728,17 @@ void WebAppWindow::OnKeyEvent(ui::KeyEvent* event) {
 
 void WebAppWindow::InitWindow() {
   widget_ = new views::Widget();
-  views::Widget::InitParams init_params(ToViewsWigetType(params_.type));
-  init_params.bounds =
-      gfx::Rect(params_.pos_x, params_.pos_y, params_.width, params_.height);
+  views::Widget::InitParams init_params(params_.type);
+  // Update params width and and height with current window rect because bounds
+  // might have changed due to resize or orientation change. This is needed
+  // for keep alive apps.when WebAppWindow is not getting destroyed but
+  // reinitialized.
+  params_.bounds.set_width(rect_.width());
+  params_.bounds.set_height(rect_.height());
+  init_params.bounds = params_.bounds;
 
   init_params.delegate = this;
-  init_params.show_state = ToUiWindowShowState(params_.show_state);
+  init_params.show_state = params_.show_state;
   desktop_native_widget_aura_ = new AppRuntimeDesktopNativeWidgetAura(this);
   desktop_native_widget_aura_->SetNativeEventDelegate(this);
   init_params.native_widget = desktop_native_widget_aura_;
@@ -795,8 +762,10 @@ void WebAppWindow::InitWindow() {
 
   widget_->Init(std::move(init_params));
 
-  if (params_.show_state == WebAppWindowBase::CreateParams::WindowShowState::kFullscreen)
+  if (params_.show_state == ui::SHOW_STATE_FULLSCREEN)
     widget_->SetFullscreen(true);
+
+  SetLocationHint(params_.location_hint);
 }
 
 void WebAppWindow::RecreateIfNeeded() {

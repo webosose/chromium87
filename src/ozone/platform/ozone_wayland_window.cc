@@ -1,5 +1,5 @@
 // Copyright 2014 Intel Corporation. All rights reserved.
-// Copyright 2017-2018 LG Electronics, Inc.
+// Copyright 2017 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -520,6 +520,10 @@ void OzoneWaylandWindow::ResetCustomCursor() {
                                      webos::lsm_cursor_restore_location));
   }
 #endif
+}
+
+void OzoneWaylandWindow::SetLocationHint(gfx::LocationHint value) {
+  sender_->Send(new WaylandDisplay_SetLocationHint(handle_, value));
 }
 
 void OzoneWaylandWindow::CreateGroup(

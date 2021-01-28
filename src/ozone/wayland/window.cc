@@ -1,6 +1,6 @@
 // Copyright 2013 The Chromium Authors. All rights reserved.
 // Copyright 2013 Intel Corporation. All rights reserved.
-// Copyright 2016-2018 LG Electronics, Inc.
+// Copyright 2016 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -198,6 +198,19 @@ void WaylandWindow::SetWindowProperty(const std::string& name,
   }
 
   shell_surface_->SetWindowProperty(name, value);
+}
+
+void WaylandWindow::SetLocationHint(gfx::LocationHint value) {
+#if defined(OS_WEBOS)
+  if (!shell_surface_) {
+    LOG(ERROR) << "No shell_surface found";
+    return;
+  }
+
+  shell_surface_->SetLocationHint(value);
+#else
+  LOG(INFO) << "WaylandWindow::SetLocationHint() reached";
+#endif
 }
 
 void WaylandWindow::CreateGroup(const ui::WindowGroupConfiguration& config) {

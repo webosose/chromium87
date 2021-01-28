@@ -66,6 +66,36 @@ inline neva_app_runtime::XInputEventType ToAppruntimeXInputEventType(
   NOTREACHED();
 }
 
+inline gfx::LocationHint ToGfxLocationHint(
+    WebAppWindowBase::LocationHint value) {
+  switch (value) {
+    case WebAppWindowBase::LocationHint::kUnknown:
+      return gfx::LocationHint::kUnknown;
+    case WebAppWindowBase::LocationHint::kNorth:
+      return gfx::LocationHint::kNorth;
+    case WebAppWindowBase::LocationHint::kWest:
+      return gfx::LocationHint::kWest;
+    case WebAppWindowBase::LocationHint::kSouth:
+      return gfx::LocationHint::kSouth;
+    case WebAppWindowBase::LocationHint::kEast:
+      return gfx::LocationHint::kEast;
+    case WebAppWindowBase::LocationHint::kCenter:
+      return gfx::LocationHint::kCenter;
+    case WebAppWindowBase::LocationHint::kNorthWest:
+      return gfx::LocationHint::kNorthWest;
+    case WebAppWindowBase::LocationHint::kNorthEast:
+      return gfx::LocationHint::kNorthEast;
+    case WebAppWindowBase::LocationHint::kSouthWest:
+      return gfx::LocationHint::kSouthWest;
+    case WebAppWindowBase::LocationHint::kSouthEast:
+      return gfx::LocationHint::kSouthEast;
+    default:
+      NOTREACHED() << __func__ << "(): unknown location hint value: "
+                   << static_cast<uint32_t>(value);
+      return gfx::LocationHint::kUnknown;
+  }
+}
+
 }  // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,15 +118,11 @@ void WebAppWindowBase::InitWindow(int width, int height) {
     return;
   }
 
-  neva_app_runtime::WebAppWindowBase::CreateParams params;
-  params.width = width;
-  params.height = height;
-  params.show_state =
-      neva_app_runtime::WebAppWindowBase::CreateParams::WindowShowState
-          ::kFullscreen;
-  params.type =
-      neva_app_runtime::WebAppWindowBase::CreateParams::WidgetType
-          ::kWindowFrameless;
+  neva_app_runtime::WebAppWindow::CreateParams params;
+  params.bounds.set_width(width);
+  params.bounds.set_height(height);
+  params.show_state = ui::SHOW_STATE_DEFAULT;
+  params.type = views::Widget::InitParams::TYPE_WINDOW_FRAMELESS;
   webapp_window_ = new WebAppWindow(params);
   webapp_window_->SetDelegate(this);
 }
@@ -201,7 +227,11 @@ void WebAppWindowBase::SetWindowProperty(const std::string& name,
 }
 
 void WebAppWindowBase::SetLocationHint(LocationHint value) {
-  NOTIMPLEMENTED();
+  if (webapp_window_) {
+    VLOG(1) << "WebAppWindowBase::SetLocationHint value = "
+            << static_cast<int>(value);
+    webapp_window_->SetLocationHint(ToGfxLocationHint(value));
+  }
 }
 
 void WebAppWindowBase::SetOpacity(float opacity) {

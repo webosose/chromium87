@@ -1,6 +1,6 @@
 // Copyright 2013 The Chromium Authors. All rights reserved.
 // Copyright 2013 Intel Corporation. All rights reserved.
-// Copyright 2017-2018 LG Electronics, Inc.
+// Copyright 2017 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -672,6 +672,15 @@ void WaylandDisplay::SetWindowProperty(unsigned w,
   widget->SetWindowProperty(name, value);
 }
 
+void WaylandDisplay::SetLocationHint(unsigned w, gfx::LocationHint value) {
+  WaylandWindow* widget = GetWidget(w);
+  if (!widget) {
+    LOG(ERROR) << __PRETTY_FUNCTION__ << ", window not found.";
+    return;
+  }
+  widget->SetLocationHint(value);
+}
+
 void WaylandDisplay::DetachWindowGroup(unsigned w) {
 #if defined(OS_WEBOS)
   WaylandWindow* widget = GetWidget(w);
@@ -1101,6 +1110,7 @@ bool WaylandDisplay::OnMessageReceived(const IPC::Message& message) {
   IPC_MESSAGE_HANDLER(WaylandDisplay_DragWillBeAccepted, DragWillBeAccepted)
   IPC_MESSAGE_HANDLER(WaylandDisplay_DragWillBeRejected, DragWillBeRejected)
   IPC_MESSAGE_HANDLER(WaylandDisplay_SetWindowProperty, SetWindowProperty)
+  IPC_MESSAGE_HANDLER(WaylandDisplay_SetLocationHint, SetLocationHint)
   IPC_MESSAGE_HANDLER(WaylandDisplay_SetSurroundingText, SetSurroundingText)
   IPC_MESSAGE_HANDLER(WaylandDisplay_XInputActivate, XInputActivate)
   IPC_MESSAGE_HANDLER(WaylandDisplay_XInputInvokeAction, XInputInvokeAction)

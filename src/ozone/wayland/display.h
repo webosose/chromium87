@@ -1,6 +1,6 @@
 // Copyright 2013 The Chromium Authors. All rights reserved.
 // Copyright 2013 Intel Corporation. All rights reserved.
-// Copyright 2017-2018 LG Electronics, Inc.
+// Copyright 2017 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@
 #include "ui/events/event_constants.h"
 #include "ui/events/types/event_type.h"
 #include "ui/gfx/geometry/rect.h"
+#include "ui/gfx/location_hint.h"
 #include "ui/gl/gl_surface.h"
 #include "ui/ozone/public/gpu_platform_support.h"
 #include "ui/ozone/public/surface_factory_ozone.h"
@@ -324,6 +325,7 @@ class WaylandDisplay : public ui::SurfaceFactoryOzone,
   void SetWindowProperty(unsigned w,
                          const std::string& name,
                          const std::string& value);
+  void SetLocationHint(unsigned w, gfx::LocationHint value);
   void CreateWindowGroup(unsigned w,
                          const ui::WindowGroupConfiguration& config);
   void AttachToWindowGroup(unsigned w,

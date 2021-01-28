@@ -23,7 +23,7 @@
 namespace webos {
 
 WebAppWindow::WebAppWindow(
-    const neva_app_runtime::WebAppWindowBase::CreateParams& params)
+    const neva_app_runtime::WebAppWindow::CreateParams& params)
     : neva_app_runtime::WebAppWindow(params, nullptr) {
   SetDeferredDeleting(true);
 }

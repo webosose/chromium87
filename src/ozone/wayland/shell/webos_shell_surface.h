@@ -1,4 +1,4 @@
-// Copyright 2014-2018 LG Electronics, Inc.
+// Copyright 2014 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ class WebosShellSurface : public WLShellSurface {
   void SetInputRegion(const std::vector<gfx::Rect>& region) override;
   void SetWindowProperty(const std::string& name,
                          const std::string& value) override;
+  void SetLocationHint(gfx::LocationHint value) override;
   void OnStateChanged(ui::WidgetState state);
   static void HandleStateChanged(
       void* data,
@@ -77,6 +78,7 @@ class WebosShellSurface : public WLShellSurface {
   WebOSKeyMasks webos_group_key_masks_;
   bool minimized_;
   wl_webos_shell_surface* webos_shell_surface_;
+  gfx::LocationHint location_hint_ = gfx::LocationHint::kUnknown;
   DISALLOW_COPY_AND_ASSIGN(WebosShellSurface);
 };
 

@@ -29,7 +29,7 @@ class WebAppWindowDelegate;
 
 class WebAppWindow : public neva_app_runtime::WebAppWindow {
  public:
-  WebAppWindow(const neva_app_runtime::WebAppWindowBase::CreateParams& params);
+  WebAppWindow(const neva_app_runtime::WebAppWindow::CreateParams& params);
   WebAppWindow(const WebAppWindow&) = delete;
   WebAppWindow& operator=(const WebAppWindow&) = delete;
   ~WebAppWindow() override;

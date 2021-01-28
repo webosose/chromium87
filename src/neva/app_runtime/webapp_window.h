@@ -19,8 +19,9 @@
 
 #include "base/timer/timer.h"
 #include "neva/app_runtime/public/app_runtime_constants.h"
-#include "neva/app_runtime/public/webapp_window_base.h"
+
 #include "ui/display/display_observer.h"
+#include "ui/gfx/location_hint.h"
 #include "ui/views/widget/desktop_aura/neva/native_event_delegate.h"
 #include "ui/views/widget/desktop_aura/neva/ui_constants.h"
 #include "ui/views/widget/widget.h"
@@ -52,7 +53,15 @@ class WebAppWindow : public views::NativeEventDelegate,
                      public display::DisplayObserver,
                      public views::WidgetDelegateView {
  public:
-  WebAppWindow(const WebAppWindowBase::CreateParams& params, WebAppWindowDelegate* delegate);
+  struct CreateParams {
+    gfx::Rect bounds;
+    views::Widget::InitParams::Type type =
+        views::Widget::InitParams::TYPE_WINDOW;
+    ui::WindowShowState show_state = ui::SHOW_STATE_DEFAULT;
+    content::WebContents* web_contents = nullptr;
+    gfx::LocationHint location_hint = gfx::LocationHint::kUnknown;
+  };
+  WebAppWindow(const CreateParams& params, WebAppWindowDelegate* delegate);
   WebAppWindow(const WebAppWindow&) = delete;
   WebAppWindow& operator=(const WebAppWindow&) = delete;
   ~WebAppWindow() override;
@@ -80,6 +89,7 @@ class WebAppWindow : public views::NativeEventDelegate,
                        int hotspot_x,
                        int hotspot_y);
   void SetWindowProperty(const std::string& name, const std::string& value);
+  void SetLocationHint(gfx::LocationHint value);
   void Show();
   void Minimize();
   void Close();
@@ -156,7 +166,7 @@ class WebAppWindow : public views::NativeEventDelegate,
  private:
   friend WebAppScrollObserver;
 
-  static views::Widget* CreateWebAppWindow(const WebAppWindowBase::CreateParams& create_params);
+  static views::Widget* CreateWebAppWindow(const CreateParams& create_params);
   void InitWindow();
   void ComputeScaleFactor();
   int CalculateTextInputOverlappedHeight(const gfx::Rect& rect);
@@ -182,7 +192,7 @@ class WebAppWindow : public views::NativeEventDelegate,
   int shift_y_ = 0;
 
   bool input_panel_visible_ = false;
-  WebAppWindowBase::CreateParams params_;
+  CreateParams params_;
   gfx::Rect rect_;
   float scale_factor_;
   int current_rotation_ = -1;

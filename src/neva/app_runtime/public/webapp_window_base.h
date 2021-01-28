@@ -34,28 +34,41 @@ using WebContents = void;
 
 class APP_RUNTIME_EXPORT WebAppWindowBase : WebAppWindowDelegate {
  public:
+  enum class WidgetType {
+    kWindow,
+    kWindowFrameless,
+    kControl,
+    kPopup,
+    kMenu,
+    kTooltip,
+    kBubble,
+    kDrag,
+  };
+
+  enum class WindowShowState {
+    kDefault,
+    kNormal,
+    kMinimized,
+    kMaximized,
+    kInactive,
+    kFullscreen,
+    kEnd,
+  };
+
+  enum class LocationHint {
+    kUnknown,
+    kNorth,
+    kWest,
+    kSouth,
+    kEast,
+    kCenter,
+    kNorthWest,
+    kNorthEast,
+    kSouthWest,
+    kSouthEast,
+  };
+
   struct CreateParams {
-    enum class WidgetType {
-      kWindow,
-      kWindowFrameless,
-      kControl,
-      kPopup,
-      kMenu,
-      kTooltip,
-      kBubble,
-      kDrag,
-    };
-
-    enum class WindowShowState {
-      kDefault,
-      kNormal,
-      kMinimized,
-      kMaximized,
-      kInactive,
-      kFullscreen,
-      kEnd,
-    };
-
     int width = 0;
     int height = 0;
     int pos_x = 0;
@@ -63,6 +76,7 @@ class APP_RUNTIME_EXPORT WebAppWindowBase : WebAppWindowDelegate {
     WidgetType type = WidgetType::kWindow;
     WindowShowState show_state = WindowShowState::kDefault;
     WebContents* web_contents = nullptr;
+    LocationHint location_hint = LocationHint::kUnknown;
   };
 
   WebAppWindowBase();
@@ -92,6 +106,7 @@ class APP_RUNTIME_EXPORT WebAppWindowBase : WebAppWindowDelegate {
   void SetGroupKeyMask(KeyMask key_mask);
   void SetKeyMask(KeyMask key_mask, bool set);
   void SetWindowProperty(const std::string& name, const std::string& value);
+  void SetLocationHint(LocationHint value);
   void SetOpacity(float opacity);
   void Resize(int width, int height);
   void SetBounds(int x, int y, int width, int height);
