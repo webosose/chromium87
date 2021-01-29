@@ -161,8 +161,7 @@ RootWindowController::RootWindowController(
   host_->Show();
 
 #if defined(OS_WEBOS)
-  window_bounds_ = bounds;
-  ComputeScaleFactor(window_bounds_.height());
+  ComputeScaleFactor(bounds.height());
 #endif
 }
 
@@ -291,9 +290,35 @@ void RootWindowController::ComputeScaleFactor(int window_height) {
     scale_factor_ = static_cast<float>(display_height) / window_height;
 }
 
-bool RootWindowController::IsTextInputOverlapped(aura::WindowTreeHost* host) {
-  vkb_overlap_y_value_ = 0;
+int RootWindowController::CalculateTextInputOverlappedHeight(
+    aura::WindowTreeHost* host,
+    const gfx::Rect& rect) {
+  int shift_height = 0;
+  if (!host)
+    return shift_height;
 
+  ui::InputMethod* ime = host->GetInputMethod();
+  if (!ime || !ime->GetTextInputClient())
+    return shift_height;
+
+  gfx::Rect input_bounds = ime->GetTextInputClient()->GetTextInputBounds();
+  gfx::Rect caret_bounds = ime->GetTextInputClient()->GetCaretBounds();
+  gfx::Rect input_bounds_to_window_pos =
+      gfx::Rect(input_bounds.x(),
+                caret_bounds.y(),
+                input_bounds.width(), input_bounds.height());
+  gfx::Rect scaled_rect =
+      gfx::Rect(rect.x() / scale_factor_, rect.y() / scale_factor_,
+                rect.width() / scale_factor_, rect.height() / scale_factor_);
+
+  if (input_bounds_to_window_pos.Intersects(scaled_rect))
+    shift_height = input_bounds_to_window_pos.bottom() - scaled_rect.y();
+
+  return shift_height;
+}
+
+bool RootWindowController::CanShiftContent(aura::WindowTreeHost* host,
+                                           int height) {
   if (!host)
     return false;
 
@@ -301,39 +326,80 @@ bool RootWindowController::IsTextInputOverlapped(aura::WindowTreeHost* host) {
   if (!ime || !ime->GetTextInputClient())
     return false;
 
-  gfx::Rect caret_bounds = ime->GetTextInputClient()->GetCaretBounds();
+  gfx::Rect input_bounds = ime->GetTextInputClient()->GetTextInputBounds();
 
-  for (AppWindow* app_window : app_windows_) {
-    content::WebContents* web_contents = app_window->web_contents();
-    if (!web_contents)
-      continue;
-
-    const int caret_bottom_y_pos =
-        caret_bounds.y() + caret_bounds.height() -
-        web_contents->GetContentNativeView()->bounds().y();
-    const int caret_bottom_y_pos_with_margin =
-        caret_bottom_y_pos + kKeyboardHeightMargin;
-    const int vkb_top_y_pos = window_bounds_.height() - input_panel_height();
-
-    vkb_overlap_y_value_ =
-        std::max(0, caret_bottom_y_pos_with_margin - vkb_top_y_pos);
-    return (vkb_overlap_y_value_ > 0);
-  }
-  return false;
+  return input_bounds.y() >= height;
 }
 
-void RootWindowController::SetInsetY(int height) {
-  if (height == last_inset_height_)
-    return;
-  for (AppWindow* app_window : app_windows_) {
-    DispatchSetInsetY(height, app_window->web_contents());
+void RootWindowController::CheckShiftContent(aura::WindowTreeHost* host) {
+  if (input_panel_rect_.height()) {
+    gfx::Rect panel_rect_margin = gfx::Rect(
+        input_panel_rect_.x(), input_panel_rect_.y() - kKeyboardHeightMargin,
+        input_panel_rect_.width(),
+        input_panel_rect_.height() + kKeyboardHeightMargin);
+    int shift_height = CalculateTextInputOverlappedHeight(host, panel_rect_margin);
+    if (shift_height != 0 && CanShiftContent(host, shift_height))
+        ShiftContentByY(shift_height);
   }
-  last_inset_height_ = height;
+}
+
+void RootWindowController::ShiftContentByY(int height) {
+  content::WebContents* web_contents = nullptr;
+
+  // FIXME : For multi apps, we should search app with active text input.
+  // Enact-browser is one app and this is not effective currently.
+  for (AppWindow* app_window : app_windows_) {
+    web_contents = app_window->web_contents();
+    if (web_contents && web_contents->GetMainFrame() &&
+        web_contents->GetMainFrame()->IsRenderFrameLive())
+      break;
+  }
+
+  if (web_contents == nullptr)
+    return;
+
+  content::RenderFrameHost* rfh = web_contents->GetMainFrame();
+  if (rfh && rfh->IsRenderFrameLive()) {
+    std::stringstream ss;
+    ss << "document.dispatchEvent(new CustomEvent('shiftContent', { detail: "
+       << height << "}));";
+    const base::string16 js_code = base::UTF8ToUTF16(ss.str());
+    if (height == 0) {
+      rfh->ExecuteJavaScript(js_code, base::NullCallback());
+    } else {
+      if (timer_for_shifting_.IsRunning())
+        timer_for_shifting_.Reset();
+      else
+        timer_for_shifting_.Start(
+            FROM_HERE,
+            base::TimeDelta::FromMilliseconds(kKeyboardAnimationTime),
+            base::BindOnce(
+                &content::RenderFrameHost::ExecuteJavaScript,
+                base::Unretained(rfh), js_code,
+                content::RenderFrameHost::JavaScriptResultCallback()));
+    }
+    if (!shifting_was_requested_)
+      shifting_was_requested_ = true;
+  }
+}
+
+void RootWindowController::RestoreContentByY() {
+  if (shifting_was_requested_) {
+    if (timer_for_shifting_.IsRunning())
+      timer_for_shifting_.Reset();
+    ShiftContentByY(0);
+    shifting_was_requested_ = false;
+  }
 }
 
 void RootWindowController::OnInputPanelVisibilityChanged(
     aura::WindowTreeHost* host,
     bool visibility) {
+  if (visibility)
+    CheckShiftContent(host);
+  else
+    RestoreContentByY();
+
   input_panel_visible_ = visibility;
 }
 
@@ -342,14 +408,9 @@ void RootWindowController::OnInputPanelRectChanged(aura::WindowTreeHost* host,
                                                    int32_t y,
                                                    uint32_t width,
                                                    uint32_t height) {
-  input_panel_bounds_.SetRect(x, y, width, height);
-  if (input_panel_bounds_.height() && input_panel_visible_) {
-    if (IsTextInputOverlapped(host)) {
-      SetInsetY(vkb_overlap_y_value_);
-    }
-  } else {
-    SetInsetY(0);
-  }
+  input_panel_rect_.SetRect(x, y, width, height);
+  if (input_panel_visible_)
+    CheckShiftContent(host);
 }
 #endif
 

@@ -107,18 +107,18 @@ class RootWindowController : public aura::client::WindowParentingClient,
 
 #if defined(OS_WEBOS)
   void ComputeScaleFactor(int window_height);
-  int input_panel_height() {
-    return input_panel_bounds_.height() / scale_factor_;
-  }
-  bool IsTextInputOverlapped(aura::WindowTreeHost* host);
-  void SetInsetY(int height);
+  int CalculateTextInputOverlappedHeight(aura::WindowTreeHost* host,
+                                         const gfx::Rect& rect);
+  bool CanShiftContent(aura::WindowTreeHost* host, int height);
+  void CheckShiftContent(aura::WindowTreeHost* host);
+  void ShiftContentByY(int height);
+  void RestoreContentByY();
 
-  gfx::Rect window_bounds_;
-  gfx::Rect input_panel_bounds_;
+  gfx::Rect input_panel_rect_;
   float scale_factor_ = 1.f;
   bool input_panel_visible_ = false;
-  int last_inset_height_ = 0;
-  int vkb_overlap_y_value_ = 0;
+  bool shifting_was_requested_ = false;
+  base::OneShotTimer timer_for_shifting_;
 #endif
 
   DesktopDelegate* const desktop_delegate_;
