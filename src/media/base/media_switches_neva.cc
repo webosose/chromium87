@@ -27,6 +27,9 @@ const char kFakeUrlMediaDuration[] = "fake-url-media-duration";
 // Enables platforms to provide HW accelarated video decoder.
 const char kEnableWebRTCPlatformVideoDecoder[] =
     "enable-webrtc-platform-video-decoder";
+// Enables platforms to provide h/w accelarated video encoder.
+const char kEnableWebRTCPlatformVideoEncoder[] =
+    "enable-webrtc-platform-video-encoder";
 #endif
 // Enable 'accurate seek' which decodes more frames from a keyframe to the frame
 // to seek with some delay. Without this flag, URI video seek just jumps to a

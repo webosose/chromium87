@@ -26,6 +26,7 @@
 #include "base/command_line.h"
 #include "media/base/media_switches_neva.h"
 #include "media/webrtc/neva/neva_webrtc_video_decoder_factory.h"
+#include "media/webrtc/neva/neva_webrtc_video_encoder_factory.h"
 #endif
 
 namespace blink {
@@ -194,6 +195,15 @@ class DecoderAdapter : public webrtc::VideoDecoderFactory {
 std::unique_ptr<webrtc::VideoEncoderFactory> CreateHWVideoEncoderFactory(
     media::GpuVideoAcceleratorFactories* gpu_factories) {
   std::unique_ptr<webrtc::VideoEncoderFactory> encoder_factory;
+
+#if defined(USE_NEVA_WEBRTC)
+  const base::CommandLine* cmd_line = base::CommandLine::ForCurrentProcess();
+  if (cmd_line->HasSwitch(switches::kEnableWebRTCPlatformVideoEncoder)) {
+    encoder_factory = std::make_unique<media::NevaWebRtcVideoEncoderFactory>(
+        gpu_factories->GetTaskRunner());
+  }
+  if (!encoder_factory)
+#endif
 
   if (gpu_factories && gpu_factories->IsGpuVideoAcceleratorEnabled() &&
       Platform::Current()->IsWebRtcHWEncodingEnabled()) {

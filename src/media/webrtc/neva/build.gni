@@ -17,11 +17,30 @@
 import("//neva/neva.gni")
 
 neva_webrtc = {
+  configs = []
+  public_configs = []
+  deps = [ "//skia" ]
+  public_deps = [ "//base" ]
   _dir = get_path_info("../neva", "abspath")
   sources = [
     "$_dir/neva_webrtc_video_decoder_factory.cc",
     "$_dir/neva_webrtc_video_decoder_factory.h",
+    "$_dir/neva_webrtc_video_encoder_factory.cc",
+    "$_dir/neva_webrtc_video_encoder_factory.h",
     "$_dir/webrtc_pass_through_video_decoder.cc",
     "$_dir/webrtc_pass_through_video_decoder.h",
+    "$_dir/webrtc_pass_through_video_encoder.cc",
+    "$_dir/webrtc_pass_through_video_encoder.h",
+    "$_dir/webrtc_video_encoder.cc",
+    "$_dir/webrtc_video_encoder.h",
   ]
+
+  if (is_webos) {
+    import ("//media/webrtc/neva/webos/build.gni")
+    configs += webos.configs
+    public_configs += webos.public_configs
+    deps += webos.deps
+    public_deps += webos.public_deps
+    sources += webos.sources
+  }
 }
