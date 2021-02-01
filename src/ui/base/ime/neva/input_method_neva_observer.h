@@ -21,6 +21,7 @@
 
 #include "base/component_export.h"
 #include "ui/base/ime/input_method_observer.h"
+#include "ui/base/ime/neva/input_method_common.h"
 #include "ui/base/ime/text_input_type.h"
 
 namespace ui {
@@ -40,7 +41,7 @@ class COMPONENT_EXPORT(UI_BASE_IME) InputMethodNevaObserver
   void OnShowVirtualKeyboardIfEnabled() override;
 
   virtual void OnShowIme() = 0;
-  virtual void OnHideIme() = 0;
+  virtual void OnHideIme(ImeHiddenType) = 0;
   virtual void OnTextInputTypeChanged(ui::TextInputType text_input_type,
                                       int text_input_flags) = 0;
   virtual void SetSurroundingText(const std::string& text,
