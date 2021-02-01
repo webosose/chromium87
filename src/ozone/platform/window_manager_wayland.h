@@ -33,6 +33,7 @@
 #include "ui/events/platform/platform_event_dispatcher.h"
 #include "ui/events/platform/platform_event_source.h"
 #include "ui/gfx/native_widget_types.h"
+#include "ui/gfx/sequential_id_generator.h"
 #include "ui/ozone/public/gpu_platform_support_host.h"
 #include "ui/views/widget/desktop_aura/neva/ui_constants.h"
 
@@ -236,6 +237,9 @@ class WindowManagerWayland
   ozonewayland::OzoneWaylandScreen* platform_screen_;
   PlatformCursor platform_cursor_;
   bool dragging_;
+
+  SequentialIDGenerator touch_slot_generator_;
+
   // Support weak pointers for attach & detach callbacks.
   base::WeakPtrFactory<WindowManagerWayland> weak_ptr_factory_;
   DISALLOW_COPY_AND_ASSIGN(WindowManagerWayland);

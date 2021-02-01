@@ -30,6 +30,7 @@
 #include "ui/events/event_utils.h"
 #include "ui/events/ozone/layout/keyboard_layout_engine_manager.h"
 #include "ui/events/platform/platform_event_source.h"
+#include "ui/gfx/geometry/point_f.h"
 #include "ui/platform_window/platform_window_delegate.h"
 
 namespace ui {
@@ -44,6 +45,7 @@ WindowManagerWayland::WindowManagerWayland(OzoneGpuPlatformSupportHost* proxy)
                            base::Unretained(this)))),
       platform_screen_(NULL),
       dragging_(false),
+      touch_slot_generator_(0),
       weak_ptr_factory_(this) {
   proxy_->RegisterHandler(this);
 }
@@ -584,12 +586,14 @@ void WindowManagerWayland::NotifyTouchEvent(EventType type,
                                             float y,
                                             int32_t touch_id,
                                             uint32_t time_stamp) {
-  gfx::Point position(x, y);
-  base::TimeTicks timestamp = ui::EventTimeForNow() + base::TimeDelta::FromMilliseconds(time_stamp);
-  TouchEvent touchev(
-      type, position, timestamp,
-      ui::PointerDetails(ui::EventPointerType::kTouch, touch_id));
-  DispatchEvent(&touchev);
+  gfx::PointF location(x, y);
+  TouchEvent event(
+      type, location, location,
+      base::TimeTicks() + base::TimeDelta::FromMilliseconds(time_stamp),
+      PointerDetails(
+          EventPointerType::kTouch,
+          static_cast<int>(touch_slot_generator_.GetGeneratedID(touch_id))));
+  DispatchEvent(&event);
 }
 
 void WindowManagerWayland::NotifyScreenChanged(unsigned width,
