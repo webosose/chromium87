@@ -6,6 +6,7 @@ module media_session.mojom;
 
 import "mojo/public/mojom/base/string16.mojom";
 import "mojo/public/mojom/base/time.mojom";
+import "mojo/public/mojom/base/unguessable_token.mojom";
 import "ui/gfx/geometry/mojom/geometry.mojom";
 import "url/mojom/url.mojom";
 
@@ -15,6 +16,8 @@ import "url/mojom/url.mojom";
 enum MediaPlaybackState {
   kPaused,
   kPlaying,
+  [EnableIf=is_webos]
+  kStopped,
 };
 
 [Extensible]
@@ -188,6 +191,10 @@ interface MediaSessionObserver {
 
   // Called when the position associated with the session has changed.
   MediaSessionPositionChanged@4(MediaPosition? position);
+
+  // Called when the Observed MediaSession Request has changed
+  [EnableIf=is_webos]
+  MediaSessionRequestChanged@5(mojo_base.mojom.UnguessableToken? request_id);
 };
 
 // A MediaSession manages the media session and audio focus for a given

@@ -28,6 +28,7 @@ namespace {
 
 const char kURIAudio[] = "luna://com.webos.audio";
 const char kURISetting[] = "luna://com.webos.settingsservice";
+const char kURIMediaController[] = "luna://com.webos.service.mediacontroller";
 
 }  // namespace
 
@@ -39,7 +40,8 @@ std::string LunaServiceClient::GetServiceURI(URIType type,
 
   static std::map<URIType, std::string> kURIMap = {
       {URIType::AUDIO, kURIAudio},
-      {URIType::SETTING, kURISetting}};
+      {URIType::SETTING, kURISetting},
+      {URIType::MEDIACONTROLLER, kURIMediaController}};
 
   auto luna_service_uri = [&kURIMap, &type]() {
     std::map<URIType, std::string>::iterator it;
@@ -124,6 +126,7 @@ bool LunaServiceClient::CallAsync(const std::string& uri,
   LOG(INFO) << "[REQ] - " << uri << " " << param;
   if (!LSCallOneReply(handle_, uri.c_str(), param.c_str(), HandleAsync, wrapper,
                       NULL, &error)) {
+    LOG(ERROR) << "[SUB] " << uri << ": fail[" << error.message << "]";
     std::move(wrapper->callback).Run("");
     delete wrapper;
     return false;
@@ -150,10 +153,10 @@ bool LunaServiceClient::Subscribe(const std::string& uri,
     return false;
   }
 
+  VLOG(1) << "[REQ] - " << uri << " " << param;
   if (!LSCall(handle_, uri.c_str(), param.c_str(), HandleSubscribe, wrapper,
               subscribeKey, &error)) {
-    LOG(INFO) << "[SUB] " << uri << ":[" << param << "] fail[" << error.message
-              << "]";
+    LOG(ERROR) << "[SUB] " << uri << ": fail[" << error.message << "]";
     delete wrapper;
     return false;
   }

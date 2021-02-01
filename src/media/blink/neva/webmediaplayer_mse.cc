@@ -216,6 +216,16 @@ void WebMediaPlayerMSE::ExitedFullscreen() {
   geometry_update_helper_->SetFullscreenMode(false);
 }
 
+void WebMediaPlayerMSE::OnPlay() {
+  if (client_)
+    client_->RequestPlay();
+}
+
+void WebMediaPlayerMSE::OnPause() {
+  if (client_)
+    client_->RequestPause();
+}
+
 void WebMediaPlayerMSE::OnSuspend() {
   if (is_suspended_) {
     delegate_->DidMediaSuspended(delegate_id_);

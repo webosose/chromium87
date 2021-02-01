@@ -43,7 +43,8 @@ class LunaServiceClient {
     DRM,
     SETTING,
     PHOTORENDERER,
-    URITypeMax = PHOTORENDERER,
+    MEDIACONTROLLER,
+    URITypeMax = MEDIACONTROLLER,
   };
 
   using ResponseCB = base::Callback<void(const std::string&)>;

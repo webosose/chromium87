@@ -500,6 +500,11 @@ void WebMediaPlayerNeva::SetVolume(double volume) {
   FUNC_LOG(1);
   volume_ = volume;
   player_api_->SetVolume(volume_);
+
+  if (delegate_)
+    delegate_->DidMediaMetadataChange(
+        delegate_id_, HasAudio(), HasVideo(),
+        DurationToMediaContentType(base::TimeDelta::FromSecondsD(Duration())));
 }
 
 void WebMediaPlayerNeva::SetLatencyHint(double seconds) {
@@ -1388,6 +1393,16 @@ void WebMediaPlayerNeva::OnFrameShown() {
     return;
 
   OnResume();
+}
+
+void WebMediaPlayerNeva::OnPlay() {
+  if (client_)
+    client_->RequestPlay();
+}
+
+void WebMediaPlayerNeva::OnPause() {
+  if (client_)
+    client_->RequestPause();
 }
 
 void WebMediaPlayerNeva::OnEnterPictureInPicture() {

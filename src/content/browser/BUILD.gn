@@ -2782,6 +2782,14 @@ source_set("browser") {
     ]
   }
 
+  if (is_webos) {
+    sources += [
+      "media/session/webos/media_session_observer_webos.cc",
+      "media/session/webos/media_session_observer_webos.h",
+    ]
+    deps += [ "//base/neva/webos" ]
+  }
+
   if ((is_linux || is_chromeos) && use_dbus) {
     deps += [ "//dbus" ]
   }

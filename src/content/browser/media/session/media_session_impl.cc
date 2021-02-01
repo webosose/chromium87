@@ -41,6 +41,10 @@
 #include "content/browser/media/session/media_session_android.h"
 #endif  // defined(OS_ANDROID)
 
+#if defined(OS_WEBOS)
+#include "content/browser/media/session/webos/media_session_observer_webos.h"
+#endif  // defined(OS_WEBOS)
+
 namespace content {
 
 using blink::mojom::MediaSessionPlaybackState;
@@ -400,6 +404,16 @@ bool MediaSessionImpl::AddPlayer(MediaSessionPlayerObserver* observer,
   if (audio_focus_state_ != State::ACTIVE)
     return false;
 
+#if defined(OS_WEBOS)
+  auto it = normal_players_.find(key);
+  if (it == normal_players_.end()) {
+    base::UnguessableToken request_id = GetRequestId();
+    VLOG(1) << __func__ << " request_id: " << request_id.ToString();
+    for (auto& observer : observers_)
+      observer->MediaSessionRequestChanged(request_id);
+  }
+#endif  // defined(OS_WEBOS)
+
   // The session should be reset if a player is starting while all players are
   // suspended.
   if (old_audio_focus_state != State::ACTIVE)
@@ -434,6 +448,13 @@ void MediaSessionImpl::RemovePlayer(MediaSessionPlayerObserver* observer,
   it = one_shot_players_.find(identifier);
   if (it != one_shot_players_.end())
     one_shot_players_.erase(it);
+
+#if defined(OS_WEBOS)
+  if (normal_players_.find(identifier) != normal_players_.end()) {
+    for (auto& observer : observers_)
+      observer->MediaSessionRequestChanged(base::nullopt);
+  }
+#endif  // defined(OS_WEBOS)
 
   AbandonSystemAudioFocusIfNeeded();
   UpdateRoutedService();
@@ -862,6 +883,11 @@ MediaSessionImpl::MediaSessionImpl(WebContents* web_contents)
 #if defined(OS_ANDROID)
   session_android_.reset(new MediaSessionAndroid(this));
 #endif  // defined(OS_ANDROID)
+
+#if defined(OS_WEBOS)
+  media_session_observer_.reset(new MediaSessionObserverWebOS(this));
+#endif  // defined(OS_WEBOS)
+
   if (web_contents && web_contents->GetMainFrame() &&
       web_contents->GetMainFrame()->GetView()) {
     focused_ = web_contents->GetMainFrame()->GetView()->HasFocus();

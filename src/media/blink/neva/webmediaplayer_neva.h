@@ -250,8 +250,8 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerNeva
   void OnFrameClosed() override {}
   void OnFrameShown() override;
   void OnIdleTimeout() override {}
-  void OnPlay() override {}
-  void OnPause() override {}
+  void OnPlay() override;
+  void OnPause() override;
   // TODO(neva) : This method has been added during chromium72 upgrade.
   // Need to revisit and confirm that does not cause any regression
   void OnMuted(bool muted) override {}

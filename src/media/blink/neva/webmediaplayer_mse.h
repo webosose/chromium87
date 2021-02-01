@@ -97,8 +97,8 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerMSE
   void OnFrameShown() override {}
   void OnFrameClosed() override {}
   void OnIdleTimeout() override {}
-  void OnPlay() override {}
-  void OnPause() override {}
+  void OnPlay() override;
+  void OnPause() override;
   void OnVolumeMultiplierUpdate(double multiplier) override {}
   void OnBecamePersistentVideo(bool value) override {}
   void OnSuspend() override;
