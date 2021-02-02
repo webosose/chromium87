@@ -86,4 +86,9 @@ void AppRuntimeWebViewHostImpl::DidLargestContentfulPaint() {
     webview_delegate_->DidLargestContentfulPaint();
 }
 
+void AppRuntimeWebViewHostImpl::DidResumeDOM() {
+  if (webview_delegate_)
+    webview_delegate_->DidResumeDOM();
+}
+
 }  // namespace neva_app_runtime

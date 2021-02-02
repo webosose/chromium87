@@ -83,6 +83,7 @@ class WamDemoWebView : public neva_app_runtime::WebViewBase {
   void DidSwapCompositorFrame() override;
   void DidDropAllPeerConnections(
       neva_app_runtime::DropPeerConnectionReason reason) override;
+  void DidResumeDOM() override;
 
   // from WebViewControllerDelegate
   void RunCommand(

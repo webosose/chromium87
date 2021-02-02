@@ -233,6 +233,10 @@ void WamDemoWebView::DidSwapCompositorFrame() {
             << "(): Did swap window frame notification is delivered";
 }
 
+void WamDemoWebView::DidResumeDOM() {
+  LOG(INFO) << __func__ << "(): Did ResumeDOM notification is delivered";
+}
+
 void WamDemoWebView::DidDropAllPeerConnections(
     neva_app_runtime::DropPeerConnectionReason reason) {}
 

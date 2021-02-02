@@ -114,6 +114,11 @@ void AppRuntimeRenderFrameObserver::ResumeDOM() {
   dom_suspended_ = false;
 
   page_pauser_.reset();
+
+  mojo::AssociatedRemote<mojom::AppRuntimeWebViewHost> interface;
+  render_frame()->GetRemoteAssociatedInterfaces()->GetInterface(&interface);
+  if (interface)
+    interface->DidResumeDOM();
 }
 
 void AppRuntimeRenderFrameObserver::ResetStateToMarkNextPaint() {
