@@ -202,6 +202,8 @@ void WebViewBase::SetAppPreloadHint(bool is_preload) {
 void WebViewBase::SetUseAccessibility(bool enabled) {
   if (enabled)
     GetWebContents()->EnableWebContentsOnlyAccessibilityMode();
+  else
+    GetWebContents()->SetAccessibilityMode(ui::AXMode());
 }
 
 void WebViewBase::SetBlockWriteDiskcache(bool blocked) {
