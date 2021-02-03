@@ -2012,6 +2012,8 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   if (prefs.spatial_navigation_enabled)
     WebRuntimeFeatures::EnableKeyboardFocusableScrollers(true);
 
+  WebRuntimeFeatures::EnableCSSNavigation(prefs.css_navigation_enabled);
+
   settings->SetSelectionIncludesAltImageText(true);
 
   settings->SetV8CacheOptions(prefs.v8_cache_options);

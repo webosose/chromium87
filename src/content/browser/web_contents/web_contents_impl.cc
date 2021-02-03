@@ -2499,6 +2499,9 @@ const blink::web_pref::WebPreferences WebContentsImpl::ComputeWebPreferences() {
   if (IsSpatialNavigationDisabled())
     prefs.spatial_navigation_enabled = false;
 
+  prefs.css_navigation_enabled =
+      command_line.HasSwitch(switches::kEnableCSSNavigation);
+
   prefs.disable_reading_from_canvas =
       command_line.HasSwitch(switches::kDisableReadingFromCanvas);
 

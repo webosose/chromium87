@@ -5058,7 +5058,38 @@
       inherited: true,
       style_builder_template: "empty",
     },
-
+    // CSS3 UI sequential navigation order property
+    {
+      name: "nav-index",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      inherited: true,
+      style_builder_template: "empty",
+    },
+    // CSS3 UI directional focus navigation properties
+    {
+      name: "nav-up",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      inherited: true,
+      style_builder_template: "empty",
+    },
+    {
+      name: "nav-down",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      inherited: true,
+      style_builder_template: "empty",
+    },
+    {
+      name: "nav-left",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      inherited: true,
+      style_builder_template: "empty",
+    },
+    {
+      name: "nav-right",
+      property_methods: ["ParseSingleValue", "CSSValueFromComputedStyleInternal"],
+      inherited: true,
+      style_builder_template: "empty",
+    },
     // Descriptor only names
     {
       name: "font-display",

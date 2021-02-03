@@ -490,6 +490,11 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.spatial_navigation_enabled;
   }
 
+  static bool css_navigation_enabled(
+      const blink::web_pref::WebPreferences& r) {
+    return r.css_navigation_enabled;
+  }
+
   static bool navigate_on_drag_drop(const blink::web_pref::WebPreferences& r) {
     return r.navigate_on_drag_drop;
   }

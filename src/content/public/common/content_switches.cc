@@ -397,6 +397,9 @@ const char kEnableSmoothScrolling[]         = "enable-smooth-scrolling";
 // Enable spatial navigation
 const char kEnableSpatialNavigation[]       = "enable-spatial-navigation";
 
+// Enable CSS3 UI sequential navigation order and directional focus navigation
+const char kEnableCSSNavigation[] = "enable-css-navigation";
+
 // Blocks all insecure requests from secure contexts, and prevents the user
 // from overriding that decision.
 const char kEnableStrictMixedContentChecking[] =

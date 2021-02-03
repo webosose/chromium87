@@ -539,6 +539,10 @@
       status: "experimental",
     },
     {
+      name: "CSSNavigation",
+      status: "experimental",
+    },
+    {
       name: "CSSOffsetPathRay",
       status: "experimental",
     },

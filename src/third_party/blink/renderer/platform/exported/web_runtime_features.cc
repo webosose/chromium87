@@ -189,6 +189,10 @@ void WebRuntimeFeatures::EnableSameSiteByDefaultCookies(bool enable) {
   RuntimeEnabledFeatures::SetSameSiteByDefaultCookiesEnabled(enable);
 }
 
+void WebRuntimeFeatures::EnableCSSNavigation(bool enable) {
+  RuntimeEnabledFeatures::SetCSSNavigationEnabled(enable);
+}
+
 void WebRuntimeFeatures::EnableScrollTopLeftInterop(bool enable) {
   RuntimeEnabledFeatures::SetScrollTopLeftInteropEnabled(enable);
 }

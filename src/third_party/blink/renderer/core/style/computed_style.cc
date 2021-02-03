@@ -60,6 +60,8 @@
 #include "third_party/blink/renderer/core/style/style_generated_image.h"
 #include "third_party/blink/renderer/core/style/style_image.h"
 #include "third_party/blink/renderer/core/style/style_inherited_variables.h"
+#include "third_party/blink/renderer/core/style/style_navigation_data.h"
+#include "third_party/blink/renderer/core/style/style_navigation_index.h"
 #include "third_party/blink/renderer/core/style/style_non_inherited_variables.h"
 #include "third_party/blink/renderer/core/style/style_ray.h"
 #include "third_party/blink/renderer/platform/fonts/font.h"
@@ -2368,6 +2370,97 @@ bool ComputedStyle::ShadowListHasCurrentColor(const ShadowList* shadow_list) {
                      [](const ShadowData& shadow) {
                        return shadow.GetColor().IsCurrentColor();
                      });
+}
+
+const scoped_refptr<StyleNavigationData> ComputedStyle::Navigation(
+    CSSPropertyID property) const {
+  switch (property) {
+    case CSSPropertyID::kNavUp:
+      return NavigationDataUpInternal();
+    case CSSPropertyID::kNavDown:
+      return NavigationDataDownInternal();
+    case CSSPropertyID::kNavLeft:
+      return NavigationDataLeftInternal();
+    case CSSPropertyID::kNavRight:
+      return NavigationDataRightInternal();
+    default:
+      break;
+  }
+  return nullptr;
+}
+
+scoped_refptr<StyleNavigationData> ComputedStyle::AccessNavigation(
+    CSSPropertyID property) {
+  switch (property) {
+    case CSSPropertyID::kNavUp: {
+      if (!NavigationDataUpInternal())
+        SetNavigationDataUpInternal(
+            scoped_refptr<StyleNavigationData>(StyleNavigationData::Create()));
+      return NavigationDataUpInternal();
+    }
+    case CSSPropertyID::kNavDown: {
+      if (!NavigationDataDownInternal())
+        SetNavigationDataDownInternal(
+            scoped_refptr<StyleNavigationData>(StyleNavigationData::Create()));
+      return NavigationDataDownInternal();
+    }
+    case CSSPropertyID::kNavLeft: {
+      if (!NavigationDataLeftInternal())
+        SetNavigationDataLeftInternal(
+            scoped_refptr<StyleNavigationData>(StyleNavigationData::Create()));
+      return NavigationDataLeftInternal();
+    }
+    case CSSPropertyID::kNavRight: {
+      if (!NavigationDataRightInternal())
+        SetNavigationDataRightInternal(
+            scoped_refptr<StyleNavigationData>(StyleNavigationData::Create()));
+      return NavigationDataRightInternal();
+    }
+    default:
+      break;
+  }
+  return nullptr;
+}
+
+const scoped_refptr<StyleNavigationIndex> ComputedStyle::NavigationIndex()
+    const {
+  return NavigationIndexInternal();
+}
+
+scoped_refptr<StyleNavigationIndex> ComputedStyle::AccessNavigationIndex() {
+  if (!NavigationIndexInternal()) {
+    SetNavigationIndexInternal(
+        scoped_refptr<StyleNavigationIndex>(StyleNavigationIndex::Create()));
+  }
+  return NavigationIndexInternal();
+}
+
+void ComputedStyle::InheritNavigation(CSSPropertyID property,
+                                      const ComputedStyle* inherit_parent) {
+  switch (property) {
+    case CSSPropertyID::kNavUp:
+      SetNavigationDataUpInternal(scoped_refptr<StyleNavigationData>(
+          inherit_parent->NavigationDataUpInternal()));
+      break;
+    case CSSPropertyID::kNavDown:
+      SetNavigationDataDownInternal(scoped_refptr<StyleNavigationData>(
+          inherit_parent->NavigationDataDownInternal()));
+      break;
+    case CSSPropertyID::kNavLeft:
+      SetNavigationDataLeftInternal(scoped_refptr<StyleNavigationData>(
+          inherit_parent->NavigationDataLeftInternal()));
+      break;
+    case CSSPropertyID::kNavRight:
+      SetNavigationDataRightInternal(scoped_refptr<StyleNavigationData>(
+          inherit_parent->NavigationDataRightInternal()));
+      break;
+    case CSSPropertyID::kNavIndex:
+      SetNavigationIndexInternal(scoped_refptr<StyleNavigationIndex>(
+          inherit_parent->NavigationIndexInternal()));
+      break;
+    default:
+      break;
+  }
 }
 
 STATIC_ASSERT_ENUM(cc::OverscrollBehavior::Type::kAuto,

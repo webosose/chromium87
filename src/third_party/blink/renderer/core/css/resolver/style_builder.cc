@@ -42,7 +42,10 @@
 #include <utility>
 
 #include "third_party/blink/renderer/core/animation/css/css_animations.h"
+#include "third_party/blink/renderer/core/css/css_custom_ident_value.h"
+#include "third_party/blink/renderer/core/css/css_identifier_value.h"
 #include "third_party/blink/renderer/core/css/css_property_name.h"
+#include "third_party/blink/renderer/core/css/css_value_list.h"
 #include "third_party/blink/renderer/core/css/properties/css_property_ref.h"
 #include "third_party/blink/renderer/core/css/properties/longhand.h"
 #include "third_party/blink/renderer/core/css/properties/longhands/variable.h"
@@ -51,6 +54,99 @@
 #include "third_party/blink/renderer/core/style/computed_style.h"
 
 namespace blink {
+
+namespace {
+
+inline bool IsCSSNavigationProperty(CSSPropertyID id) {
+  switch (id) {
+    case CSSPropertyID::kNavIndex:
+    case CSSPropertyID::kNavLeft:
+    case CSSPropertyID::kNavRight:
+    case CSSPropertyID::kNavUp:
+    case CSSPropertyID::kNavDown:
+      return true;
+    default:
+      return false;
+  }
+}
+
+void ApplyCSSNavigationProperty(CSSPropertyID id,
+                                StyleResolverState& state,
+                                const CSSValue& value,
+                                bool is_initial,
+                                bool is_inherit) {
+  if (is_inherit) {
+    state.Style()->InheritNavigation(id, state.ParentStyle());
+    return;
+  }
+
+  auto* identifier_value = DynamicTo<CSSIdentifierValue>(value);
+  if (id == CSSPropertyID::kNavIndex) {
+    bool is_auto = (identifier_value &&
+                    identifier_value->GetValueID() == CSSValueID::kAuto);
+    is_auto = (is_initial || is_auto);
+
+    scoped_refptr<StyleNavigationIndex> navigation_index =
+        state.Style()->AccessNavigationIndex();
+    DCHECK(navigation_index.get());
+
+    if (is_auto) {
+      navigation_index->is_auto = true;
+      return;
+    }
+
+    navigation_index->is_auto = false;
+    navigation_index->index =
+        std::max(static_cast<int>(std::numeric_limits<short>::min()),
+                 std::min(To<CSSPrimitiveValue>(value).GetIntValue(),
+                          static_cast<int>(std::numeric_limits<short>::max())));
+
+    state.GetElement().setTabIndex(navigation_index->index);
+  } else if (id == CSSPropertyID::kNavLeft || id == CSSPropertyID::kNavRight ||
+             id == CSSPropertyID::kNavUp || id == CSSPropertyID::kNavDown) {
+    scoped_refptr<StyleNavigationData> navigation =
+        state.Style()->AccessNavigation(id);
+    DCHECK(navigation.get());
+
+    if (identifier_value &&
+        identifier_value->GetValueID() == CSSValueID::kAuto) {
+      navigation->flag =
+          StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_NONE;
+      return;
+    }
+
+    if (value.IsCustomIdentValue()) {
+      navigation->flag =
+          StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_CURRENT;
+      navigation->id = To<CSSCustomIdentValue>(value).Value();
+    } else if (value.IsValueList()) {
+      const CSSValueList& list = To<CSSValueList>(value);
+      DCHECK_EQ(list.length(), 2U);
+      const CSSValue& item0 = list.Item(0);
+      if (!item0.IsCustomIdentValue())
+        return;
+      navigation->id = To<CSSCustomIdentValue>(item0).Value();
+
+      const CSSValue& item1 = list.Item(1);
+      if (item1.IsPrimitiveValue() && identifier_value &&
+          identifier_value->GetValueID() == CSSValueID::kRoot) {
+        navigation->flag =
+            StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_ROOT;
+      } else if (item1.IsCustomIdentValue()) {
+        navigation->flag =
+            StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_NAME;
+        navigation->target = To<CSSCustomIdentValue>(item1).Value();
+      } else {
+        navigation->flag =
+            StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_CURRENT;
+      }
+    }
+  } else {
+    NOTREACHED();
+  }
+}
+
+}  // namespace
 
 void StyleBuilder::ApplyProperty(const CSSPropertyName& name,
                                  StyleResolverState& state,
@@ -97,6 +193,11 @@ void StyleBuilder::ApplyProperty(const CSSProperty& property,
       is_inherit = true;
     else
       is_initial = true;
+  }
+
+  if (IsCSSNavigationProperty(id)) {
+    ApplyCSSNavigationProperty(id, state, value, is_initial, is_inherit);
+    return;
   }
 
   if (is_initial)

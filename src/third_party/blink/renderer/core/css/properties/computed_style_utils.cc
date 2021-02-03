@@ -2809,4 +2809,45 @@ const CSSValue* ComputedStyleUtils::ComputedPropertyValue(
   }
 }
 
+CSSValue* ComputedStyleUtils::ValueForNavigationDataList(
+    const ComputedStyle& style,
+    CSSPropertyID property_id) {
+  const scoped_refptr<StyleNavigationData> navigation =
+      style.Navigation(property_id);
+  if (!navigation ||
+      (navigation &&
+       navigation->flag ==
+           StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_NONE))
+    return CSSIdentifierValue::Create(CSSValueID::kAuto);
+
+  CSSValue* value_id = MakeGarbageCollected<CSSCustomIdentValue>(
+      AtomicString(navigation->id));
+  if (navigation->flag ==
+      StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_CURRENT)
+    return value_id;
+
+  CSSValueList* list = CSSValueList::CreateSpaceSeparated();
+  list->Append(*value_id);
+  if (navigation->flag ==
+      StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_NAME) {
+    list->Append(*MakeGarbageCollected<CSSCustomIdentValue>(
+        AtomicString(navigation->target)));
+  } else {
+    list->Append(*CSSIdentifierValue::Create(CSSValueID::kRoot));
+  }
+
+  return list;
+}
+
+CSSValue* ComputedStyleUtils::ValueForNavigationIndex(
+    const ComputedStyle& style,
+    CSSPropertyID) {
+  const scoped_refptr<StyleNavigationIndex> navigation_index =
+      style.NavigationIndex();
+  if (!navigation_index || navigation_index->is_auto)
+    return CSSIdentifierValue::Create(CSSValueID::kAuto);
+  return CSSNumericLiteralValue::Create(navigation_index->index,
+                                        CSSPrimitiveValue::UnitType::kNumber);
+}
+
 }  // namespace blink

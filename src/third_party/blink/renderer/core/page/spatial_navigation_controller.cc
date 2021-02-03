@@ -6,6 +6,7 @@
 
 #include "third_party/blink/public/mojom/input/focus_type.mojom-blink.h"
 #include "third_party/blink/public/mojom/scroll/scroll_into_view_params.mojom-blink.h"
+#include "third_party/blink/renderer/core/css/css_property_names.h"
 #include "third_party/blink/renderer/core/dom/document.h"
 #include "third_party/blink/renderer/core/dom/element.h"
 #include "third_party/blink/renderer/core/dom/element_traversal.h"
@@ -155,6 +156,77 @@ bool IsInAccessibilityMode(Page* page) {
   return document->ExistingAXObjectCache();
 }
 
+bool AdvanceFocusCSSNavigation(SpatialNavigationDirection direction,
+                               Node* interest_node,
+                               const LocalFrame* current_frame,
+                               Document* focused_document) {
+  if (!interest_node->IsElementNode() || !focused_document)
+    return false;
+
+  const auto* interest_element = To<Element>(interest_node);
+  if (!interest_element)
+    return false;
+
+  const auto* layoutObject = interest_element->GetLayoutObject();
+  const auto* style = layoutObject ? layoutObject->Style() : nullptr;
+  if (!style)
+    return false;
+
+  CSSPropertyID property = CSSPropertyID::kInvalid;
+  switch (direction) {
+    case SpatialNavigationDirection::kUp:
+      property = CSSPropertyID::kNavUp;
+      break;
+    case SpatialNavigationDirection::kDown:
+      property = CSSPropertyID::kNavDown;
+      break;
+    case SpatialNavigationDirection::kLeft:
+      property = CSSPropertyID::kNavLeft;
+      break;
+    case SpatialNavigationDirection::kRight:
+      property = CSSPropertyID::kNavRight;
+      break;
+    default:
+      NOTREACHED();
+      break;
+  }
+
+  const scoped_refptr<StyleNavigationData> navigation =
+      style->Navigation(property);
+  if (navigation &&
+      navigation->flag !=
+          StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_NONE) {
+    Frame* target_frame = nullptr;
+    if (navigation->flag ==
+        StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_ROOT)
+      target_frame = &current_frame->Tree().Top();
+    else if (navigation->flag ==
+             StyleNavigationData::ENavigationTarget::NAVIGATION_TARGET_NAME)
+      target_frame = current_frame->Tree().FindFrameByName(
+          AtomicString(navigation->target));
+
+    Document* target_document = nullptr;
+    if (target_frame) {
+      if (auto* local_frame = DynamicTo<LocalFrame>(target_frame))
+        target_document = local_frame->GetDocument();
+    }
+    if (!target_document)
+      target_document = focused_document;
+
+    auto* element =
+        target_document->getElementById(AtomicString(navigation->id));
+    if (element && element->IsKeyboardFocusable() &&
+        element != interest_element) {
+      element->focus(FocusParams(SelectionBehaviorOnFocus::kReset,
+                                 mojom::blink::FocusType::kSpatialNavigation,
+                                 nullptr));
+      return true;
+    }
+  }
+
+  return false;
+}
+
 }  // namespace
 
 SpatialNavigationController::SpatialNavigationController(Page& page)
@@ -299,6 +371,19 @@ bool SpatialNavigationController::Advance(
   Node* interest_node = StartingNode();
   if (!interest_node)
     return false;
+
+  if (RuntimeEnabledFeatures::CSSNavigationEnabled()) {
+    const auto* current_frame =
+        DynamicTo<LocalFrame>(page_->GetFocusController().FocusedOrMainFrame());
+    if (!current_frame)
+      return false;
+    auto* focused_document = current_frame->GetDocument();
+    if (AdvanceFocusCSSNavigation(direction, interest_node, current_frame,
+                                  focused_document))
+      return true;
+    if (!IsSpatialNavigationEnabled(current_frame))
+      return false;
+  }
 
   interest_node->GetDocument()
       .View()

@@ -263,6 +263,9 @@ class CORE_EXPORT ComputedStyleUtils {
   static const CSSValue* ComputedPropertyValue(const CSSProperty&,
                                                const ComputedStyle&,
                                                const LayoutObject* = nullptr);
+  static CSSValue* ValueForNavigationDataList(const ComputedStyle&,
+                                              CSSPropertyID);
+  static CSSValue* ValueForNavigationIndex(const ComputedStyle&, CSSPropertyID);
 };
 
 }  // namespace blink

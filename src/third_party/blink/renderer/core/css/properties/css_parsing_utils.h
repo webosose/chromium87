@@ -515,6 +515,8 @@ CSSValue* ConsumePositionLonghand(CSSParserTokenRange& range,
 }
 
 CSSValue* ConsumeCaretWidth(CSSParserTokenRange&, const CSSParserContext&);
+CSSValue* ConsumeNavigationDirection(CSSParserTokenRange&);
+CSSValue* ConsumeNavigationIndex(CSSParserTokenRange&, const CSSParserContext&);
 
 }  // namespace css_parsing_utils
 }  // namespace blink
