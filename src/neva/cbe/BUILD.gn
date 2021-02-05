@@ -21,7 +21,6 @@ if (use_cbe) {
   assert(is_linux)
 
   shared_library("chromium_cbe") {
-    testonly = true
     output_name = "cbe"
     sources = []
 

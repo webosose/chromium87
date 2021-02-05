@@ -166,8 +166,6 @@ static_library("test_support") {
 }
 
 repack("shell_and_test_pak") {
-  testonly = true
-
   sources = [
     "$root_gen_dir/content/browser/devtools/devtools_resources.pak",
     "$root_gen_dir/content/content_resources.pak",

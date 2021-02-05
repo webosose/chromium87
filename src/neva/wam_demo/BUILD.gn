@@ -26,7 +26,7 @@ copy("cursor") {
 }
 
 source_set("wam_demo_lib") {
-  testonly = true
+  testonly = !use_cbe || !is_wam_demo_cbe
 
   configs += [
     "//content:content_implementation",
@@ -73,7 +73,7 @@ source_set("wam_demo_lib") {
 }
 
 executable("wam_demo") {
-  testonly = true
+  testonly = !use_cbe || !is_wam_demo_cbe
   output_name = "wam_demo"
 
   configs += [

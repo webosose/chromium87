@@ -43,8 +43,15 @@ source_set("app_shell_lib") {
   # TODO(jamescook): investigate and get rid of test dependencies. This library
   # is testonly because it depends on testonly libraries, namely
   # //content/shell:content_shell_lib. See http://crbug.com/438283
-  testonly = true
-  deps = [
+  # In webOS, we use //content/shell:content_shell_nontest_lib instead
+  # and remove the testonly flag of //extensions:shell_and_test_pak.
+  testonly = !use_cbe
+  if (use_cbe) {
+    deps = [ "//content/shell:content_shell_nontest_lib" ]
+  } else {
+    deps = [ "//content/shell:content_shell_lib" ]
+  }
+  deps += [
     ":resources",
     ":version_header",
     "//apps",
@@ -64,7 +71,6 @@ source_set("app_shell_lib") {
     "//components/user_prefs",
     "//components/version_info",
     "//content",
-    "//content/shell:content_shell_lib",
     "//device/bluetooth",
     "//extensions:extensions_resources",
     "//extensions:shell_and_test_pak",
