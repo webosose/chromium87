@@ -195,6 +195,13 @@ void ProxyImpl::BeginMainFrameAbortedOnImpl(
   scheduler_->BeginMainFrameAborted(reason);
 }
 
+void ProxyImpl::BeginMainFrameAppliedScrollAndScale() {
+  TRACE_EVENT0("cc", "ProxyImpl::BeginMainFrameAppliedScrollAndScale");
+  DCHECK(IsImplThread());
+
+  host_impl_->BeginMainFrameAppliedScrollAndScale();
+}
+
 void ProxyImpl::SetVisibleOnImpl(bool visible) {
   TRACE_EVENT1("cc", "ProxyImpl::SetVisibleOnImplThread", "visible", visible);
   DCHECK(IsImplThread());

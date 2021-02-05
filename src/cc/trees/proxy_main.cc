@@ -223,6 +223,10 @@ void ProxyMain::BeginMainFrame(
     // layer tree, to prevent scroll offsets getting out of sync.
     layer_tree_host_->ApplyCompositorChanges(
         begin_main_frame_state->commit_data.get());
+    ImplThreadTaskRunner()->PostTask(
+        FROM_HERE,
+        base::BindOnce(&ProxyImpl::BeginMainFrameAppliedScrollAndScale,
+                       base::Unretained(proxy_impl_.get())));
   }
 
   layer_tree_host_->ApplyMutatorEvents(

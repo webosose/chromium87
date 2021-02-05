@@ -572,6 +572,18 @@ void LayerTreeHostImpl::BeginMainFrameAborted(
   }
 }
 
+void LayerTreeHostImpl::BeginMainFrameAppliedScrollAndScale() {
+  VLOG(1) << __func__;
+  CHECK(active_tree_->property_trees());
+  // TODO(jose.dapena): find a better solution for this and
+  // apply upstream. When ApplyScrollAndScale happens, but
+  // ACTIVATE_SYNC_TREE or COMMIT are not called, then
+  // the pending delta on SyncedScrollOffset is not updated.
+  // This forces it to happen, so we don't lose synchronization
+  // between the SyncedScrollOffset and the actual offset stored.
+  active_tree_->ApplySentScrollAndScaleDeltasFromAbortedCommit();
+}
+
 void LayerTreeHostImpl::ReadyToCommit(
     const viz::BeginFrameArgs& commit_args,
     const BeginMainFrameMetrics* begin_main_frame_metrics) {

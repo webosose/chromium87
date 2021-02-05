@@ -324,6 +324,7 @@ class CC_EXPORT LayerTreeHostImpl : public TileManagerClient,
       CommitEarlyOutReason reason,
       std::vector<std::unique_ptr<SwapPromise>> swap_promises,
       const viz::BeginFrameArgs& args);
+  void BeginMainFrameAppliedScrollAndScale();
   virtual void ReadyToCommit(
       const viz::BeginFrameArgs& commit_args,
       const BeginMainFrameMetrics* begin_main_frame_metrics);
