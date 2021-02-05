@@ -13,6 +13,7 @@
 
 #include "base/atomic_sequence_num.h"
 #include "base/location.h"
+#include "base/logging.h"
 #include "base/metrics/histogram.h"
 #include "base/single_thread_task_runner.h"
 #include "base/time/time.h"
@@ -947,17 +948,26 @@ void Layer::SetScrollOffsetFromImplSide(
   DCHECK(IsPropertyChangeAllowed());
   // This function only gets called during a BeginMainFrame, so there
   // is no need to call SetNeedsUpdate here.
-  DCHECK(layer_tree_host_ && layer_tree_host_->CommitRequested());
+  auto& property_trees = *layer_tree_host_->property_trees();
+  ScrollNode* scroll_node =
+      property_trees.scroll_tree.FindNodeFromElementId(element_id());
+  gfx::ScrollOffset clamped_scroll_offset =
+      scroll_node ? property_trees.scroll_tree.ClampScrollOffsetToLimits(
+                        scroll_offset, *scroll_node)
+                  : scroll_offset;
+  VLOG(3) << __func__ << " offset " << scroll_offset.x() << ","
+          << scroll_offset.y() << " clamped " << clamped_scroll_offset.x()
+          << "," << clamped_scroll_offset.y();
 
   auto& inputs = EnsureLayerTreeInputs();
-  if (inputs.scroll_offset == scroll_offset)
+  if (inputs.scroll_offset == clamped_scroll_offset)
     return;
-  inputs.scroll_offset = scroll_offset;
+  inputs.scroll_offset = clamped_scroll_offset;
 
   UpdatePropertyTreeScrollOffset();
 
   if (!inputs.did_scroll_callback.is_null())
-    inputs.did_scroll_callback.Run(scroll_offset, element_id());
+    inputs.did_scroll_callback.Run(clamped_scroll_offset, element_id());
 
   // The callback could potentially change the layer structure:
   // "this" may have been destroyed during the process.
@@ -998,6 +1008,7 @@ void Layer::SetScrollable(const gfx::Size& bounds) {
   auto& inputs = EnsureLayerTreeInputs();
   if (inputs.scrollable && inputs.scroll_container_bounds == bounds)
     return;
+  VLOG(3) << __func__ << " bound " << bounds.width() << "x" << bounds.height();
   bool was_scrollable = inputs.scrollable;
   inputs.scrollable = true;
   inputs.scroll_container_bounds = bounds;
