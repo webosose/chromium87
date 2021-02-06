@@ -215,6 +215,11 @@ void ForeignVideoWindowProvider::HandleExportedWindowAssigned(
     struct wl_webos_exported* webos_exported,
     const char* native_window_id,
     uint32_t exported_type) {
+  if (!native_window_id) {
+    LOG(ERROR) << __func__ << " window id is NULL";
+    return;
+  }
+
   ForeignVideoWindowProvider* window_provider =
       static_cast<ForeignVideoWindowProvider*>(data);
   if (!window_provider)
@@ -232,7 +237,7 @@ void ForeignVideoWindowProvider::HandleExportedWindowAssigned(
 
 void ForeignVideoWindowProvider::OnCreatedForeignWindow(
     struct wl_webos_exported* webos_exported,
-    const std::string& native_window_id,
+    const std::string native_window_id,
     ui::ForeignWindowType type) {
   VLOG(1) << __func__ << " native_window_id=" << native_window_id;
   ForeignVideoWindow* window = FindWindow(webos_exported);

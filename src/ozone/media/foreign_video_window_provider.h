@@ -46,7 +46,7 @@ class ForeignVideoWindowProvider : public VideoWindowProvider {
       const char* window_id,
       uint32_t exported_type);
   void OnCreatedForeignWindow(struct wl_webos_exported* webos_exported,
-                              const std::string& native_window_id,
+                              const std::string native_window_id,
                               ui::ForeignWindowType type);
 
   base::UnguessableToken CreateNativeVideoWindow(
