@@ -160,6 +160,8 @@ void MojoMediaPlatformAPI::Seek(base::TimeDelta time) {
   DCHECK(media_task_runner_->BelongsToCurrentThread());
   if (media_platform_api_)
     media_platform_api_->Seek(time);
+
+  client_current_time_.store(time);
 }
 
 void MojoMediaPlatformAPI::Suspend(media::SuspendReason reason) {
