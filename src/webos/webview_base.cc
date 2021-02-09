@@ -569,11 +569,6 @@ void WebViewBase::SetBackHistoryAPIDisabled(const bool on) {
       neva_app_runtime::WebView::Attribute::BackHistoryKeyDisabled, on);
 }
 
-void WebViewBase::SetForceVideoTexture(bool on) {
-  webview_->UpdatePreferencesAttribute(
-      neva_app_runtime::WebView::Attribute::ForceVideoTexture, on);
-}
-
 void WebViewBase::SetNotifyFMPDirectly(const bool on) {
   notify_on_first_paint_ = on;
 }
