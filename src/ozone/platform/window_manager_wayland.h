@@ -26,6 +26,9 @@
 #include "base/file_descriptor_posix.h"
 #include "base/memory/weak_ptr.h"
 #include "ui/base/cursor/cursor.h"
+#include "ui/events/devices/device_hotplug_event_observer.h"
+#include "ui/events/devices/input_device.h"
+#include "ui/events/devices/touchscreen_device.h"
 #include "ui/events/event.h"
 #include "ui/events/event_modifiers.h"
 #include "ui/events/event_source.h"
@@ -83,6 +86,7 @@ class WindowManagerWayland
   gfx::AcceleratedWidget event_grabber() const { return event_grabber_; }
 
  private:
+  ui::DeviceHotplugEventObserver* GetHotplugEventObserver();
   void OnActivationChanged(unsigned windowhandle, bool active);
   std::list<OzoneWaylandWindow*>& open_windows();
   void OnWindowFocused(unsigned handle);
@@ -133,6 +137,12 @@ class WindowManagerWayland
   void CloseWidget(unsigned handle);
 
   void ScreenChanged(unsigned width, unsigned height, int rotation);
+  void KeyboardAdded(int id, const std::string& name);
+  void KeyboardRemoved(int id);
+  void PointerAdded(int id, const std::string& name);
+  void PointerRemoved(int id);
+  void TouchscreenAdded(int id, const std::string& name);
+  void TouchscreenRemoved(int id);
   void WindowResized(unsigned windowhandle,
                      unsigned width,
                      unsigned height);
@@ -183,6 +193,12 @@ class WindowManagerWayland
                         int32_t touch_id,
                         uint32_t time_stamp);
   void NotifyScreenChanged(unsigned width, unsigned height, int rotation);
+  void NotifyKeyboardAdded(int id, const std::string& name);
+  void NotifyKeyboardRemoved(int id);
+  void NotifyPointerAdded(int id, const std::string& name);
+  void NotifyPointerRemoved(int id);
+  void NotifyTouchscreenAdded(int id, const std::string& name);
+  void NotifyTouchscreenRemoved(int id);
 
   void NotifyDragEnter(unsigned windowhandle,
                        float x,
@@ -234,6 +250,9 @@ class WindowManagerWayland
   EventModifiers modifiers_;
   // Keyboard state.
   std::unique_ptr<KeyboardEvdevNeva> keyboard_;
+  std::vector<ui::InputDevice> keyboard_devices_;
+  std::vector<ui::InputDevice> pointer_devices_;
+  std::vector<ui::TouchscreenDevice> touchscreen_devices_;
   ozonewayland::OzoneWaylandScreen* platform_screen_;
   PlatformCursor platform_cursor_;
   bool dragging_;

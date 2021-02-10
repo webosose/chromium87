@@ -23,6 +23,11 @@ EVENTS_BASE_EXPORT extern const char kEdgeTouchFiltering[];
 EVENTS_BASE_EXPORT extern const char kDisableCancelAllTouches[];
 #endif
 
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+EVENTS_BASE_EXPORT extern const char kIgnoreTouchDevices[];
+EVENTS_BASE_EXPORT extern const char kForceMaxTouchPoints[];
+#endif  // defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
 }  // namespace switches
 
 #endif  // UI_EVENTS_EVENTS_SWITCHES_H_

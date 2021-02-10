@@ -35,6 +35,12 @@
 #include "ozone/wayland/data_device.h"
 #endif
 
+namespace {
+const char kKeyboardSuffix[] = "_keyboard";
+const char kPointerSuffix[] = "_pointer";
+const char kTouchscreenSuffix[] = "_touch";
+}  // namespace
+
 namespace ozonewayland {
 
 WaylandSeat::WaylandSeat(WaylandDisplay* display,
@@ -51,7 +57,8 @@ WaylandSeat::WaylandSeat(WaylandDisplay* display,
       input_touch_(NULL),
       text_input_(NULL) {
   static const struct wl_seat_listener kInputSeatListener = {
-    WaylandSeat::OnSeatCapabilities,
+      WaylandSeat::OnSeatCapabilities,
+      WaylandSeat::OnName,
   };
 
   seat_ = static_cast<wl_seat*>(
@@ -83,10 +90,16 @@ WaylandSeat::~WaylandSeat() {
 
 void WaylandSeat::OnSeatCapabilities(void *data, wl_seat *seat, uint32_t caps) {
   WaylandSeat* device = static_cast<WaylandSeat*>(data);
+  WaylandDisplay* display = WaylandDisplay::GetInstance();
+  VLOG(3) << __func__ << " name=" << device->name_ << " caps=" << caps;
   if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !device->input_keyboard_) {
     device->input_keyboard_ = new WaylandKeyboard();
+    device->input_keyboard_->SetName(device->name_ + kKeyboardSuffix);
     device->input_keyboard_->OnSeatCapabilities(seat, caps);
+    display->KeyboardAdded(device->input_keyboard_->GetId(),
+                           device->input_keyboard_->GetName());
   } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && device->input_keyboard_) {
+    display->KeyboardRemoved(device->input_keyboard_->GetId());
     delete device->input_keyboard_;
     device->input_keyboard_ = NULL;
   }
@@ -94,7 +107,11 @@ void WaylandSeat::OnSeatCapabilities(void *data, wl_seat *seat, uint32_t caps) {
   if ((caps & WL_SEAT_CAPABILITY_POINTER) && !device->input_pointer_) {
     device->input_pointer_ = new WaylandPointer();
     device->input_pointer_->OnSeatCapabilities(seat, caps);
+    device->input_pointer_->SetName(device->name_ + kPointerSuffix);
+    display->PointerAdded(device->input_pointer_->GetId(),
+                          device->input_pointer_->GetName());
   } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && device->input_pointer_) {
+    display->PointerRemoved(device->input_pointer_->GetId());
     delete device->input_pointer_;
     device->input_pointer_ = NULL;
   }
@@ -102,9 +119,42 @@ void WaylandSeat::OnSeatCapabilities(void *data, wl_seat *seat, uint32_t caps) {
   if ((caps & WL_SEAT_CAPABILITY_TOUCH) && !device->input_touch_) {
     device->input_touch_ = new WaylandTouchscreen();
     device->input_touch_->OnSeatCapabilities(seat, caps);
+    device->input_touch_->SetName(device->name_ + kTouchscreenSuffix);
+    display->TouchscreenAdded(device->input_touch_->GetId(),
+                              device->input_touch_->GetName());
   } else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && device->input_touch_) {
+    display->TouchscreenRemoved(device->input_touch_->GetId());
     delete device->input_touch_;
     device->input_touch_ = NULL;
+  }
+}
+
+void WaylandSeat::OnName(void* data, wl_seat* seat, const char* name) {
+  WaylandSeat* device = static_cast<WaylandSeat*>(data);
+  device->name_ = name;
+
+  VLOG(3) << __func__ << " name=" << name;
+
+  // A name change implies the need to update all the devices reported
+  // to hotplug
+  WaylandDisplay* display = WaylandDisplay::GetInstance();
+  if (device->input_keyboard_) {
+    device->input_keyboard_->SetName(device->name_ + kKeyboardSuffix);
+    display->KeyboardRemoved(device->input_keyboard_->GetId());
+    display->KeyboardAdded(device->input_keyboard_->GetId(),
+                           device->input_keyboard_->GetName());
+  }
+  if (device->input_pointer_) {
+    device->input_pointer_->SetName(device->name_ + kPointerSuffix);
+    display->PointerRemoved(device->input_pointer_->GetId());
+    display->PointerAdded(device->input_pointer_->GetId(),
+                          device->input_pointer_->GetName());
+  }
+  if (device->input_touch_) {
+    device->input_touch_->SetName(device->name_ + kTouchscreenSuffix);
+    display->TouchscreenRemoved(device->input_touch_->GetId());
+    display->TouchscreenAdded(device->input_touch_->GetId(),
+                              device->input_touch_->GetName());
   }
 }
 

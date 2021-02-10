@@ -185,6 +185,13 @@ class WaylandDisplay : public ui::SurfaceFactoryOzone,
       gfx::BufferFormat format,
       gfx::NativePixmapHandle handle) override;
 
+  void KeyboardAdded(int id, const std::string& name);
+  void KeyboardRemoved(int id);
+  void PointerAdded(int id, const std::string& name);
+  void PointerRemoved(int id);
+  void TouchscreenAdded(int id, const std::string& name);
+  void TouchscreenRemoved(int id);
+
   void MotionNotify(float x, float y);
   void ButtonNotify(unsigned handle,
                     ui::EventType type,

@@ -209,6 +209,31 @@ IPC_MESSAGE_CONTROL1(
     WaylandInput_CursorVisibilityChanged,  // NOLINT(readability/fn_size)
     bool /*visible*/)
 
+IPC_MESSAGE_CONTROL2(WaylandInput_KeyboardAdded,  // NOLINT(readability/fn_size)
+                     int /* id */,
+                     std::string /* name */)
+
+IPC_MESSAGE_CONTROL1(
+    WaylandInput_KeyboardRemoved,  // NOLINT(readability/fn_size)
+    int /* id */)
+
+IPC_MESSAGE_CONTROL2(WaylandInput_PointerAdded,  // NOLINT(readability/fn_size)
+                     int /* id */,
+                     std::string /* name */)
+
+IPC_MESSAGE_CONTROL1(
+    WaylandInput_PointerRemoved,  // NOLINT(readability/fn_size)
+    int /* id */)
+
+IPC_MESSAGE_CONTROL2(
+    WaylandInput_TouchscreenAdded,  // NOLINT(readability/fn_size)
+    int /* id */,
+    std::string /* name */)
+
+IPC_MESSAGE_CONTROL1(
+    WaylandInput_TouchscreenRemoved,  // NOLINT(readability/fn_size)
+    int /* id */)
+
 //------------------------------------------------------------------------------
 // GPU Messages
 // These messages are from the Browser to the GPU process.

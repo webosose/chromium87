@@ -20,14 +20,18 @@
 #include <string>
 
 #include "base/bind.h"
+#include "base/command_line.h"
 #include "base/logging.h"
 #include "base/memory/unsafe_shared_memory_region.h"
+#include "base/strings/string_number_conversions.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "ozone/platform/desktop_platform_screen_delegate.h"
 #include "ozone/platform/messages.h"
 #include "ozone/platform/ozone_gpu_platform_support_host.h"
 #include "ozone/platform/ozone_wayland_window.h"
 #include "ozone/wayland/ozone_wayland_screen.h"
+#include "ui/events/devices/device_data_manager.h"
+#include "ui/events/event_switches.h"
 #include "ui/events/event_utils.h"
 #include "ui/events/ozone/layout/keyboard_layout_engine_manager.h"
 #include "ui/events/platform/platform_event_source.h"
@@ -52,6 +56,11 @@ WindowManagerWayland::WindowManagerWayland(OzoneGpuPlatformSupportHost* proxy)
 }
 
 WindowManagerWayland::~WindowManagerWayland() {
+}
+
+ui::DeviceHotplugEventObserver*
+WindowManagerWayland::GetHotplugEventObserver() {
+  return ui::DeviceDataManager::GetInstance();
 }
 
 void WindowManagerWayland::OnRootWindowCreated(
@@ -293,6 +302,12 @@ void WindowManagerWayland::OnMessageReceived(const IPC::Message& message) {
   IPC_MESSAGE_HANDLER(WaylandWindow_StateChanged, NativeWindowStateChanged)
   IPC_MESSAGE_HANDLER(WaylandWindow_StateAboutToChange, NativeWindowStateAboutToChange)
   IPC_MESSAGE_HANDLER(WaylandInput_CursorVisibilityChanged, CursorVisibilityChanged)
+  IPC_MESSAGE_HANDLER(WaylandInput_KeyboardAdded, KeyboardAdded)
+  IPC_MESSAGE_HANDLER(WaylandInput_KeyboardRemoved, KeyboardRemoved)
+  IPC_MESSAGE_HANDLER(WaylandInput_PointerAdded, PointerAdded)
+  IPC_MESSAGE_HANDLER(WaylandInput_PointerRemoved, PointerRemoved)
+  IPC_MESSAGE_HANDLER(WaylandInput_TouchscreenAdded, TouchscreenAdded)
+  IPC_MESSAGE_HANDLER(WaylandInput_TouchscreenRemoved, TouchscreenRemoved)
   IPC_END_MESSAGE_MAP()
 }
 
@@ -396,6 +411,42 @@ void WindowManagerWayland::ScreenChanged(unsigned width, unsigned height,
       FROM_HERE,
       base::Bind(&WindowManagerWayland::NotifyScreenChanged,
           weak_ptr_factory_.GetWeakPtr(), width, height, rotation));
+}
+
+void WindowManagerWayland::KeyboardAdded(int id, const std::string& name) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyKeyboardAdded,
+                            weak_ptr_factory_.GetWeakPtr(), id, name));
+}
+
+void WindowManagerWayland::KeyboardRemoved(int id) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyKeyboardRemoved,
+                            weak_ptr_factory_.GetWeakPtr(), id));
+}
+
+void WindowManagerWayland::PointerAdded(int id, const std::string& name) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyPointerAdded,
+                            weak_ptr_factory_.GetWeakPtr(), id, name));
+}
+
+void WindowManagerWayland::PointerRemoved(int id) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyPointerRemoved,
+                            weak_ptr_factory_.GetWeakPtr(), id));
+}
+
+void WindowManagerWayland::TouchscreenAdded(int id, const std::string& name) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyTouchscreenAdded,
+                            weak_ptr_factory_.GetWeakPtr(), id, name));
+}
+
+void WindowManagerWayland::TouchscreenRemoved(int id) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyTouchscreenRemoved,
+                            weak_ptr_factory_.GetWeakPtr(), id));
 }
 
 void WindowManagerWayland::WindowResized(unsigned handle,
@@ -602,6 +653,59 @@ void WindowManagerWayland::NotifyScreenChanged(unsigned width,
                                                int rotation) {
   if (platform_screen_)
     platform_screen_->GetDelegate()->OnScreenChanged(width, height, rotation);
+}
+
+void WindowManagerWayland::NotifyKeyboardAdded(int id,
+                                               const std::string& name) {
+  keyboard_devices_.push_back(
+      ui::InputDevice(id, ui::INPUT_DEVICE_UNKNOWN, name));
+  GetHotplugEventObserver()->OnKeyboardDevicesUpdated(keyboard_devices_);
+}
+
+void WindowManagerWayland::NotifyKeyboardRemoved(int id) {
+  base::EraseIf(keyboard_devices_,
+                [id](const auto& device) { return device.id == id; });
+  GetHotplugEventObserver()->OnKeyboardDevicesUpdated(keyboard_devices_);
+}
+
+void WindowManagerWayland::NotifyPointerAdded(int id, const std::string& name) {
+  pointer_devices_.push_back(
+      ui::InputDevice(id, ui::INPUT_DEVICE_UNKNOWN, name));
+  GetHotplugEventObserver()->OnMouseDevicesUpdated(pointer_devices_);
+}
+
+void WindowManagerWayland::NotifyPointerRemoved(int id) {
+  base::EraseIf(pointer_devices_,
+                [id](const auto& device) { return device.id == id; });
+  GetHotplugEventObserver()->OnMouseDevicesUpdated(pointer_devices_);
+}
+
+void WindowManagerWayland::NotifyTouchscreenAdded(int id,
+                                                  const std::string& name) {
+  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
+  if (command_line->HasSwitch(switches::kIgnoreTouchDevices))
+    return;
+  int max_touch_points = 1;
+  std::string override_max_touch_points =
+      command_line->GetSwitchValueASCII(switches::kForceMaxTouchPoints);
+  if (!override_max_touch_points.empty()) {
+    int temp;
+    if (base::StringToInt(override_max_touch_points, &temp))
+      max_touch_points = temp;
+  }
+  touchscreen_devices_.push_back(ui::TouchscreenDevice(
+      id, ui::INPUT_DEVICE_UNKNOWN, name, gfx::Size(), max_touch_points));
+  GetHotplugEventObserver()->OnTouchscreenDevicesUpdated(touchscreen_devices_);
+}
+
+void WindowManagerWayland::NotifyTouchscreenRemoved(int id) {
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kIgnoreTouchDevices)) {
+    return;
+  }
+  base::EraseIf(touchscreen_devices_,
+                [id](const auto& device) { return device.id == id; });
+  GetHotplugEventObserver()->OnTouchscreenDevicesUpdated(touchscreen_devices_);
 }
 
 void WindowManagerWayland::NotifyDragEnter(

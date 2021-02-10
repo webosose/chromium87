@@ -35,4 +35,9 @@ const char kEdgeTouchFiltering[] = "edge-touch-filtering";
 const char kDisableCancelAllTouches[] = "disable-cancel-all-touches";
 #endif
 
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+const char kIgnoreTouchDevices[] = "ignore-touch-devices";
+const char kForceMaxTouchPoints[] = "force-max-touch-points";
+#endif  // defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
 }  // namespace switches

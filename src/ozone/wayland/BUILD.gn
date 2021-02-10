@@ -86,6 +86,8 @@ source_set("wayland") {
     "egl/gl_surface_wayland.h",
     "input/cursor.cc",
     "input/cursor.h",
+    "input/hotplug_device.cc",
+    "input/hotplug_device.h",
     "input/keyboard.cc",
     "input/keyboard.h",
     "input/pointer.cc",
