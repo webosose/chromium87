@@ -23,6 +23,10 @@
 #include "ui/aura/window.h"
 #include "ui/views/widget/desktop_aura/desktop_screen.h"
 
+#if defined(OS_WEBOS)
+#include "base/environment.h"
+#endif
+
 namespace views {
 
 DesktopScreenWayland::DesktopScreenWayland()
@@ -55,6 +59,14 @@ void DesktopScreenWayland::SetGeometry(const gfx::Rect& geometry) {
     displays_.push_back(display::Display(displays_.size(), rect_));
     change_notifier_.NotifyDisplaysChanged(old_displays, displays_);
   }
+}
+
+display::Display DesktopScreenWayland::GetDisplayByDisplayId(
+    int display_id) const {
+  for (auto& display : displays_)
+    if (display.id() == display_id)
+      return display;
+  return GetPrimaryDisplay();
 }
 
 gfx::Point DesktopScreenWayland::GetCursorScreenPoint() {
@@ -107,13 +119,19 @@ display::Display DesktopScreenWayland::GetDisplayNearestWindow(
   // create the aura::RootWindow. So we ask what the DRWH believes the
   // window bounds are instead of going through the aura::Window's screen
   // bounds.
-  aura::WindowTreeHost* host = window->GetHost();
+  aura::WindowTreeHost* host = nullptr;
+  if (window)
+    host = window->GetHost();
   if (host) {
     DesktopWindowTreeHostOzone* rwh =
         DesktopWindowTreeHostOzone::GetHostForAcceleratedWidget(
             host->GetAcceleratedWidget());
     if (rwh)
+#if defined(OS_WEBOS)
+      return GetDisplayByDisplayId(std::stoi(rwh->GetDisplayId()));
+#else
       return GetDisplayMatching(rwh->GetBoundsInScreen());
+#endif
   }
 
   return GetPrimaryDisplay();
@@ -156,8 +174,22 @@ display::Display DesktopScreenWayland::GetDisplayMatching(
 }
 
 display::Display DesktopScreenWayland::GetPrimaryDisplay() const {
+#if defined(OS_WEBOS)
+  // webOS specific way to determine the screen to use:
+  // DISPLAY_ID is set by the application manager meaning the display ID to use.
+  std::unique_ptr<base::Environment> env(base::Environment::Create());
+  std::string display_id_env;
+  if (env->GetVar("DISPLAY_ID", &display_id_env)) {
+    int display_id = std::stoi(display_id_env);
+    for (auto& display : displays_)
+      if (display.id() == display_id)
+        return display;
+  }
+  return displays_.front();
+#else
   DCHECK(!rect_.IsEmpty());
   return displays_.front();
+#endif
 }
 
 void DesktopScreenWayland::AddObserver(display::DisplayObserver* observer) {
@@ -168,31 +200,45 @@ void DesktopScreenWayland::RemoveObserver(display::DisplayObserver* observer) {
   change_notifier_.RemoveObserver(observer);
 }
 
-void DesktopScreenWayland::OnScreenChanged(unsigned width,
+void DesktopScreenWayland::OnScreenChanged(const std::string& display_id,
+                                           const std::string& display_name,
+                                           unsigned width,
                                            unsigned height,
                                            int rotation) {
 #if defined(OS_WEBOS)
-  if (rect_.width() != static_cast<int>(width) ||
-      rect_.height() != static_cast<int>(height) || rotation_ != rotation) {
-    rect_ = gfx::Rect(0, 0, width, height);
-    rotation_ = rotation;
+  std::vector<display::Display> old_displays = displays_;
 
-    std::vector<display::Display> new_displays, old_displays = displays_;
+  bool matching = false;
+  bool displays_changed = false;
+  int displayid = 0;
+  gfx::Rect display_rect = gfx::Rect(0, 0, width, height);
 
-    if (!displays_.size())
-      displays_.push_back(display::Display(displays_.size(), rect_));
+  if (!display_id.empty())
+    displayid = std::stoi(display_id);
 
-    for (auto& display : displays_) {
-      display.set_bounds(gfx::Rect(0, 0, rect_.width(), rect_.height()));
-      display.set_work_area(gfx::Rect(0, 0, rect_.width(), rect_.height()));
-      display.SetRotationAsDegree(rotation_);
-
-      new_displays.push_back(display);
+  for (auto& display : displays_) {
+    if (display.id() == displayid) {
+      matching = true;
+      if (display.bounds() != display_rect ||
+          display.RotationAsDegree() != rotation) {
+        display.set_bounds(display_rect);
+        display.set_work_area(display_rect);
+        display.SetRotationAsDegree(rotation);
+        displays_changed = true;
+      }
     }
-
-    displays_ = new_displays;
-    change_notifier_.NotifyDisplaysChanged(old_displays, displays_);
   }
+
+  if (!matching) {
+    display::Display display(displayid, display_rect);
+    display.set_work_area(display_rect);
+    display.SetRotationAsDegree(rotation);
+    displays_.push_back(display);
+    displays_changed = true;
+  }
+
+  if (displays_changed)
+    change_notifier_.NotifyDisplaysChanged(old_displays, displays_);
 #else
   SetGeometry(gfx::Rect(0, 0, width, height));
 #endif

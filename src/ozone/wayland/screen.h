@@ -20,6 +20,7 @@
 #define OZONE_WAYLAND_SCREEN_H_
 
 #include <stdint.h>
+#include <string>
 
 #include "base/macros.h"
 #include "base/optional.h"
@@ -42,8 +43,15 @@ class WaylandScreen {
   // Returns the active allocation of the screen.
   gfx::Rect Geometry() const { return rect_; }
 
+  std::string GetDisplayId() const { return display_id_; }
+  std::string GetDisplayName() const { return display_name_; }
+
   base::Optional<int32_t> GetOutputTransform() const { return transform_; }
   int GetOutputTransformDegrees() const;
+  // Helper to extract the value of a query param. Returns "*** not found ***"
+  // if the requested query param is not in the query string.
+  std::string GetQueryParam(const std::string& query_str,
+                            const std::string& param_name);
 
  private:
   // Callback functions that allows the display to initialize the screen's
@@ -73,14 +81,19 @@ class WaylandScreen {
   // The Wayland output this object wraps
   wl_output* output_;
 
-  // Rect and transform of active mode.
-  gfx::Rect rect_;
-  base::Optional<int32_t> transform_;
-
+  // WebOS specific memebers
 #if defined(OS_WEBOS)
+  std::string pending_display_id_;
+  std::string pending_display_name_;
   gfx::Rect pending_rect_;
   int32_t pending_transform_;
 #endif
+
+  // Rect and transform of active mode.
+  std::string display_id_;
+  std::string display_name_;
+  gfx::Rect rect_;
+  base::Optional<int32_t> transform_;
 
   DISALLOW_COPY_AND_ASSIGN(WaylandScreen);
 };

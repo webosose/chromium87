@@ -544,6 +544,10 @@ void OzoneWaylandWindow::DetachGroup() {
   sender_->Send(new WaylandDisplay_DetachWindowGroup(handle_));
 }
 
+std::string OzoneWaylandWindow::GetDisplayId() {
+  return display_id_;
+}
+
 void OzoneWaylandWindow::ShowInputPanel() {
   sender_->Send(new WaylandDisplay_ShowInputPanel(handle_));
 }

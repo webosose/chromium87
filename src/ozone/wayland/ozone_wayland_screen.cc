@@ -26,7 +26,7 @@ namespace ozonewayland {
 OzoneWaylandScreen::OzoneWaylandScreen(
     ui::DesktopPlatformScreenDelegate* observer,
     ui::WindowManagerWayland* window_manager)
-    : look_ahead_screen_(nullptr), observer_(observer) {
+    : look_ahead_screen_list_(), observer_(observer) {
   LookAheadOutputGeometry();
   window_manager->OnPlatformScreenCreated(this);
 }
@@ -51,24 +51,27 @@ void OzoneWaylandScreen::LookAheadOutputGeometry() {
   wl_registry_add_listener(registry, &registry_output, this);
 
   if (wl_display_roundtrip(display) > 0) {
+    for (WaylandScreen* look_ahead_screen : look_ahead_screen_list_) {
 #if defined(OS_WEBOS)
-    while (look_ahead_screen_->Geometry().IsEmpty() ||
-        !look_ahead_screen_->GetOutputTransform().has_value())
+      while (look_ahead_screen->Geometry().IsEmpty() ||
+          !look_ahead_screen->GetOutputTransform().has_value())
 #else
-    while (look_ahead_screen_->Geometry().IsEmpty())
+      while (look_ahead_screen->Geometry().IsEmpty())
 #endif
-      wl_display_roundtrip(display);
+        wl_display_roundtrip(display);
 
-    observer_->OnScreenChanged(
-        look_ahead_screen_->Geometry().width(),
-        look_ahead_screen_->Geometry().height(),
-        look_ahead_screen_->GetOutputTransformDegrees());
+      observer_->OnScreenChanged(
+          look_ahead_screen->GetDisplayId(),
+          look_ahead_screen->GetDisplayName(),
+          look_ahead_screen->Geometry().width(),
+          look_ahead_screen->Geometry().height(),
+          look_ahead_screen->GetOutputTransformDegrees());
+    }
   }
 
-  if (look_ahead_screen_) {
-    delete look_ahead_screen_;
-    look_ahead_screen_ = nullptr;
-  }
+  for (WaylandScreen* look_ahead_screen : look_ahead_screen_list_)
+    delete look_ahead_screen;
+  look_ahead_screen_list_.clear();
 
   wl_registry_destroy(registry);
   wl_display_flush(display);
@@ -84,7 +87,7 @@ void OzoneWaylandScreen::DisplayHandleOutputOnly(void *data,
 
   if (strcmp(interface, "wl_output") == 0) {
     WaylandScreen* screen = new WaylandScreen(registry, name);
-    disp->look_ahead_screen_ = screen;
+    disp->look_ahead_screen_list_.push_back(screen);
   }
 }
 

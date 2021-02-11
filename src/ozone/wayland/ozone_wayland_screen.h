@@ -20,6 +20,8 @@
 
 #include <wayland-client.h>
 
+#include <list>
+
 #include "base/macros.h"
 #include "ozone/platform/desktop_platform_screen.h"
 
@@ -52,7 +54,7 @@ class OzoneWaylandScreen : public ui::DesktopPlatformScreen {
       uint32_t name,
       const char *interface,
       uint32_t version);
-  WaylandScreen* look_ahead_screen_;
+  std::list<WaylandScreen*> look_ahead_screen_list_;
   ui::DesktopPlatformScreenDelegate* observer_;
   DISALLOW_COPY_AND_ASSIGN(OzoneWaylandScreen);
 };

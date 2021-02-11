@@ -21,14 +21,21 @@
 #include <wayland-client.h>
 
 #include "ozone/wayland/display.h"
+#include "url/third_party/mozilla/url_parse.h"
 
 namespace ozonewayland {
 namespace {
 #if defined(OS_WEBOS)
+const char kDisplayIdQueryKey[] = "display_id";
+const char kDisplayNameQueryKey[] = "name";
+
+const char kNotFound[] = "*** not found ***";
+
 const uint32_t kOutputInterfaceVersion = 2;
 #else
 const uint32_t kOutputInterfaceVersion = 1;
 #endif
+const char kDefaultDisplayId[] = "-1";
 const int kNoTransform = 0;
 const int k90DegressCounterClockwise = 90;
 const int k180DegreesCounterClockwise = 180;
@@ -38,9 +45,13 @@ const int k270DegreesCounterClockwise = 270;
 WaylandScreen::WaylandScreen(wl_registry* registry, uint32_t id)
     : output_(nullptr),
 #if defined(OS_WEBOS)
+      pending_display_id_(kDefaultDisplayId),
+      pending_display_name_(),
       pending_rect_(0, 0, 0, 0),
       pending_transform_(0),
 #endif
+      display_id_(kDefaultDisplayId),
+      display_name_(),
       rect_(0, 0, 0, 0) {
   static const wl_output_listener kOutputListener = {
     WaylandScreen::OutputHandleGeometry,
@@ -84,6 +95,19 @@ int WaylandScreen::GetOutputTransformDegrees() const {
   return result;
 }
 
+std::string WaylandScreen::GetQueryParam(const std::string& query_str,
+                                         const std::string& param_name) {
+  url::Component query(0, query_str.length());
+  url::Component key, value;
+  while (url::ExtractQueryKeyValue(query_str.c_str(), &query, &key, &value)) {
+    std::string key_string(query_str.substr(key.begin, key.len));
+    std::string param_text(query_str.substr(value.begin, value.len));
+    if (key_string == param_name)
+      return param_text;
+  }
+  return kNotFound;
+}
+
 // static
 void WaylandScreen::OutputHandleGeometry(void *data,
                                          wl_output *output,
@@ -97,6 +121,14 @@ void WaylandScreen::OutputHandleGeometry(void *data,
                                          int32_t output_transform) {
   WaylandScreen* screen = static_cast<WaylandScreen*>(data);
 #if defined(OS_WEBOS)
+  std::string display_id = screen->GetQueryParam(model, kDisplayIdQueryKey);
+  if (display_id != kNotFound)
+    screen->pending_display_id_ = display_id;
+
+  std::string display_name = screen->GetQueryParam(model, kDisplayNameQueryKey);
+  if (display_name != kNotFound)
+    screen->pending_display_name_ = display_name;
+
   // We don't really support other than (0,0) origin
   screen->pending_rect_.set_origin(gfx::Point(x, y));
   screen->pending_transform_ = output_transform;
@@ -120,7 +152,8 @@ void WaylandScreen::OutputHandleMode(void* data,
     screen->rect_.set_size(gfx::Size(width, height));
 
     if (WaylandDisplay::GetInstance())
-      WaylandDisplay::GetInstance()->OutputScreenChanged(screen->rect_.width(),
+      WaylandDisplay::GetInstance()->OutputScreenChanged(
+          screen->display_id_, screen->display_name_, screen->rect_.width(),
           screen->rect_.height(), screen->GetOutputTransformDegrees());
 #endif
   }
@@ -131,8 +164,12 @@ void WaylandScreen::OutputHandleMode(void* data,
 void WaylandScreen::OutputDone(void* data, struct wl_output* wl_output) {
   WaylandScreen* screen = static_cast<WaylandScreen*>(data);
 
-  if (screen->rect_ != screen->pending_rect_ ||
+  if (screen->display_id_ != screen->pending_display_id_ ||
+      screen->display_name_ != screen->pending_display_name_ ||
+      screen->rect_ != screen->pending_rect_ ||
       screen->transform_ != screen->pending_transform_) {
+    screen->display_id_ = screen->pending_display_id_;
+    screen->display_name_ = screen->pending_display_name_;
     screen->rect_ = screen->pending_rect_;
     screen->transform_ = screen->pending_transform_;
 
@@ -141,7 +178,8 @@ void WaylandScreen::OutputDone(void* data, struct wl_output* wl_output) {
     // because we need to ensure we have fetched geometry before continuing
     // Ozone initialization.
     if (WaylandDisplay::GetInstance())
-      WaylandDisplay::GetInstance()->OutputScreenChanged(screen->rect_.width(),
+      WaylandDisplay::GetInstance()->OutputScreenChanged(
+          screen->display_id_, screen->display_name_, screen->rect_.width(),
           screen->rect_.height(), screen->GetOutputTransformDegrees());
   }
 }

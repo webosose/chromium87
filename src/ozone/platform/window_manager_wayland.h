@@ -136,7 +136,11 @@ class WindowManagerWayland
                    uint32_t time_stamp);
   void CloseWidget(unsigned handle);
 
-  void ScreenChanged(unsigned width, unsigned height, int rotation);
+  void ScreenChanged(const std::string& display_id,
+                     const std::string& display_name,
+                     unsigned width,
+                     unsigned height,
+                     int rotation);
   void KeyboardAdded(int id, const std::string& name);
   void KeyboardRemoved(int id);
   void PointerAdded(int id, const std::string& name);
@@ -192,7 +196,11 @@ class WindowManagerWayland
                         float y,
                         int32_t touch_id,
                         uint32_t time_stamp);
-  void NotifyScreenChanged(unsigned width, unsigned height, int rotation);
+  void NotifyScreenChanged(const std::string& display_id,
+                           const std::string& display_name,
+                           unsigned width,
+                           unsigned height,
+                           int rotation);
   void NotifyKeyboardAdded(int id, const std::string& name);
   void NotifyKeyboardRemoved(int id);
   void NotifyPointerAdded(int id, const std::string& name);

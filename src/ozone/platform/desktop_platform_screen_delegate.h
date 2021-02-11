@@ -18,6 +18,8 @@
 #ifndef OZONE_PLATFORM_DESKTOP_PLATFORM_SCREEN_DELEGATE_H_
 #define OZONE_PLATFORM_DESKTOP_PLATFORM_SCREEN_DELEGATE_H_
 
+#include <string>
+
 #include "ozone/platform/ozone_export_wayland.h"
 
 namespace ui {
@@ -27,7 +29,9 @@ namespace ui {
 // etc.
 class OZONE_WAYLAND_EXPORT DesktopPlatformScreenDelegate {
  public:
-  virtual void OnScreenChanged(unsigned width, unsigned height,
+  virtual void OnScreenChanged(const std::string& display_id,
+                               const std::string& display_name,
+                               unsigned width, unsigned height,
                                int rotation) = 0;
 
  protected:

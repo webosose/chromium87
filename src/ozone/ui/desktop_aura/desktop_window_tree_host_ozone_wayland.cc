@@ -149,6 +149,10 @@ gfx::Rect DesktopWindowTreeHostOzone::GetBoundsInScreen() const {
   return platform_window_->GetBounds();
 }
 
+std::string DesktopWindowTreeHostOzone::GetDisplayId() const {
+  return platform_window_->GetDisplayId();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // DesktopWindowTreeHostOzone, DesktopWindowTreeHost implementation:
 

@@ -45,10 +45,15 @@ class DesktopScreenWayland : public display::Screen,
   ~DesktopScreenWayland() override;
 
   // DesktopPlatformScreenDelegate overrides.
-  void OnScreenChanged(unsigned width, unsigned height, int rotation) override;
+  void OnScreenChanged(const std::string& display_id,
+                       const std::string& display_name,
+                       unsigned width,
+                       unsigned height,
+                       int rotation) override;
 
  private:
   void SetGeometry(const gfx::Rect& geometry);
+  display::Display GetDisplayByDisplayId(int display_id) const;
   // Overridden from display::Screen:
   gfx::Point GetCursorScreenPoint() override;
   bool IsWindowUnderCursor(gfx::NativeWindow window) override;

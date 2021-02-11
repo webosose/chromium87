@@ -208,8 +208,11 @@ class WaylandDisplay : public ui::SurfaceFactoryOzone,
                    float y,
                    int32_t touch_id,
                    uint32_t time_stamp);
-
-  void OutputScreenChanged(unsigned width, unsigned height, int rotation);
+  void OutputScreenChanged(const std::string& display_id,
+                           const std::string& display_name,
+                           unsigned width,
+                           unsigned height,
+                           int rotation);
   void WindowResized(unsigned handle, unsigned width, unsigned height);
   void WindowUnminimized(unsigned windowhandle);
   void WindowDeActivated(unsigned windowhandle);
