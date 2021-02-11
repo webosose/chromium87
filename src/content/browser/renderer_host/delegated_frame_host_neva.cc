@@ -16,13 +16,6 @@
 
 #include "content/browser/renderer_host/delegated_frame_host_neva.h"
 
-#include "base/command_line.h"
-#include "base/task/post_task.h"
-#include "cc/base/switches.h"
-#include "components/viz/service/frame_sinks/compositor_frame_sink_support.h"
-#include "content/public/browser/browser_task_traits.h"
-#include "content/public/browser/browser_thread.h"
-
 namespace content {
 
 namespace {
@@ -41,47 +34,26 @@ DelegatedFrameHost::DelegatedFrameHost(const viz::FrameSinkId& frame_sink_id,
           frame_sink_id,
           static_cast<neva_wrapped::DelegatedFrameHostClient*>(client),
           should_register_frame_sink_id),
-      use_aggressive_release_policy_(
-          base::CommandLine::ForCurrentProcess()->HasSwitch(
-              cc::switches::kEnableAggressiveReleasePolicy)),
       weak_factory_(this) {}
 
 DelegatedFrameHost::~DelegatedFrameHost() {}
 
-void DelegatedFrameHost::WasShown(
-    const viz::LocalSurfaceId& new_local_surface_id,
-    const gfx::Size& new_dip_size,
-    blink::mojom::RecordContentToVisibleTimeRequestPtr
-        record_tab_switch_time_request) {
-  // Calling origin procedure
-  neva_wrapped::DelegatedFrameHost::WasShown(
-      new_local_surface_id, new_dip_size,
-      std::move(record_tab_switch_time_request));
-  if (use_aggressive_release_policy_) {
-    background_cleanup_task_.Cancel();
-    if (compositor_)
-      compositor_->ResumeDrawing();
-  }
-
-  DelegatedFrameHostClient* client =
-      static_cast<DelegatedFrameHostClient*>(client_);
+void DelegatedFrameHost::ResumeDrawing() {
+  background_cleanup_task_.Cancel();
+  if (compositor_)
+    compositor_->ResumeDrawing();
 }
 
-void DelegatedFrameHost::WasHidden(HiddenCause cause) {
-  // Calling origin procedure
-  neva_wrapped::DelegatedFrameHost::WasHidden(cause);
+void DelegatedFrameHost::SuspendDrawing() {
+  if (compositor_)
+    compositor_->SuspendDrawing();
 
-  if (use_aggressive_release_policy_) {
-    if (compositor_)
-      compositor_->SuspendDrawing();
-
-    EvictDelegatedFrame();
-    background_cleanup_task_.Reset(base::BindOnce(
-        &DelegatedFrameHost::DoBackgroundCleanup, weak_factory_.GetWeakPtr()));
-    base::ThreadTaskRunnerHandle::Get()->PostDelayedTask(
-        FROM_HERE, background_cleanup_task_.callback(),
-        base::TimeDelta::FromMilliseconds(kBackgroundCleanupDelayMs));
-  }
+  EvictDelegatedFrame();
+  background_cleanup_task_.Reset(base::BindOnce(
+      &DelegatedFrameHost::DoBackgroundCleanup, weak_factory_.GetWeakPtr()));
+  base::ThreadTaskRunnerHandle::Get()->PostDelayedTask(
+      FROM_HERE, background_cleanup_task_.callback(),
+      base::TimeDelta::FromMilliseconds(kBackgroundCleanupDelayMs));
 }
 
 void DelegatedFrameHost::DoBackgroundCleanup() {

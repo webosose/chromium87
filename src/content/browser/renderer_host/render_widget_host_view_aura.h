@@ -104,6 +104,10 @@ class CONTENT_EXPORT RenderWidgetHostViewAura
   void Show() override;
   void Hide() override;
   bool IsShowing() override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void ResumeDrawing() override;
+  void SuspendDrawing() override;
+#endif
   void WasUnOccluded() override;
   void WasOccluded() override;
   gfx::Rect GetViewBounds() override;

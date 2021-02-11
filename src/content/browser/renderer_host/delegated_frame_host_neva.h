@@ -47,18 +47,16 @@ class CONTENT_EXPORT DelegatedFrameHost
                      bool should_register_frame_sink_id);
   ~DelegatedFrameHost() override;
 
-  void WasHidden(HiddenCause cause);
-  void WasShown(const viz::LocalSurfaceId& local_surface_id,
-                const gfx::Size& dip_size,
-                blink::mojom::RecordContentToVisibleTimeRequestPtr
-                    record_tab_switch_time_request);
+  // The methods manage to suspend and resume drawing by the compositor.
+  void ResumeDrawing();
+  void SuspendDrawing();
+
   base::WeakPtr<DelegatedFrameHost> GetWeakPtr() {
     return weak_factory_.GetWeakPtr();
   }
 
   void DoBackgroundCleanup();
 
-  bool use_aggressive_release_policy_ = false;
   base::CancelableOnceClosure background_cleanup_task_;
 
   base::WeakPtrFactory<DelegatedFrameHost> weak_factory_;

@@ -451,6 +451,18 @@ void RenderWidgetHostViewAura::Hide() {
   HideImpl();
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void RenderWidgetHostViewAura::ResumeDrawing() {
+  if (delegated_frame_host_)
+    delegated_frame_host_->ResumeDrawing();
+}
+
+void RenderWidgetHostViewAura::SuspendDrawing() {
+  if (delegated_frame_host_)
+    delegated_frame_host_->SuspendDrawing();
+}
+#endif
+
 void RenderWidgetHostViewAura::SetSize(const gfx::Size& size) {
   // For a SetSize operation, we don't care what coordinate system the origin
   // of the window is in, it's only important to make sure that the origin

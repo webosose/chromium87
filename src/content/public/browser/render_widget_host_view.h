@@ -129,6 +129,10 @@ class CONTENT_EXPORT RenderWidgetHostView {
   // Whether the view is showing.
   virtual bool IsShowing() = 0;
 
+  // The methods manage to suspend and resume drawing by the compositor.
+  virtual void ResumeDrawing() {}
+  virtual void SuspendDrawing() {}
+
   // Indicates if the view is currently occluded (e.g, not visible because it's
   // covered up by other windows), and as a result the view's renderer may be
   // suspended. Calling Show()/Hide() overrides the state set by these methods.

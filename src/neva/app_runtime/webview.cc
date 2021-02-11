@@ -16,10 +16,12 @@
 
 #include "neva/app_runtime/webview.h"
 
+#include "base/command_line.h"
 #include "base/files/file_path.h"
 #include "base/memory/memory_pressure_listener.h"
 #include "base/strings/utf_string_conversions.h"
 #include "browser/app_runtime_browser_context_adapter.h"
+#include "cc/base/switches.h"
 #include "components/media_capture_util/devices_dispatcher.h"
 #include "content/browser/child_process_security_policy_impl.h"
 #include "content/browser/renderer_host/render_view_host_impl.h"
@@ -140,6 +142,10 @@ WebView::WebView(int width, int height, WebViewProfile* profile)
 
   webview_controller_impl_ =
       std::make_unique<AppRuntimeWebViewControllerImpl>(web_contents_.get());
+
+  use_aggressive_release_policy_ =
+      base::CommandLine::ForCurrentProcess()->HasSwitch(
+          cc::switches::kEnableAggressiveReleasePolicy);
 
   // Default policy : Skip frame is enabled.
   SetSkipFrame(true);
@@ -275,16 +281,22 @@ void WebView::SuspendPaintingAndSetVisibilityHidden() {
   content::RenderWidgetHostViewAura* const host_view =
       static_cast<content::RenderWidgetHostViewAura*>(
           web_contents_->GetRenderViewHost()->GetWidget()->GetView());
-  if (host_view)
+  if (host_view) {
     host_view->Hide();
+    if (use_aggressive_release_policy_)
+      host_view->SuspendDrawing();
+  }
 }
 
 void WebView::ResumePaintingAndSetVisibilityVisible() {
   content::RenderWidgetHostViewAura* const host_view =
       static_cast<content::RenderWidgetHostViewAura*>(
           web_contents_->GetRenderViewHost()->GetWidget()->GetView());
-  if (host_view)
+  if (host_view) {
     host_view->Show();
+    if (use_aggressive_release_policy_)
+      host_view->ResumeDrawing();
+  }
 }
 
 bool WebView::SetSkipFrame(bool enable) {

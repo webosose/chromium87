@@ -293,6 +293,7 @@ class WebView : public content::WebContentsDelegate,
   bool active_on_non_blank_paint_ = false;
   bool full_screen_ = false;
   bool enable_skip_frame_ = false;
+  bool use_aggressive_release_policy_ = false;
   bool allow_local_resources_load_ = false;
   int width_;
   int height_;
