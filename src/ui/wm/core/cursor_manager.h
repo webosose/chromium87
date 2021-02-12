@@ -63,6 +63,9 @@ class WM_CORE_EXPORT CursorManager : public aura::client::CursorClient,
   void AddObserver(aura::client::CursorClientObserver* observer) override;
   void RemoveObserver(aura::client::CursorClientObserver* observer) override;
   bool ShouldHideCursorOnKeyEvent(const ui::KeyEvent& event) const override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void SetPlatformCursorVisibility(bool visible) override;
+#endif
 
  private:
   // Overridden from NativeCursorManagerDelegate:
@@ -95,6 +98,10 @@ class WM_CORE_EXPORT CursorManager : public aura::client::CursorClient,
   // CursorManager instance is created it gets populated with the correct
   // cursor visibility state.
   static bool last_cursor_visibility_state_;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  bool platform_cursor_is_visible_ = true;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(CursorManager);
 };

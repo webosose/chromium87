@@ -416,8 +416,7 @@ void WebAppWindow::Close() {
 
 void WebAppWindow::CursorVisibilityChanged(bool visible) {
   if (cursor_manager_.get())
-    static_cast<wm::NativeCursorManagerDelegate*>(cursor_manager_.get())
-        ->CommitVisibility(visible);
+    cursor_manager_->SetPlatformCursorVisibility(visible);
   if (delegate_)
     delegate_->CursorVisibilityChanged(visible);
 }

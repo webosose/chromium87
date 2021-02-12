@@ -89,6 +89,9 @@ class AURA_EXPORT CursorClient {
 
   // Returns true if the mouse cursor should be hidden on |event|.
   virtual bool ShouldHideCursorOnKeyEvent(const ui::KeyEvent& event) const = 0;
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void SetPlatformCursorVisibility(bool visible) {}
+#endif
 
  protected:
   virtual ~CursorClient() {}
