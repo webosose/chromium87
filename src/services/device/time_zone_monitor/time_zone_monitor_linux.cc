@@ -46,6 +46,7 @@ class TimeZoneMonitorLinux : public TimeZoneMonitor {
 #else
     std::unique_ptr<icu::TimeZone> new_zone(DetectHostTimeZoneFromIcu());
 
+#if !defined(OS_WEBOS)
     // We get here multiple times on Linux per a single tz change, but
     // want to update the ICU default zone and notify renderer only once.
     // The timezone must have previously been populated. See InitializeICU().
@@ -54,6 +55,7 @@ class TimeZoneMonitorLinux : public TimeZoneMonitor {
       VLOG(1) << "timezone already updated";
       return;
     }
+#endif  // !defined(OS_WEBOS)
 
     UpdateIcuAndNotifyClients(std::move(new_zone));
 #endif  // defined(IS_CHROMECAST)

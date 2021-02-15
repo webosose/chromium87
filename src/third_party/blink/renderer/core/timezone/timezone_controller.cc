@@ -34,6 +34,13 @@ void NotifyTimezoneChangeToV8(v8::Isolate* isolate) {
   isolate->DateTimeConfigurationChangeNotification();
 }
 
+bool NotifyIfRequiredAndReturn() {
+#if defined(OS_WEBOS)
+  NotifyTimezoneChangeToV8(V8PerIsolateData::MainThreadIsolate());
+#endif  // defined(OS_WEBOS)
+  return false;
+}
+
 void NotifyTimezoneChangeOnWorkerThread(WorkerThread* worker_thread) {
   DCHECK(worker_thread->IsCurrentThread());
   NotifyTimezoneChangeToV8(worker_thread->GlobalScope()->GetIsolate());
@@ -79,7 +86,7 @@ bool SetIcuTimeZoneAndNotifyV8(const String& timezone_id) {
   CHECK(timezone);
 
   if (*timezone == icu::TimeZone::getUnknown())
-    return false;
+    return NotifyIfRequiredAndReturn();
 
   icu::TimeZone::adoptDefault(timezone.release());
 
