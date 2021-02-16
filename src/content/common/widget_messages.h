@@ -78,4 +78,9 @@ IPC_MESSAGE_ROUTED1(WidgetHostMsg_RequestSetBounds, gfx::Rect /* bounds */)
 // Close message.
 IPC_MESSAGE_CONTROL1(WidgetHostMsg_Close_ACK, int /* old_route_id */)
 
+#if defined(USE_NEVA_APPRUNTIME)
+IPC_MESSAGE_ROUTED0(WidgetMsg_ActivateCompositor)
+IPC_MESSAGE_ROUTED0(WidgetMsg_DeactivateCompositor)
+#endif
+
 #endif  //  CONTENT_COMMON_WIDGET_MESSAGES_H_

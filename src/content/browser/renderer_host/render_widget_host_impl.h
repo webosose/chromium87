@@ -812,6 +812,11 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   base::Optional<blink::VisualProperties>
   GetLastVisualPropertiesSentToRendererForTesting();
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void ActivateRendererCompositor();
+  void DeactivateRendererCompositor();
+#endif
+
  protected:
   // ---------------------------------------------------------------------------
   // The following method is overridden by RenderViewHost to send upwards to

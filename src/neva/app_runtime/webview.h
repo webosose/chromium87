@@ -255,6 +255,9 @@ class WebView : public content::WebContentsDelegate,
   WebViewProfile* GetProfile() const;
   void SetProfile(WebViewProfile* profile);
 
+  void ActivateRendererCompositor();
+  void DeactivateRendererCompositor();
+
  private:
   void SendGetCookiesResponse(const net::CookieAccessResultList& cookie_list,
                               const net::CookieAccessResultList& excluded_cookies);

@@ -330,6 +330,9 @@ class CORE_EXPORT WebFrameWidgetBase
   gfx::Size VisibleViewportSizeInDIPs() override;
   void SetPendingWindowRect(const gfx::Rect* window_screen_rect) override;
   bool IsHidden() const override;
+#if defined(USE_NEVA_APPRUNTIME)
+  bool NeverComposited();
+#endif
 
   // WidgetBaseClient methods.
   void RecordDispatchRafAlignedInputTime(

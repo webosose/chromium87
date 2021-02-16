@@ -211,6 +211,10 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   void OnImeEventGuardFinish(ImeEventGuard* guard);
 
   bool is_hidden() const { return is_hidden_; }
+#if defined(USE_NEVA_APPRUNTIME)
+  // Returns whether produce graphical output or not
+  bool NeverComposited() { return never_composited_; }
+#endif
   void set_is_pasting(bool value) { is_pasting_ = value; }
   bool is_pasting() const { return is_pasting_; }
   void set_handling_select_range(bool value) { handling_select_range_ = value; }

@@ -1277,6 +1277,12 @@ bool WebFrameWidgetBase::IsHidden() const {
   return widget_base_->is_hidden();
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+bool WebFrameWidgetBase::NeverComposited() {
+  return widget_base_->NeverComposited();
+}
+#endif
+
 void WebFrameWidgetBase::AutoscrollStart(const gfx::PointF& position) {
   GetAssociatedFrameWidgetHost()->AutoscrollStart(std::move(position));
 }

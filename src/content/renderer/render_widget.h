@@ -51,6 +51,8 @@
 #include "third_party/blink/public/web/web_page_popup.h"
 #include "third_party/blink/public/web/web_widget.h"
 #include "third_party/blink/public/web/web_widget_client.h"
+#include "third_party/blink/renderer/platform/widget/widget_base.h"
+#include "third_party/blink/renderer/core/frame/web_frame_widget_base.h"
 #include "ui/base/ime/ime_text_span.h"
 #include "ui/base/ime/text_input_mode.h"
 #include "ui/base/ime/text_input_type.h"
@@ -64,6 +66,7 @@
 
 namespace blink {
 class WebFrameWidget;
+class WebFrameWidgetBase;
 class WebInputMethodController;
 class WebLocalFrame;
 class WebMouseEvent;
@@ -329,6 +332,11 @@ class CONTENT_EXPORT RenderWidget
   void OnDragSourceEnded(const gfx::PointF& client_point,
                          const gfx::PointF& screen_point,
                          blink::DragOperation drag_operation);
+
+#if defined(USE_NEVA_APPRUNTIME)
+  void OnActivateCompositor();
+  void OnDeactivateCompositor();
+#endif
 
   // Set the pending window rect.
   // Because the real render_widget is hosted in another process, there is

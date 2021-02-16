@@ -3348,6 +3348,16 @@ RenderWidgetHostImpl::CollectSurfaceIdsForEviction() {
   return rvh->CollectSurfaceIdsForEviction();
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void RenderWidgetHostImpl::ActivateRendererCompositor() {
+  Send(new WidgetMsg_ActivateCompositor(routing_id_));
+}
+
+void RenderWidgetHostImpl::DeactivateRendererCompositor() {
+  Send(new WidgetMsg_DeactivateCompositor(routing_id_));
+}
+#endif
+
 std::unique_ptr<RenderWidgetHostIterator>
 RenderWidgetHostImpl::GetEmbeddedRenderWidgetHosts() {
   // This iterates over all RenderWidgetHosts and returns those whose Views

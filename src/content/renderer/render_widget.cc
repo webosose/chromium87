@@ -341,6 +341,10 @@ bool RenderWidget::OnMessageReceived(const IPC::Message& message) {
     IPC_MESSAGE_HANDLER(WidgetMsg_SetViewportIntersection,
                         OnSetViewportIntersection)
     IPC_MESSAGE_HANDLER(DragMsg_TargetDragEnter, OnDragTargetDragEnter)
+#if defined(USE_NEVA_APPRUNTIME)
+    IPC_MESSAGE_HANDLER(WidgetMsg_ActivateCompositor, OnActivateCompositor)
+    IPC_MESSAGE_HANDLER(WidgetMsg_DeactivateCompositor, OnDeactivateCompositor)
+#endif
     IPC_MESSAGE_UNHANDLED(handled = false)
   IPC_END_MESSAGE_MAP()
   return handled;
@@ -686,6 +690,20 @@ void RenderWidget::OnDragTargetDragEnter(
 
   Send(new DragHostMsg_UpdateDragCursor(routing_id(), operation));
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+void RenderWidget::OnActivateCompositor() {
+  blink::WebFrameWidgetBase* web_frame_widget_base =
+      static_cast<blink::WebFrameWidgetBase*>(webwidget_);
+
+  if (web_frame_widget_base && !web_frame_widget_base->NeverComposited())
+    webwidget_->SetCompositorVisible(!web_frame_widget_base->IsHidden());
+}
+
+void RenderWidget::OnDeactivateCompositor() {
+  webwidget_->SetCompositorVisible(false);
+}
+#endif
 
 void RenderWidget::ConvertViewportToWindow(blink::WebRect* rect) {
   if (compositor_deps_->IsUseZoomForDSFEnabled()) {
