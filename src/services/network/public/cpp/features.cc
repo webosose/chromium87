@@ -177,7 +177,7 @@ const char kCorbAllowlistAlsoAppliesToOorCorsParamName[] =
 // See also https://crbug.com/920634
 const base::Feature kRequestInitiatorSiteLockEnfocement = {
     "RequestInitiatorSiteLockEnfocement",
-#if defined(OS_ANDROID)
+#if defined(OS_ANDROID) || defined(OS_WEBOS)
     base::FEATURE_DISABLED_BY_DEFAULT};
 #else
     base::FEATURE_ENABLED_BY_DEFAULT};
