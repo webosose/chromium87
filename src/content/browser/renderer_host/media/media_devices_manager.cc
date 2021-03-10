@@ -49,6 +49,11 @@ namespace content {
 
 namespace {
 
+#if defined(OS_WEBOS)
+const char kWebOSDefaultAudioDeviceId[] = "sysdefault:CARD=";
+const char kWebOSBlacklistedAudioDeviceId[] = "sysdefault:CARD=LGSIC";
+#endif
+
 // Resolutions used if the source doesn't support capability enumeration.
 struct {
   uint16_t width;
@@ -911,6 +916,20 @@ void MediaDevicesManager::AudioDevicesEnumerated(
 
   blink::WebMediaDeviceInfoArray snapshot;
   for (const media::AudioDeviceDescription& description : device_descriptions) {
+#if defined(OS_WEBOS)
+    if (type == blink::MEDIA_DEVICE_TYPE_AUDIO_INPUT &&
+        description.unique_id.compare(
+            0, base::size(kWebOSDefaultAudioDeviceId) - 1,
+            kWebOSDefaultAudioDeviceId) != 0) {
+      continue;
+    }
+    if (type == blink::MEDIA_DEVICE_TYPE_AUDIO_INPUT &&
+        description.unique_id.compare(
+            0, base::size(kWebOSBlacklistedAudioDeviceId) - 1,
+            kWebOSBlacklistedAudioDeviceId) == 0) {
+      continue;
+    }
+#endif
     snapshot.emplace_back(description.unique_id, description.device_name,
                           description.group_id,
                           media::VideoCaptureControlSupport(),
