@@ -724,6 +724,15 @@ void WebMediaPlayerWebRTC::OnPipelineError(PipelineStatus status) {
   VLOG(1) << __func__ << " : delegate_id_: " << delegate_id_
           << " status : " << status;
 
+  if (main_render_task_runner_ &&
+      !main_render_task_runner_->BelongsToCurrentThread()) {
+    main_render_task_runner_->PostTask(
+        FROM_HERE,
+        base::BindOnce(&WebMediaPlayerWebRTC::OnPipelineError,
+                       weak_ptr_this_, status));
+    return;
+  }
+
   if (is_loading_) {
     is_loading_ = false;
     delegate_->DidMediaActivated(delegate_id_);
