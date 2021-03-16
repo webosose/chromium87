@@ -1515,7 +1515,7 @@ void GrGLCaps::initFormatTable(const GrGLContextInfo& ctxInfo, const GrGLInterfa
     }
 
     // Format: R8
-    {
+    if (!fDriverBugWorkarounds.disable_texture_rg) {
         FormatInfo& info = this->getFormatInfo(GrGLFormat::kR8);
         info.fFormatType = FormatType::kNormalizedFixedPoint;
         info.fInternalFormatForRenderbuffer = GR_GL_R8;
@@ -2138,7 +2138,7 @@ void GrGLCaps::initFormatTable(const GrGLContextInfo& ctxInfo, const GrGLInterfa
     }
 
     // Format: R16F
-    {
+    if (!fDriverBugWorkarounds.disable_texture_rg) {
         FormatInfo& info = this->getFormatInfo(GrGLFormat::kR16F);
         info.fFormatType = FormatType::kFloat;
         info.fInternalFormatForRenderbuffer = GR_GL_R16F;
@@ -2396,7 +2396,7 @@ void GrGLCaps::initFormatTable(const GrGLContextInfo& ctxInfo, const GrGLInterfa
     }
 
     // Format: RG8
-    {
+    if (!fDriverBugWorkarounds.disable_texture_rg) {
         FormatInfo& info = this->getFormatInfo(GrGLFormat::kRG8);
         info.fFormatType = FormatType::kNormalizedFixedPoint;
         info.fInternalFormatForRenderbuffer = GR_GL_RG8;
@@ -2800,7 +2800,7 @@ void GrGLCaps::initFormatTable(const GrGLContextInfo& ctxInfo, const GrGLInterfa
     }
 
     // Format: R16
-    {
+    if (!fDriverBugWorkarounds.disable_texture_rg) {
         FormatInfo& info = this->getFormatInfo(GrGLFormat::kR16);
         info.fFormatType = FormatType::kNormalizedFixedPoint;
         info.fInternalFormatForRenderbuffer = GR_GL_R16;
@@ -2869,7 +2869,7 @@ void GrGLCaps::initFormatTable(const GrGLContextInfo& ctxInfo, const GrGLInterfa
     }
 
     // Format: RG16
-    {
+    if (!fDriverBugWorkarounds.disable_texture_rg) {
         FormatInfo& info = this->getFormatInfo(GrGLFormat::kRG16);
         info.fFormatType = FormatType::kNormalizedFixedPoint;
         info.fInternalFormatForTexImageOrStorage =
@@ -3006,7 +3006,7 @@ void GrGLCaps::initFormatTable(const GrGLContextInfo& ctxInfo, const GrGLInterfa
     }
 
     // Format:RG16F
-    {
+    if (!fDriverBugWorkarounds.disable_texture_rg) {
         bool rg16FTextureSupport = false;
         bool rg16FRenderTargetSupport = false;
         if (GR_IS_GR_GL(standard)) {

@@ -3640,6 +3640,15 @@
       "features": [
         "force_enable_color_buffer_float_except_rgb32f"
       ]
+    },
+    {
+      "id": 359,
+      "description": "The Mali-Gxx driver fails with glCopyTexSubImage2D using GL_R8",
+      "gl_vendor": "ARM.*",
+      "gl_renderer": "Mali-G.*",
+      "features": [
+        "disable_texture_rg"
+      ]
     }
-  ]
+]
 }

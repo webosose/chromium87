@@ -42,4 +42,6 @@
          unbind_attachments_on_bound_render_fbo_delete) \
   GPU_OP(UNFOLD_SHORT_CIRCUIT_AS_TERNARY_OPERATION,     \
          unfold_short_circuit_as_ternary_operation)     \
+  GPU_OP(DISABLE_TEXTURE_RG,                            \
+         disable_texture_rg)                            \
 // The End

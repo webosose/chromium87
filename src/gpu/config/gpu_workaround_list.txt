@@ -49,6 +49,7 @@ disable_program_caching_for_transform_feedback
 disable_program_disk_cache
 disable_software_to_accelerated_canvas_upgrade
 disable_texture_cube_map_seamless
+disable_texture_rg
 disable_texture_storage
 disable_timestamp_queries
 disable_vp_scaling
