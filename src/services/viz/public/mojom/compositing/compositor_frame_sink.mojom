@@ -84,6 +84,10 @@ interface CompositorFrameSink {
   // SharedBitmapId for this case.
   DidDeleteSharedBitmap(gpu.mojom.Mailbox id);
 
+  // Invalidating layer tree frame sink allows it to free the resources including
+  // the booked resources for last frame.
+  Invalidate(bool needs_redraw);
+
   // This should be called atmost once for the lifetime of this frame sink. Once
   // the value has been set to anything other than kUnspecified, subsequent calls
   // are silently ignored.

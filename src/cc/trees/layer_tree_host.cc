@@ -676,7 +676,15 @@ void LayerTreeHost::SetVisible(bool visible) {
   if (visible_ == visible)
     return;
   visible_ = visible;
+#if defined(USE_NEVA_APPRUNTIME)
+  if (settings_.use_aggressive_release_policy && visible)
+    client_->EnsureLocalSurface();
+#endif
   proxy_->SetVisible(visible);
+#if defined(USE_NEVA_APPRUNTIME)
+  if (settings_.use_aggressive_release_policy && !visible)
+    proxy_->InvalidateLocalSurface();
+#endif
 }
 
 bool LayerTreeHost::IsVisible() const {
@@ -1418,6 +1426,12 @@ void LayerTreeHost::SetLocalSurfaceIdFromParent(
   UpdateDeferMainFrameUpdateInternal();
   SetNeedsCommit();
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+void LayerTreeHost::InvalidateLocalSurface() {
+  proxy_->InvalidateLocalSurface();
+}
+#endif
 
 void LayerTreeHost::RequestNewLocalSurfaceId() {
   // We can still request a new viz::LocalSurfaceId but that request will be

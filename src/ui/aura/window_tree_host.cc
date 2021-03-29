@@ -193,6 +193,12 @@ void WindowTreeHost::UpdateCompositorScaleAndSize(
                                window_->GetLocalSurfaceId());
 }
 
+void WindowTreeHost::OnCompositingEnsureLocalSurface(ui::Compositor*) {
+  window_->AllocateLocalSurfaceId();
+  ScopedLocalSurfaceIdValidator lsi_validator(window());
+  compositor_->ResetLocalSurfaceId(window_->GetLocalSurfaceId());
+}
+
 void WindowTreeHost::ConvertDIPToScreenInPixels(gfx::Point* point) const {
   ConvertDIPToPixels(point);
   gfx::Point location = GetLocationOnScreenInPixels();
@@ -409,7 +415,7 @@ void WindowTreeHost::CreateCompositor(const viz::FrameSinkId& frame_sink_id,
       context_factory, base::ThreadTaskRunnerHandle::Get(),
       ui::IsPixelCanvasRecordingEnabled(), use_external_begin_frame_control,
       force_software_compositor);
-#if defined(OS_CHROMEOS)
+#if defined(OS_CHROMEOS) || defined(USE_NEVA_APPRUNTIME)
   compositor_->AddObserver(this);
 #endif
   if (!dispatcher()) {

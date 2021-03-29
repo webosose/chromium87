@@ -472,6 +472,11 @@ void Compositor::SetScaleAndSize(float scale,
   }
 }
 
+void Compositor::ResetLocalSurfaceId(
+    const viz::LocalSurfaceId& local_surface_id) {
+  host_->SetLocalSurfaceIdFromParent(local_surface_id);
+}
+
 void Compositor::SetDisplayColorSpaces(
     const gfx::DisplayColorSpaces& display_color_spaces) {
   if (display_color_spaces_ == display_color_spaces)
@@ -776,6 +781,11 @@ void Compositor::OnCompleteSwapWithNewSize(const gfx::Size& size) {
 void Compositor::OnCompleteSwap() {
   for (auto& observer : observer_list_)
     observer.OnCompositingCompleteSwap(this);
+}
+
+void Compositor::EnsureLocalSurface() {
+  for (auto& observer : observer_list_)
+    observer.OnCompositingEnsureLocalSurface(this);
 }
 #endif
 

@@ -102,6 +102,10 @@ class CC_EXPORT Proxy {
 
   virtual void SetEnableFrameRateThrottling(
       bool enable_frame_rate_throttling) = 0;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void InvalidateLocalSurface() = 0;
+#endif
 };
 
 }  // namespace cc

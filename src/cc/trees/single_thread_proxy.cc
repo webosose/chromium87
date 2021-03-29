@@ -458,6 +458,12 @@ void SingleThreadProxy::DidCompletePageScaleAnimationOnImplThread() {
   layer_tree_host_->DidCompletePageScaleAnimation();
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void SingleThreadProxy::InvalidateLocalSurface() {
+  host_impl_->InvalidateLocalSurface();
+}
+#endif
+
 void SingleThreadProxy::DidLoseLayerTreeFrameSinkOnImplThread() {
   TRACE_EVENT0("cc",
                "SingleThreadProxy::DidLoseLayerTreeFrameSinkOnImplThread");

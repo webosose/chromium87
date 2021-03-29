@@ -138,6 +138,9 @@ class CC_EXPORT SingleThreadProxy : public Proxy,
   void NotifyPaintWorkletStateChange(
       Scheduler::PaintWorkletState state) override;
   void NotifyThroughputTrackerResults(CustomTrackerResults results) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void InvalidateLocalSurface();
+#endif
 
   void RequestNewLayerTreeFrameSink();
 

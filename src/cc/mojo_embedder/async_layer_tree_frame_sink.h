@@ -122,6 +122,7 @@ class CC_MOJO_EMBEDDER_EXPORT AsyncLayerTreeFrameSink
   void DidAllocateSharedBitmap(base::ReadOnlySharedMemoryRegion region,
                                const viz::SharedBitmapId& id) override;
   void DidDeleteSharedBitmap(const viz::SharedBitmapId& id) override;
+  void Invalidate(bool needs_redraw) override;
 
   const viz::HitTestRegionList& get_last_hit_test_data_for_testing() const {
     return last_hit_test_data_;

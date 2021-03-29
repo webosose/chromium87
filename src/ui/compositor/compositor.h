@@ -209,6 +209,8 @@ class COMPOSITOR_EXPORT Compositor : public cc::LayerTreeHostClient,
                        const gfx::Size& size_in_pixel,
                        const viz::LocalSurfaceId& local_surface_id);
 
+  void ResetLocalSurfaceId(const viz::LocalSurfaceId& local_surface_id);
+
   // Set the output color profile into which this compositor should render. Also
   // sets the SDR white level (in nits) used to scale HDR color space primaries.
   void SetDisplayColorSpaces(
@@ -371,6 +373,7 @@ class COMPOSITOR_EXPORT Compositor : public cc::LayerTreeHostClient,
 #endif
 #if defined(USE_NEVA_APPRUNTIME)
   void OnCompleteSwap();
+  void EnsureLocalSurface();
 #endif
 
   bool IsLocked() { return lock_manager_.IsLocked(); }

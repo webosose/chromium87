@@ -727,4 +727,12 @@ void ProxyMain::SetEnableFrameRateThrottling(
                                 enable_frame_rate_throttling));
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void ProxyMain::InvalidateLocalSurface() {
+  ImplThreadTaskRunner()->PostTask(
+      FROM_HERE, base::BindOnce(&ProxyImpl::InvalidateLocalSurface,
+                                base::Unretained(proxy_impl_.get())));
+}
+#endif
+
 }  // namespace cc

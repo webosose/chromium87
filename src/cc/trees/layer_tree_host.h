@@ -456,6 +456,10 @@ class CC_EXPORT LayerTreeHost : public MutatorHostClient {
   void SetLocalSurfaceIdFromParent(
       const viz::LocalSurfaceId& local_surface_id_from_parent);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void InvalidateLocalSurface();
+#endif
+
   const viz::LocalSurfaceId& local_surface_id_from_parent() const {
     return local_surface_id_from_parent_;
   }

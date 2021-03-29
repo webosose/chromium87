@@ -87,6 +87,10 @@ class CC_EXPORT LayerTreeFrameSinkClient {
       const gfx::Rect& viewport_rect,
       const gfx::Transform& transform) = 0;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void DidInvalidateLayerTreeFrameSink() {}
+#endif
+
  protected:
   virtual ~LayerTreeFrameSinkClient() {}
 };

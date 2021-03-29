@@ -805,4 +805,10 @@ void ProxyImpl::SetEnableFrameRateThrottling(
   host_impl_->SetEnableFrameRateThrottling(enable_frame_rate_throttling);
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void ProxyImpl::InvalidateLocalSurface() {
+  host_impl_->InvalidateLocalSurface();
+}
+#endif
+
 }  // namespace cc

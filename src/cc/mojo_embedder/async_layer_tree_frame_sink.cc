@@ -277,6 +277,11 @@ void AsyncLayerTreeFrameSink::DidDeleteSharedBitmap(
   compositor_frame_sink_ptr_->DidDeleteSharedBitmap(id);
 }
 
+void AsyncLayerTreeFrameSink::Invalidate(bool needs_redraw) {
+  DCHECK(compositor_frame_sink_ptr_);
+  compositor_frame_sink_ptr_->Invalidate(needs_redraw);
+}
+
 void AsyncLayerTreeFrameSink::DidReceiveCompositorFrameAck(
     const std::vector<viz::ReturnedResource>& resources) {
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);

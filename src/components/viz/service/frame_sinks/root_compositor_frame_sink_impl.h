@@ -96,6 +96,7 @@ class RootCompositorFrameSinkImpl : public mojom::CompositorFrameSink,
   void DidAllocateSharedBitmap(base::ReadOnlySharedMemoryRegion region,
                                const SharedBitmapId& id) override;
   void DidDeleteSharedBitmap(const SharedBitmapId& id) override;
+  void Invalidate(bool needs_redraw) override;
   void SubmitCompositorFrameSync(
       const LocalSurfaceId& local_surface_id,
       CompositorFrame frame,
@@ -146,6 +147,8 @@ class RootCompositorFrameSinkImpl : public mojom::CompositorFrameSink,
   // |display_client_| may be NullRemote on platforms that do not use it.
   mojo::Remote<mojom::DisplayClient> display_client_;
   mojo::AssociatedReceiver<mojom::DisplayPrivate> display_private_receiver_;
+
+  float device_scale_factor_ = 1.f;
 
   std::unique_ptr<VSyncParameterListener> vsync_listener_;
 

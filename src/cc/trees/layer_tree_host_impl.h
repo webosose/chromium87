@@ -179,6 +179,10 @@ class LayerTreeHostImplClient {
       base::TimeDelta first_scroll_delay,
       base::TimeTicks first_scroll_timestamp) = 0;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void DidInvalidateLayerTreeFrameSink() {}
+#endif
+
  protected:
   virtual ~LayerTreeHostImplClient() = default;
 };
@@ -339,6 +343,9 @@ class CC_EXPORT LayerTreeHostImpl : public TileManagerClient,
   void SetFullViewportDamage();
   void SetViewportDamage(const gfx::Rect& damage_rect);
   void SetEnableFrameRateThrottling(bool enable_frame_rate_throttling);
+#if defined(USE_NEVA_APPRUNTIME)
+  void InvalidateLocalSurface();
+#endif
 
   // Interface for ThreadedInputHandler
   void BindToInputHandler(

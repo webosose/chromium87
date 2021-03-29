@@ -336,8 +336,10 @@ void RootCompositorFrameSinkImpl::SubmitCompositorFrame(
     CompositorFrame frame,
     base::Optional<HitTestRegionList> hit_test_region_list,
     uint64_t submit_time) {
-  if (support_->last_activated_local_surface_id() != local_surface_id)
+  if (support_->last_activated_local_surface_id() != local_surface_id) {
     display_->SetLocalSurfaceId(local_surface_id, frame.device_scale_factor());
+    device_scale_factor_ = frame.device_scale_factor();
+  }
 
   const auto result = support_->MaybeSubmitCompositorFrame(
       local_surface_id, std::move(frame), std::move(hit_test_region_list),
@@ -380,6 +382,14 @@ void RootCompositorFrameSinkImpl::DidAllocateSharedBitmap(
 void RootCompositorFrameSinkImpl::DidDeleteSharedBitmap(
     const SharedBitmapId& id) {
   support_->DidDeleteSharedBitmap(id);
+}
+
+void RootCompositorFrameSinkImpl::Invalidate(bool needs_redraw) {
+  TRACE_EVENT0("viz", "RootCompositorFrameSinkImpl::Invalidate");
+  if (needs_redraw && support_->last_activated_local_surface_id().is_valid()) {
+    support_->EvictSurface(support_->last_activated_local_surface_id());
+    display_->SetLocalSurfaceId(LocalSurfaceId(), device_scale_factor_);
+  }
 }
 
 void RootCompositorFrameSinkImpl::InitializeCompositorFrameSinkType(

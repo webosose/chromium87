@@ -106,6 +106,9 @@ class CC_EXPORT ProxyMain : public Proxy {
   void SetRenderFrameObserver(
       std::unique_ptr<RenderFrameMetadataObserver> observer) override;
   void SetEnableFrameRateThrottling(bool enable_frame_rate_throttling) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void InvalidateLocalSurface() override;
+#endif
 
   // Returns |true| if the request was actually sent, |false| if one was
   // already outstanding.

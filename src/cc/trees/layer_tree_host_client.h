@@ -172,6 +172,10 @@ class LayerTreeHostClient {
   virtual std::unique_ptr<BeginMainFrameMetrics> GetBeginMainFrameMetrics() = 0;
   virtual void NotifyThroughputTrackerResults(CustomTrackerResults results) = 0;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void EnsureLocalSurface(){};
+#endif
+
  protected:
   virtual ~LayerTreeHostClient() = default;
 };

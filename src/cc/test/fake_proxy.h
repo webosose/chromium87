@@ -54,6 +54,10 @@ class FakeProxy : public Proxy {
   void SetEnableFrameRateThrottling(
       bool enable_frame_rate_throttling) override {}
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void InvalidateLocalSurface() override {}
+#endif
+
  private:
   LayerTreeHost* layer_tree_host_;
 };

@@ -71,6 +71,9 @@ class CC_EXPORT ProxyImpl : public LayerTreeHostImplClient,
   void SetRenderFrameObserver(
       std::unique_ptr<RenderFrameMetadataObserver> observer);
   void SetEnableFrameRateThrottling(bool enable_frame_rate_throttling);
+#if defined(USE_NEVA_APPRUNTIME)
+  void InvalidateLocalSurface();
+#endif
 
   void MainFrameWillHappenOnImplForTesting(CompletionEvent* completion,
                                            bool* main_frame_will_happen);

@@ -49,6 +49,7 @@ class COMPOSITOR_EXPORT CompositorObserver {
 #endif  // defined(OS_LINUX) || defined(OS_CHROMEOS)
 #if defined(USE_NEVA_APPRUNTIME)
   virtual void OnCompositingCompleteSwap(ui::Compositor* compositor) {}
+  virtual void OnCompositingEnsureLocalSurface(Compositor*) {}
 #endif
 
   // Called at the top of the compositor's destructor, to give observers a

@@ -3348,6 +3348,13 @@ void LayerTreeHostImpl::SetVisible(bool visible) {
   }
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void LayerTreeHostImpl::InvalidateLocalSurface() {
+  if (layer_tree_frame_sink_)
+    layer_tree_frame_sink_->Invalidate(true);
+}
+#endif
+
 void LayerTreeHostImpl::SetNeedsOneBeginImplFrame() {
   // TODO(miletus): This is just the compositor-thread-side call to the
   // SwapPromiseMonitor to say something happened that may cause a swap in the

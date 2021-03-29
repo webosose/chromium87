@@ -358,6 +358,9 @@ class AURA_EXPORT WindowTreeHost : public ui::internal::InputMethodDelegate,
   void OnCompositingEnded(ui::Compositor* compositor) override;
   void OnCompositingChildResizing(ui::Compositor* compositor) override;
   void OnCompositingShuttingDown(ui::Compositor* compositor) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void OnCompositingEnsureLocalSurface(ui::Compositor* compositor) override;
+#endif
 
   // We don't use a std::unique_ptr for |window_| since we need this ptr to be
   // valid during its deletion. (Window's dtor notifies observers that may
