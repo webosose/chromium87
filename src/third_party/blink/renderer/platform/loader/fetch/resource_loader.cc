@@ -397,21 +397,21 @@ void ResourceLoader::CodeCacheRequest::MaybeSendCachedCode(
     return;
   }
 
-#if defined(USE_FILESCHEME_CODECACHE)
-  if (!CheckValidCachedCode()) {
-#else
   // If the resource was fetched for service worker script or was served from
   // CacheStorage via service worker then they maintain their own code cache.
   // We should not use the isolated cache.
   if (!use_isolated_code_cache_) {
-#endif
     resource_loader->ClearCachedCode();
     return;
   }
 
+#if defined(USE_FILESCHEME_CODECACHE)
+  if (!CheckValidCachedCode()) {
+#else
   // If the timestamps don't match, the code cache data may be for a different
   // response. See https://crbug.com/1099587.
   if (resource_response_time_ != cached_code_response_time_) {
+#endif
     resource_loader->ClearCachedCode();
     return;
   }
@@ -423,12 +423,6 @@ void ResourceLoader::CodeCacheRequest::MaybeSendCachedCode(
 
 #if defined(USE_FILESCHEME_CODECACHE)
 bool ResourceLoader::CodeCacheRequest::CheckValidCachedCode() {
-  // If the resource was fetched for service worker script or was served from
-  // CacheStorage via service worker then they maintain their own code cache.
-  // We should not use the isolated cache.
-  if (!use_isolated_code_cache_)
-    return false;
-
   const GURL gurl = static_cast<GURL>(static_cast<KURL>(url_));
   if (gurl.SchemeIsFile() &&
       RuntimeEnabledFeatures::LocalResourceCodeCacheEnabled() &&
