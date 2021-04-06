@@ -7742,7 +7742,8 @@ bool Document::HaveRenderBlockingResourcesLoaded() const {
   return HaveImportsLoaded() &&
          style_engine_->HaveRenderBlockingStylesheetsLoaded() &&
          !font_preload_manager_.HasPendingRenderBlockingFonts() &&
-         deferred_background_image_count_ == 0;
+         (first_contentful_paint_happened_ ||
+          deferred_background_image_count_ == 0);
 }
 
 Locale& Document::GetCachedLocale(const AtomicString& locale) {
@@ -8576,6 +8577,17 @@ void Document::RemoveDeferredBackgroundImage() {
   // resume update when all background images were undeferred
   if (deferred_background_image_count_ == 0)
     BeginLifecycleUpdatesIfRenderingReady();
+}
+
+void Document::SetFirstContentfulPaintHappened(bool happened) {
+  if (!IsMainThread() || !IsInMainFrame())
+    return;
+  if (happened == first_contentful_paint_happened_)
+    return;
+  first_contentful_paint_happened_ = happened;
+  if (happened) {
+    BeginLifecycleUpdatesIfRenderingReady();
+  }
 }
 
 template class CORE_TEMPLATE_EXPORT Supplement<Document>;
