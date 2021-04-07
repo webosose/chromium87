@@ -116,6 +116,13 @@ Provider base_provider_posix = {
 };
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+Provider base_provider_neva = {PathProviderNeva, nullptr,
+#ifndef NDEBUG
+                               PATH_NEVA_START, PATH_NEVA_END,
+#endif
+                               true};
+#endif
 
 struct PathData {
   Lock lock;
@@ -135,6 +142,11 @@ struct PathData {
     providers = &base_provider_fuchsia;
 #elif defined(OS_POSIX)
     providers = &base_provider_posix;
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+    base_provider_neva.next = providers;
+    providers = &base_provider_neva;
 #endif
   }
 };

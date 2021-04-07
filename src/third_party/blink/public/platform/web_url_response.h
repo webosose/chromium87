@@ -327,6 +327,10 @@ class WebURLResponse {
   // Whether this resource is from a MHTML archive.
   BLINK_PLATFORM_EXPORT bool FromArchive() const;
 
+#if defined(USE_FILESCHEME_CODECACHE)
+  BLINK_PLATFORM_EXPORT void SetFileLastModifiedTime(base::Time);
+#endif
+
 #if INSIDE_BLINK
  protected:
   // Permit subclasses to set arbitrary ResourceResponse pointer as

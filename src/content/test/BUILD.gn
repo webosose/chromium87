@@ -14,6 +14,7 @@ import("//content/common/features.gni")
 import("//device/vr/buildflags/buildflags.gni")
 import("//media/media_options.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
+import("//neva/neva.gni")
 import("//net/features.gni")
 import("//ppapi/buildflags/buildflags.gni")
 import("//testing/test.gni")
@@ -618,6 +619,16 @@ static_library("test_support") {
     sources += [
       "../public/test/xr_test_utils.cc",
       "../public/test/xr_test_utils.h",
+    ]
+  }
+
+  # TODO(neva): This is a workaround added in v.79 to avoid build failures for
+  # unnecessary for webOS tests.
+  if (is_webos) {
+    sources = [ ]
+    sources += [
+      "mock_background_sync_controller.cc",
+      "mock_background_sync_controller.h",
     ]
   }
 

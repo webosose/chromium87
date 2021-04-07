@@ -1,0 +1,67 @@
+From 32475511dc7f242f18bacb9320e759aada319671 Mon Sep 17 00:00:00 2001
+From: Vlad Mukulov <vladislav.mukulov@lge.com>
+Date: Mon, 23 Sep 2019 07:51:29 +0300
+Subject: [PATCH] [v8] Trace heap growing factor more accurately
+
+:Release Notes:
+More accurate trace of the heap growing factor
+
+:Detailed Notes:
+To trace heap growing factor more accurately,
+set a precision of 3 decimal places.
+
+:Test Scenario:
+Set js_flags=--trace-gc-verbose and check whether the factor
+is printed a precision of 3 decimal places
+
+1. Stop WAM
+  systemctl stop webapp-mgr
+2. Edit WebAppMgr startup script
+/etc/systemd/system/scripts/webapp-mgr.sh and add
+"--trace-gc-verbose" to WAM_JS_FLAGS:
+  export WAM_JS_FLAGS="--trace-gc-verbose"
+3. Launch WebAppMgr manually and monitor for V8 heap growing messages:
+  /etc/systemd/system/scripts/webapp-mgr.sh 2>&1 | grep -iE "factor|old size"
+4. Launch YouTube and play any 4K video
+5. Check that "Heap growing factor" is represented with 3 decimal digits.
+e.g. 1.587 below:
+...
+[31283:0x13c000]     6985 ms: HeapController factor 1.587 based on mu=0.970, speed_ratio=44 (gc=76878, mutator=1757)
+...
+
+Based on https://gpro.lgsvl.com/221478 patch
+
+:QA Notes:
+Test cases: QR-1273
+
+:Issues Addressed:
+[NEVA-3717]  ([open][upstreamable][v8][profile] Trace heap growing factor more accurately)
+---
+ src/heap/heap-controller.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/heap/heap-controller.cc b/src/heap/heap-controller.cc
+index d59f8ab..689ba66 100644
+--- a/src/heap/heap-controller.cc
++++ b/src/heap/heap-controller.cc
+@@ -19,7 +19,7 @@ double MemoryController<Trait>::GrowingFactor(Heap* heap, size_t max_heap_size,
+       DynamicGrowingFactor(gc_speed, mutator_speed, max_factor);
+   if (FLAG_trace_gc_verbose) {
+     Isolate::FromHeap(heap)->PrintWithTimestamp(
+-        "[%s] factor %.1f based on mu=%.3f, speed_ratio=%.f "
++        "[%s] factor %.3f based on mu=%.3f, speed_ratio=%.f "
+         "(gc=%.f, mutator=%.f)\n",
+         Trait::kName, factor, Trait::kTargetMutatorUtilization,
+         gc_speed / mutator_speed, gc_speed, mutator_speed);
+@@ -163,7 +163,7 @@ size_t MemoryController<Trait>::CalculateAllocationLimit(
+       static_cast<size_t>(Min(limit_above_min_size, halfway_to_the_max));
+   if (FLAG_trace_gc_verbose) {
+     Isolate::FromHeap(heap)->PrintWithTimestamp(
+-        "[%s] Limit: old size: %zu KB, new limit: %zu KB (%.1f)\n",
++        "[%s] Limit: old size: %zu KB, new limit: %zu KB (%.3f)\n",
+         Trait::kName, current_size / KB, result / KB, factor);
+   }
+   return result;
+-- 
+2.7.4
+

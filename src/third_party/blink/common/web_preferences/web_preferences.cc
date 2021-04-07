@@ -11,6 +11,11 @@
 #include "third_party/blink/public/mojom/v8_cache_options.mojom.h"
 #include "ui/base/ui_base_switches_util.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "base/command_line.h"
+#include "third_party/blink/public/common/switches.h"
+#endif
+
 namespace {
 
 bool IsTouchDragDropEnabled() {
@@ -197,6 +202,9 @@ WebPreferences::WebPreferences()
       presentation_receiver(false),
       media_controls_enabled(true),
       do_not_update_selection_on_mutating_selection_range(false),
+#if defined(USE_NEVA_MEDIA)
+      max_timeupdate_event_frequency(250),
+#endif
       autoplay_policy(
           web_pref::AutoplayPolicy::kDocumentUserActivationRequired),
       low_priority_iframes_threshold(net::EFFECTIVE_CONNECTION_TYPE_UNKNOWN),
@@ -221,6 +229,11 @@ WebPreferences::WebPreferences()
       base::ASCIIToUTF16("Impact");
   pictograph_font_family_map[web_pref::kCommonScript] =
       base::ASCIIToUTF16("Times New Roman");
+#if defined(USE_NEVA_APPRUNTIME)
+  allow_scripts_to_close_windows =
+      base::CommandLine::ForCurrentProcess()->HasSwitch(
+          blink::switches::kAllowScriptsToCloseWindows);
+#endif
 }
 
 WebPreferences::WebPreferences(const WebPreferences& other) = default;

@@ -677,6 +677,18 @@ void WebSettingsImpl::SetDoNotUpdateSelectionOnMutatingSelectionRange(
   settings_->SetDoNotUpdateSelectionOnMutatingSelectionRange(enabled);
 }
 
+#if defined(USE_NEVA_MEDIA)
+void WebSettingsImpl::SetMaxTimeupdateEventFrequency(int time) {
+  settings_->SetMaxTimeupdateEventFrequency(time);
+}
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+void WebSettingsImpl::SetDisallowScrollbarsInMainFrame(bool disallow) {
+  settings_->SetDisallowScrollbarsInMainFrame(disallow);
+}
+#endif
+
 void WebSettingsImpl::SetLowPriorityIframesThreshold(
     WebEffectiveConnectionType effective_connection_type) {
   settings_->SetLowPriorityIframesThreshold(effective_connection_type);

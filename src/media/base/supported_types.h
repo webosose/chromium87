@@ -21,6 +21,11 @@ MEDIA_EXPORT bool IsSupportedVideoType(const VideoType& type);
 MEDIA_EXPORT bool IsDefaultSupportedAudioType(const AudioType& type);
 MEDIA_EXPORT bool IsDefaultSupportedVideoType(const VideoType& type);
 
+#if defined(USE_NEVA_MEDIA)
+// Expose this function to use outside of scope.
+MEDIA_EXPORT bool IsColorSpaceSupported(const VideoColorSpace& color_space);
+#endif
+
 }  // namespace media
 
 #endif  // MEDIA_BASE_SUPPORTED_TYPES_H_

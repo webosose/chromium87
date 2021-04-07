@@ -4,7 +4,28 @@
 
 #include "ui/ozone/platform/wayland/host/shell_surface_wrapper.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "base/logging.h"
+///@}
+
 namespace ui {
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+void ShellSurfaceWrapper::SetKeyMask(KeyMask key_mask, bool set) {
+  NOTIMPLEMENTED_LOG_ONCE();
+}
+
+void ShellSurfaceWrapper::SetInputRegion(const std::vector<gfx::Rect>& region) {
+  NOTIMPLEMENTED_LOG_ONCE();
+}
+
+void ShellSurfaceWrapper::SetWindowProperty(const std::string& name,
+                                            const std::string& value) {
+  NOTIMPLEMENTED_LOG_ONCE();
+}
+///@}
 
 bool CheckIfWlArrayHasValue(struct wl_array* wl_array, uint32_t value) {
   // wl_array_for_each has a bug in upstream. It tries to assign void* to

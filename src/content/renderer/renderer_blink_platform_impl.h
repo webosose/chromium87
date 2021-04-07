@@ -168,6 +168,13 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
   bool IsWebRtcSrtpEncryptedHeadersEnabled() override;
   bool AllowsLoopbackInPeerConnection() override;
 
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  void AddSourceToAudioCapturerSourceManager(
+      media::AudioCapturerSource* source) override;
+  void RemoveSourceFromAudioCapturerSourceManager(
+      media::AudioCapturerSource* source) override;
+#endif
+
   blink::WebVideoCaptureImplManager* GetVideoCaptureImplManager() override;
 
   std::unique_ptr<blink::WebGraphicsContext3DProvider>

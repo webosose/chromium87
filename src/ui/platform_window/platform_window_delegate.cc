@@ -20,4 +20,11 @@ base::Optional<gfx::Size> PlatformWindowDelegate::GetMaximumSizeForWindow() {
   return base::nullopt;
 }
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+LinuxInputMethodContext* PlatformWindowDelegate::GetInputMethodContext() {
+  return nullptr;
+}
+///@}
+
 }  // namespace ui

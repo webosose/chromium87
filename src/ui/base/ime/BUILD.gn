@@ -74,6 +74,14 @@ component("ime") {
     "text_input_client.h",
   ]
 
+  #@name USE_NEVA_APPRUNTIME
+  #@{
+  sources += [
+    "neva/input_method_neva_observer.cc",
+    "neva/input_method_neva_observer.h",
+  ]
+  #@}
+
   defines = [ "IS_UI_BASE_IME_IMPL" ]
 
   public_deps = [

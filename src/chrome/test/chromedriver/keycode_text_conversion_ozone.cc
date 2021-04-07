@@ -30,7 +30,7 @@ bool ConvertKeyCodeToText
      std::string* text,
      std::string* error_msg) {
   ui::KeyboardLayoutEngine* keyboard_layout_engine = nullptr;
-#if defined(USE_OZONE)
+#if defined(USE_OZONE) && !defined(USE_NEVA_APPRUNTIME)
   if (features::IsUsingOzonePlatform()) {
     keyboard_layout_engine =
         ui::KeyboardLayoutEngineManager::GetKeyboardLayoutEngine();

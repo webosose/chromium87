@@ -82,6 +82,10 @@ class MEDIA_EXPORT AudioInputDevice : public AudioCapturerSource,
   void Initialize(const AudioParameters& params,
                   CaptureCallback* callback) override;
   void Start() override;
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  void Pause() override;
+  void Resume() override;
+#endif
   void Stop() override;
   void SetVolume(double volume) override;
   void SetAutomaticGainControl(bool enabled) override;
@@ -99,6 +103,9 @@ class MEDIA_EXPORT AudioInputDevice : public AudioCapturerSource,
     IDLE,             // Not started.
     CREATING_STREAM,  // Waiting for OnStreamCreated() to be called back.
     RECORDING,        // Receiving audio data.
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+    PAUSED,           // Paused while recording.
+#endif
   };
 
   // This enum is used for UMA, so the only allowed operation on this definition

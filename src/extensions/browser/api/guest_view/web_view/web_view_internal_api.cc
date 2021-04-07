@@ -943,6 +943,27 @@ ExtensionFunction::ResponseAction WebViewInternalGetAudioStateFunction::Run() {
       std::make_unique<base::Value>(web_contents->IsCurrentlyAudible())));
 }
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+WebViewInternalSuspendFunction::WebViewInternalSuspendFunction() {}
+
+WebViewInternalSuspendFunction::~WebViewInternalSuspendFunction() {}
+
+ExtensionFunction::ResponseAction WebViewInternalSuspendFunction::Run() {
+  guest_->Suspend();
+  return RespondNow(NoArguments());
+}
+
+WebViewInternalResumeFunction::WebViewInternalResumeFunction() {}
+
+WebViewInternalResumeFunction::~WebViewInternalResumeFunction() {}
+
+ExtensionFunction::ResponseAction WebViewInternalResumeFunction::Run() {
+  guest_->Resume();
+  return RespondNow(NoArguments());
+}
+///@}
+
 WebViewInternalTerminateFunction::WebViewInternalTerminateFunction() {
 }
 

@@ -72,6 +72,10 @@ class WebDocument : public WebNode {
   BLINK_EXPORT WebSecurityOrigin GetSecurityOrigin() const;
   BLINK_EXPORT bool IsSecureContext() const;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  BLINK_EXPORT void GrantLoadLocalResources();
+#endif
+
   BLINK_EXPORT WebString Encoding() const;
   BLINK_EXPORT WebString ContentLanguage() const;
   BLINK_EXPORT WebString GetReferrer() const;

@@ -1038,6 +1038,17 @@ const char kIpcDumpDirectory[] = "ipc-dump-directory";
 const char kIpcFuzzerTestcase[] = "ipc-fuzzer-testcase";
 #endif
 
+#if defined(USE_NEVA_MEDIA)
+// The command line parameter indicating that the maximum number of activated
+// media players is limited. That means only provided number of media players
+// can play media at the same time. Other media players will be suspended.
+// Note that some custom media players are allowed to play media at the same
+// time specially, when media state manager expects that these not use media
+// resource.
+const char kMaxActivatedMediaPlayers[] = "max-activated-media-players";
+
+const char kMaxTimeupdateEventFrequency[] = "max-timeupdate-event-frequency";
+#endif
 // Don't dump stuff here, follow the same order as the header.
 
 }  // namespace switches

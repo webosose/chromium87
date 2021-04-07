@@ -102,6 +102,9 @@ bool ResourceRequest::EqualsForTesting(const ResourceRequest& request) const {
          enable_load_timing == request.enable_load_timing &&
          enable_upload_progress == request.enable_upload_progress &&
          do_not_prompt_for_login == request.do_not_prompt_for_login &&
+#if defined(USE_NEVA_APPRUNTIME)
+         process_id == request.process_id &&
+#endif
          render_frame_id == request.render_frame_id &&
          is_main_frame == request.is_main_frame &&
          transition_type == request.transition_type &&

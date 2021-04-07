@@ -704,7 +704,11 @@ extern U_IMPORT char *U_TZNAME[];
 #define TZZONEINFO      "/usr/share/lib/zoneinfo/"
 #define TZ_ENV_CHECK    "localtime"
 #else
+#if defined(OS_WEBOS)
+#define TZDEFAULT       "/var/luna/preferences/localtime"
+#else
 #define TZDEFAULT       "/etc/localtime"
+#endif
 #define TZZONEINFO      "/usr/share/zoneinfo/"
 #endif
 #define TZZONEINFOTAIL  "/zoneinfo/"

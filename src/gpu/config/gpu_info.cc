@@ -196,7 +196,7 @@ GPUInfo::GPUDevice& GPUInfo::GPUDevice::operator=(
     const GPUInfo::GPUDevice& other) = default;
 
 GPUInfo::GPUDevice& GPUInfo::GPUDevice::operator=(
-    GPUInfo::GPUDevice&& other) noexcept = default;
+    GPUInfo::GPUDevice&& other) = default;
 
 GPUInfo::GPUInfo()
     : optimus(false),

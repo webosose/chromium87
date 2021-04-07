@@ -23,6 +23,14 @@
 #include "components/nacl/renderer/nacl_helper.h"
 #endif
 
+#if defined(OS_WEBOS)
+#include "webos/renderer/webos_network_error_helper.h"
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+#include "neva/app_runtime/renderer/app_runtime_render_frame_observer.h"
+#endif
+
 using blink::WebFrame;
 using blink::WebString;
 using content::RenderThread;
@@ -64,6 +72,14 @@ void ShellContentRendererClient::RenderFrameCreated(
   // http://crbug.com/403004
 #if BUILDFLAG(ENABLE_NACL)
   new nacl::NaClHelper(render_frame);
+#endif
+
+#if defined(OS_WEBOS)
+  new webos::WebOSNetworkErrorHelper(render_frame);
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+  new neva_app_runtime::AppRuntimeRenderFrameObserver(render_frame);
 #endif
 }
 

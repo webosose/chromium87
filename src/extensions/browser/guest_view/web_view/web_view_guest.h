@@ -23,6 +23,13 @@
 #include "extensions/browser/script_executor.h"
 #include "third_party/blink/public/mojom/frame/find_in_page.mojom.h"
 
+#if defined(USE_NEVA_APPRUNTIME) && defined(OS_WEBOS)
+namespace neva_app_runtime {
+class AppRuntimeWebViewControllerImpl;
+class WebViewControllerDelegate;
+}
+#endif
+
 namespace content {
 class StoragePartitionConfig;
 }  // namespace content
@@ -136,6 +143,21 @@ class WebViewGuest : public guest_view::GuestView<WebViewGuest> {
 
   // Stop loading the guest.
   void Stop();
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // Suspend the guest process.
+  void Suspend();
+
+  // Resume the guest process.
+  void Resume();
+
+  bool IsSuspended() const { return is_suspended_; }
+  ///@}
+
+#if defined(USE_NEVA_APPRUNTIME) && defined(OS_WEBOS)
+  void RenderViewCreated(content::RenderViewHost* render_view_host) override;
+#endif
 
   // Kill the guest process.
   void Terminate();
@@ -388,12 +410,25 @@ class WebViewGuest : public guest_view::GuestView<WebViewGuest> {
   // Whether the GuestView set an explicit zoom level.
   bool did_set_explicit_zoom_;
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // Whether the GuestView is suspended.
+  bool is_suspended_ = false;
+  ///@}
+
   // Store spatial navigation status.
   bool is_spatial_navigation_enabled_;
 
   // This is used to ensure pending tasks will not fire after this object is
   // destroyed.
   base::WeakPtrFactory<WebViewGuest> weak_ptr_factory_{this};
+
+#if defined(USE_NEVA_APPRUNTIME) && defined(OS_WEBOS)
+  std::unique_ptr<neva_app_runtime::AppRuntimeWebViewControllerImpl>
+      webview_controller_impl_;
+  std::unique_ptr<neva_app_runtime::WebViewControllerDelegate>
+      webview_controller_delegate_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(WebViewGuest);
 };

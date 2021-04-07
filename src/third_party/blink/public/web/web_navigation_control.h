@@ -44,6 +44,10 @@ class WebNavigationControl : public WebLocalFrame {
       std::unique_ptr<WebNavigationParams> navigation_params,
       std::unique_ptr<WebDocumentLoader::ExtraData> extra_data) = 0;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void UpdateForSameDocumentNavigation(const std::string&) = 0;
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
   // Commits a same-document navigation in the frame. For history navigations, a
   // valid WebHistoryItem should be provided. Returns CommitResult::Ok if the
   // navigation has actually committed.

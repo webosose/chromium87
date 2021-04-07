@@ -1608,6 +1608,27 @@ int InputMethodController::TextInputFlags() const {
       flags |= kWebTextInputFlagHasBeenPasswordField;
   }
 
+#if defined(USE_NEVA_APPRUNTIME)
+  if (IsA<HTMLInputElement>(element)) {
+    const AtomicString& sensitive =
+        element->getAttribute(html_names::kSensitiveAttr);
+    if (sensitive) {
+      if (sensitive.IsEmpty() ||
+          DeprecatedEqualIgnoringCase(sensitive, "true"))
+        flags |= kWebTextInputFlagSensitiveOn;
+      else
+        flags |= kWebTextInputFlagSensitiveOff;
+    }
+    const AtomicString& use_system_keyboard =
+        element->getAttribute(html_names::kSystemkeyboardAttr);
+    if (use_system_keyboard &&
+        DeprecatedEqualIgnoringCase(use_system_keyboard, "false"))
+      flags |= kWebTextInputFlagSystemKeyboardOff;
+    else
+      flags |= kWebTextInputFlagSystemKeyboardOn;
+  }
+#endif
+
   return flags;
 }
 

@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//neva/neva.gni")
 import("//third_party/widevine/cdm/widevine.gni")
 
 static_library("renderer") {
@@ -31,5 +32,9 @@ static_library("renderer") {
       "widevine_key_system_properties.h",
     ]
     deps += [ "//third_party/widevine/cdm:headers" ]
+  }
+
+  if (use_neva_media) {
+    deps += [ "//components/cdm/renderer/neva" ]
   }
 }

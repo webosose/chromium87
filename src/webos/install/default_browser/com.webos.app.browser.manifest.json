@@ -1,0 +1,14 @@
+{
+    "roleFilesPrv": [
+        "/usr/share/ls2/roles/prv/com.webos.app.browser.json"
+    ],
+    "roleFilesPub": [
+        "/usr/share/ls2/roles/pub/com.webos.app.browser.json"
+    ],
+    "serviceFiles": [
+        "/usr/share/dbus-1/services/com.webos.app.browser.service",
+        "/usr/share/dbus-1/system-services/com.webos.app.browser.service"
+    ],
+    "id": "com.webos.app.browser",
+    "version": "1.0.0"
+}

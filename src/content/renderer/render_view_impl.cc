@@ -166,6 +166,19 @@
 #include "skia/ext/skia_utils_mac.h"
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/public/platform/web_security_origin.h"
+#endif
+
+#if defined(USE_NEVA_MEDIA)
+#include "media/neva/media_preferences.h"
+#endif
+
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+#include "content/public/common/content_neva_switches.h"
+#include "content/renderer/media/audio/neva/audio_capturer_source_manager.h"
+#endif
+
 #if BUILDFLAG(ENABLE_PLUGINS)
 #include "content/renderer/pepper/pepper_plugin_instance_impl.h"
 #include "content/renderer/pepper/pepper_plugin_registry.h"
@@ -915,7 +928,10 @@ bool RenderViewImpl::AllowPopupsDuringPageUnload() {
 }
 
 void RenderViewImpl::OnPageVisibilityChanged(PageVisibilityState visibility) {
-#if defined(OS_ANDROID)
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  SuspendAudioCaptureDevices(visibility != PageVisibilityState::kVisible);
+#endif
+#if defined(OS_ANDROID) || defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
   SuspendVideoCaptureDevices(visibility != PageVisibilityState::kVisible);
 #endif
   for (auto& observer : observers_)
@@ -1000,6 +1016,24 @@ void RenderViewImpl::OnSetRendererPrefs(
           : base::TimeDelta::FromMilliseconds(
                 blink::mojom::kDefaultCaretBlinkIntervalInMilliseconds));
 
+#if defined(USE_NEVA_MEDIA)
+  std::string media_codec_capability =
+      renderer_preferences_.media_codec_capability;
+  if (!media_codec_capability.empty())
+    media::MediaPreferences::Get()->SetMediaCodecCapabilities(
+        media_codec_capability);
+
+  std::string media_preferences = renderer_preferences_.media_preferences;
+  if (!media_preferences.empty())
+    media::MediaPreferences::Get()->Update(media_preferences);
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+  if (!renderer_prefs.file_security_origin.empty())
+    url::Origin::SetFileOriginChanged(true);
+  blink::SetMutableLocalOrigin(renderer_prefs.file_security_origin);
+#endif
+
 #if defined(USE_AURA)
   if (renderer_prefs.use_custom_colors) {
     blink::SetFocusRingColor(renderer_prefs.focus_ring_color);
@@ -1041,8 +1075,25 @@ void RenderViewImpl::SetPageFrozen(bool frozen) {
     GetWebView()->SetPageFrozen(frozen);
 }
 
-#if defined(OS_ANDROID)
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+void RenderViewImpl::SuspendAudioCaptureDevices(bool suspend) {
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kDisableSuspendAudioCapture))
+    return;
+
+  RenderThreadImpl::current()->audio_capturer_source_manager()->SuspendDevices(
+      suspend);
+}
+#endif
+
+#if defined(OS_ANDROID) || defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
 void RenderViewImpl::SuspendVideoCaptureDevices(bool suspend) {
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+          switches::kDisableSuspendVideoCapture))
+    return;
+#endif
+
   if (!main_render_frame_)
     return;
 
@@ -1056,7 +1107,7 @@ void RenderViewImpl::SuspendVideoCaptureDevices(bool suspend) {
   RenderThreadImpl::current()->video_capture_impl_manager()->SuspendDevices(
       video_devices, suspend);
 }
-#endif  // defined(OS_ANDROID)
+#endif  // defined(OS_ANDROID) || defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
 
 unsigned RenderViewImpl::GetLocalSessionHistoryLengthForTesting() const {
   return history_list_length_;

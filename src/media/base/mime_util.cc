@@ -5,13 +5,21 @@
 #include "media/base/mime_util.h"
 
 #include "base/no_destructor.h"
+#if defined(USE_NEVA_MEDIA)
+#include "media/base/neva/neva_mime_util_internal.h"
+#else
 #include "media/base/mime_util_internal.h"
+#endif
 
 namespace media {
 
 // This variable is Leaky because it is accessed from WorkerPool threads.
 static const internal::MimeUtil* GetMimeUtil() {
+#if defined(USE_NEVA_MEDIA)
+  static const base::NoDestructor<internal::NevaMimeUtil> mime_util;
+#else
   static const base::NoDestructor<internal::MimeUtil> mime_util;
+#endif
   return &(*mime_util);
 }
 

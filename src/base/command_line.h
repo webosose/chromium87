@@ -30,7 +30,7 @@ namespace base {
 
 class FilePath;
 
-class BASE_EXPORT CommandLine {
+class CBE_BASE_EXPORT BASE_EXPORT CommandLine {
  public:
 #if defined(OS_WIN)
   // The native command line string type.

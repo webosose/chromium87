@@ -6,6 +6,8 @@ import("//mojo/public/tools/bindings/mojom.gni")
 import("//net/features.gni")
 import("//services/network/public/cpp/features.gni")
 
+import("//neva/neva.gni")
+
 # These interfaces are put in their own target to avoid a circular dependency,
 # which comes from the fact that proxy_resolver service uses these interfaces,
 # and the network service uses the proxy_resolver service.
@@ -514,6 +516,14 @@ mojom("mojom") {
   # because IS_CHROMECAST is not available in build/build_config.h.
   if (is_linux && !is_chromeos) {
     enabled_features += [ "needs_crypt_config" ]
+  }
+
+  if (use_neva_appruntime) {
+    enabled_features += [ "neva_appruntime" ]
+  }
+
+  if (use_filescheme_codecache) {
+    enabled_features += [ "filescheme_codecache" ]
   }
 
   if (is_android || is_chromeos) {

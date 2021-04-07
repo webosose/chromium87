@@ -8,6 +8,13 @@
 #include "base/strings/string16.h"
 #include "ui/ozone/platform/wayland/common/wayland_object.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include <cstdint>
+#include <string>
+#include <vector>
+///@}
+
 namespace gfx {
 class Rect;
 }
@@ -15,6 +22,11 @@ class Rect;
 namespace ui {
 
 class WaylandConnection;
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+enum class KeyMask: std::uint32_t;
+///@}
 
 // Wrapper interface for different wayland shells shell versions.
 class ShellSurfaceWrapper {
@@ -67,6 +79,19 @@ class ShellSurfaceWrapper {
   // their app id. This also helps the compositor to identify application's
   // .desktop file and use the icon set there.
   virtual void SetAppId(const std::string& app_id) = 0;
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+  // Sets the mask for a key event that can be (un)delivered to the client.
+  virtual void SetKeyMask(KeyMask key_mask, bool set);
+
+  // Sets the input region than can receive pointer and touch input events.
+  virtual void SetInputRegion(const std::vector<gfx::Rect>& region);
+
+  // Sets a window property on the Wayland compositor (pair of name and value).
+  virtual void SetWindowProperty(const std::string& name,
+                                 const std::string& value);
+///@}
 };
 
 bool CheckIfWlArrayHasValue(struct wl_array* wl_array, uint32_t value);

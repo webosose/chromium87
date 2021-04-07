@@ -233,6 +233,9 @@ bool StructTraits<
   out->enable_upload_progress = data.enable_upload_progress();
   out->do_not_prompt_for_login = data.do_not_prompt_for_login();
   out->render_frame_id = data.render_frame_id();
+#if defined(USE_NEVA_APPRUNTIME)
+  out->process_id = data.process_id();
+#endif
   out->is_main_frame = data.is_main_frame();
   out->transition_type = data.transition_type();
   out->report_raw_headers = data.report_raw_headers();

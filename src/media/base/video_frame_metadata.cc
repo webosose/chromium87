@@ -26,6 +26,11 @@ VideoFrameMetadata::VideoFrameMetadata(const VideoFrameMetadata& other) =
 
 void VideoFrameMetadata::MergeMetadataFrom(
     const VideoFrameMetadata* metadata_source) {
+#if defined(USE_NEVA_WEBRTC)
+  MERGE_FIELD(key_frame, metadata_source);
+  MERGE_FIELD(codec_id, metadata_source);
+  MERGE_FIELD(software_fallback_callback, metadata_source);
+#endif
   MERGE_FIELD(allow_overlay, metadata_source);
   MERGE_FIELD(capture_begin_time, metadata_source);
   MERGE_FIELD(capture_end_time, metadata_source);

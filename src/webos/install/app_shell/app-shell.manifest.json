@@ -1,0 +1,14 @@
+{
+    "id": "app_shell",
+    "version": "1.0.0",
+    "roleFilesPrv": [
+        "/usr/share/ls2/roles/prv/app-shell.json"
+    ],
+    "roleFilesPub": [
+        "/usr/share/ls2/roles/pub/app-shell.json"
+    ],
+    "serviceFiles": [
+        "/usr/share/dbus-1/services/app-shell.service",
+        "/usr/share/dbus-1/system-services/app-shell.service"
+    ]
+}

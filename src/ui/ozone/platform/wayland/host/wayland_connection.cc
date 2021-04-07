@@ -27,14 +27,22 @@
 #include "ui/ozone/platform/wayland/host/wayland_cursor_position.h"
 #include "ui/ozone/platform/wayland/host/wayland_data_device_manager.h"
 #include "ui/ozone/platform/wayland/host/wayland_data_drag_controller.h"
+#if !defined(OS_WEBOS)
 #include "ui/ozone/platform/wayland/host/wayland_drm.h"
+#endif  // !defined(OS_WEBOS)
 #include "ui/ozone/platform/wayland/host/wayland_event_source.h"
 #include "ui/ozone/platform/wayland/host/wayland_input_method_context.h"
+#if !defined(USE_NEVA_APPRUNTIME)
 #include "ui/ozone/platform/wayland/host/wayland_keyboard.h"
+#endif  // !defined(USE_NEVA_APPRUNTIME)
 #include "ui/ozone/platform/wayland/host/wayland_output_manager.h"
+#if !defined(USE_NEVA_APPRUNTIME)
 #include "ui/ozone/platform/wayland/host/wayland_pointer.h"
+#endif  // !defined(USE_NEVA_APPRUNTIME)
 #include "ui/ozone/platform/wayland/host/wayland_shm.h"
+#if !defined(USE_NEVA_APPRUNTIME)
 #include "ui/ozone/platform/wayland/host/wayland_touch.h"
+#endif  // !defined(USE_NEVA_APPRUNTIME)
 #include "ui/ozone/platform/wayland/host/wayland_window.h"
 #include "ui/ozone/platform/wayland/host/wayland_window_drag_controller.h"
 #include "ui/ozone/platform/wayland/host/wayland_zwp_linux_dmabuf.h"
@@ -45,6 +53,11 @@
 
 #include "third_party/wayland/libwayland_stubs.h"  // nogncheck
 #endif
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "ui/ozone/platform/wayland/host/wayland_extension.h"
+///@}
 
 namespace ui {
 
@@ -104,6 +117,13 @@ bool WaylandConnection::Initialize() {
     return false;
   }
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (!extension_) {
+    extension_ = CreateWaylandExtension(this);
+  }
+  ///@}
+
   // Now that the connection with the display server has been properly
   // estabilished, initialize the event source and input objects.
   DCHECK(!event_source_);
@@ -126,14 +146,23 @@ bool WaylandConnection::Initialize() {
     LOG(ERROR) << "No wl_shm object";
     return false;
   }
-  if (!shell_v6_ && !shell_) {
+  if (!shell_v6_ && !shell_
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  && !(extension_ && extension_->HasShellObject())
+  ///@}
+  ) {
     LOG(ERROR) << "No Wayland shell found";
     return false;
   }
 
   // When we are running tests with weston in headless mode, the seat is not
   // announced.
+#if defined(USE_NEVA_APPRUNTIME)
+  if (!seat())
+#else  // defined(USE_NEVA_APPRUNTIME)
   if (!seat_)
+#endif  // !defined(USE_NEVA_APPRUNTIME)
     LOG(WARNING) << "No wl_seat object. The functionality may suffer.";
 
   return true;
@@ -159,9 +188,18 @@ void WaylandConnection::SetShutdownCb(base::OnceCallback<void()> shutdown_cb) {
 
 void WaylandConnection::SetCursorBitmap(const std::vector<SkBitmap>& bitmaps,
                                         const gfx::Point& location) {
+#if defined(USE_NEVA_APPRUNTIME)
+  // TODO(neva): Perhaps it would be reasonable to update bitmap for every
+  // pointer in every seat. Currently, bitmap is updated for a current pointer
+  // from the very first seat.
+  if (!cursor())
+    return;
+  cursor()->UpdateBitmap(bitmaps, location, serial());
+#else  // defined(USE_NEVA_APPRUNTIME)
   if (!cursor_)
     return;
   cursor_->UpdateBitmap(bitmaps, location, serial());
+#endif  // !defined(USE_NEVA_APPRUNTIME)
 }
 
 bool WaylandConnection::IsDragInProgress() const {
@@ -181,6 +219,7 @@ void WaylandConnection::Flush() {
   scheduled_flush_ = false;
 }
 
+#if !defined(USE_NEVA_APPRUNTIME)
 void WaylandConnection::UpdateInputDevices(wl_seat* seat,
                                            uint32_t capabilities) {
   DCHECK(seat);
@@ -222,9 +261,14 @@ void WaylandConnection::UpdateInputDevices(wl_seat* seat,
     }
   }
 }
+#endif  // !defined(USE_NEVA_APPRUNTIME)
 
 bool WaylandConnection::CreateKeyboard() {
+#if defined(USE_NEVA_APPRUNTIME)
+  wl_keyboard* keyboard = wl_seat_get_keyboard(seat());
+#else  // defined(USE_NEVA_APPRUNTIME)
   wl_keyboard* keyboard = wl_seat_get_keyboard(seat_.get());
+#endif  // !defined(USE_NEVA_APPRUNTIME)
   if (!keyboard)
     return false;
 
@@ -238,7 +282,11 @@ bool WaylandConnection::CreateKeyboard() {
 }
 
 void WaylandConnection::CreateDataObjectsIfReady() {
+#if defined(USE_NEVA_APPRUNTIME)
+  if (data_device_manager_ && seat()) {
+#else  // defined(USE_NEVA_APPRUNTIME)
   if (data_device_manager_ && seat_) {
+#endif  // !defined(USE_NEVA_APPRUNTIME)
     DCHECK(!data_drag_controller_);
     data_drag_controller_ = std::make_unique<WaylandDataDragController>(
         this, data_device_manager_.get());
@@ -259,10 +307,12 @@ void WaylandConnection::Global(void* data,
                                uint32_t name,
                                const char* interface,
                                uint32_t version) {
+#if !defined(USE_NEVA_APPRUNTIME)
   static const wl_seat_listener seat_listener = {
       &WaylandConnection::Capabilities,
       &WaylandConnection::Name,
   };
+#endif  // !defined(USE_NEVA_APPRUNTIME)
   static const xdg_wm_base_listener shell_listener = {
       &WaylandConnection::Ping,
   };
@@ -271,6 +321,13 @@ void WaylandConnection::Global(void* data,
   };
 
   WaylandConnection* connection = static_cast<WaylandConnection*>(data);
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (connection->extension_->Bind(registry, name, interface, version)) {
+    DVLOG(1) << "Successfully bound to " << interface;
+  } else
+  ///@}
   if (!connection->compositor_ && strcmp(interface, "wl_compositor") == 0) {
     connection->compositor_ = wl::Bind<wl_compositor>(
         registry, name, std::min(version, kMaxCompositorVersion));
@@ -288,6 +345,20 @@ void WaylandConnection::Global(void* data,
     connection->shm_ = std::make_unique<WaylandShm>(shm.release(), connection);
     if (!connection->shm_)
       LOG(ERROR) << "Failed to bind to wl_shm global";
+#if defined(USE_NEVA_APPRUNTIME)
+  } else if (strcmp(interface, "wl_seat") == 0) {
+    wl::Object<wl_seat> seat =
+        wl::Bind<wl_seat>(registry, name, std::min(version, kMaxSeatVersion));
+    if (!seat) {
+      LOG(ERROR) << "Failed to bind to wl_seat global";
+      return;
+    }
+    if (!connection->seat_manager_) {
+      connection->seat_manager_ = std::make_unique<WaylandSeatManager>(
+          connection);
+    }
+    connection->seat_manager_->AddSeat(name, seat.release());
+#else  // defined(USE_NEVA_APPRUNTIME)
   } else if (!connection->seat_ && strcmp(interface, "wl_seat") == 0) {
     connection->seat_ =
         wl::Bind<wl_seat>(registry, name, std::min(version, kMaxSeatVersion));
@@ -297,6 +368,7 @@ void WaylandConnection::Global(void* data,
     }
     wl_seat_add_listener(connection->seat_.get(), &seat_listener, connection);
     connection->CreateDataObjectsIfReady();
+#endif  // !defined(USE_NEVA_APPRUNTIME)
   } else if (!connection->shell_v6_ &&
              strcmp(interface, "zxdg_shell_v6") == 0) {
     // Check for zxdg_shell_v6 first.
@@ -403,11 +475,13 @@ void WaylandConnection::Global(void* data,
              strcmp(interface, "zxdg_exporter_v1") == 0) {
     connection->xdg_foreign_ = std::make_unique<XdgForeignWrapper>(
         connection, wl::Bind<zxdg_exporter_v1>(registry, name, version));
+#if !defined(OS_WEBOS)
   } else if (!connection->drm_ && (strcmp(interface, "wl_drm") == 0) &&
              version >= kMinWlDrmVersion) {
     auto wayland_drm = wl::Bind<struct wl_drm>(registry, name, version);
     connection->drm_ =
         std::make_unique<WaylandDrm>(wayland_drm.release(), connection);
+#endif  // !defined(OS_WEBOS)
   } else if (!connection->aura_shell_ &&
              (strcmp(interface, "zaura_shell") == 0) &&
              version >= kMinAuraShellVersion) {
@@ -442,6 +516,7 @@ void WaylandConnection::GlobalRemove(void* data,
     connection->wayland_output_manager_->RemoveWaylandOutput(name);
 }
 
+#if !defined(USE_NEVA_APPRUNTIME)
 // static
 void WaylandConnection::Capabilities(void* data,
                                      wl_seat* seat,
@@ -454,6 +529,7 @@ void WaylandConnection::Capabilities(void* data,
 
 // static
 void WaylandConnection::Name(void* data, wl_seat* seat, const char* name) {}
+#endif  // !defined(USE_NEVA_APPRUNTIME)
 
 // static
 void WaylandConnection::PingV6(void* data,

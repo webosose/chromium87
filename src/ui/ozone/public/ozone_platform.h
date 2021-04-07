@@ -18,6 +18,11 @@
 #include "ui/platform_window/platform_window.h"
 #include "ui/platform_window/platform_window_delegate.h"
 
+#if defined(USE_NEVA_MEDIA)
+#include "ui/platform_window/neva/video_window_controller.h"
+#include "ui/platform_window/neva/video_window_controller_host.h"
+#endif
+
 namespace display {
 class NativeDisplayDelegate;
 }
@@ -25,6 +30,9 @@ class NativeDisplayDelegate;
 namespace ui {
 class CursorFactory;
 class InputController;
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+class GpuPlatformSupport;
+#endif
 class GpuPlatformSupportHost;
 class OverlayManagerOzone;
 class PlatformScreen;
@@ -168,6 +176,15 @@ class COMPONENT_EXPORT(OZONE) OzonePlatform {
   // once it is done.
   static const char* GetPlatformName();
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // Returns true if currently selected ozone platform is "wayland".
+  static bool IsWayland();
+
+  // Returns true if currently selected ozone platform is "wayland_external".
+  static bool IsWaylandExternal();
+  ///@}
+
   // Factory getters to override in subclasses. The returned objects will be
   // injected into the appropriate layer at startup. Subclasses should not
   // inject these objects themselves. Ownership is retained by OzonePlatform.
@@ -175,6 +192,9 @@ class COMPONENT_EXPORT(OZONE) OzonePlatform {
   virtual ui::OverlayManagerOzone* GetOverlayManager() = 0;
   virtual ui::CursorFactory* GetCursorFactory() = 0;
   virtual ui::InputController* GetInputController() = 0;
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  virtual ui::GpuPlatformSupport* GetGpuPlatformSupport();
+#endif
   virtual ui::GpuPlatformSupportHost* GetGpuPlatformSupportHost() = 0;
   virtual std::unique_ptr<SystemInputInjector> CreateSystemInputInjector() = 0;
   virtual std::unique_ptr<PlatformWindow> CreatePlatformWindow(
@@ -229,6 +249,10 @@ class COMPONENT_EXPORT(OZONE) OzonePlatform {
   // implementations to ignore sandboxing and any associated launch ordering
   // issues.
   virtual void AfterSandboxEntry();
+
+#if defined(USE_NEVA_MEDIA)
+  virtual ui::VideoWindowController* GetVideoWindowController();
+#endif
 
  protected:
   bool has_initialized_ui() const { return initialized_ui_; }

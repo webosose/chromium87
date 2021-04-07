@@ -7,6 +7,11 @@
 #ifndef CONTENT_SHELL_COMMON_SHELL_SWITCHES_H_
 #define CONTENT_SHELL_COMMON_SHELL_SWITCHES_H_
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "content/shell/common/shell_neva_switches.h"
+///@}
+
 namespace switches {
 
 extern const char kContentShellDataPath[];

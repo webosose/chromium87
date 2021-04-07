@@ -216,6 +216,10 @@ class PLATFORM_EXPORT WidgetBase : public mojom::blink::Widget,
   void set_handling_select_range(bool value) { handling_select_range_ = value; }
   bool handling_select_range() const { return handling_select_range_; }
 
+#if defined(USE_NEVA_APPRUNTIME)
+  bool HasImeEventGuard() const { return ime_event_guard_ != nullptr; }
+#endif
+
   void RequestMouseLock(
       bool has_transient_user_activation,
       bool priviledged,

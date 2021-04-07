@@ -73,6 +73,12 @@ struct StructTraits<media::mojom::VideoDecoderConfigDataView,
     return input.level();
   }
 
+#if defined(USE_NEVA_WEBRTC)
+  static bool is_live_stream(const media::VideoDecoderConfig& input) {
+    return input.is_live_stream();
+  }
+#endif
+
   static bool Read(media::mojom::VideoDecoderConfigDataView input,
                    media::VideoDecoderConfig* output);
 };

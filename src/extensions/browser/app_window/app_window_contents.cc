@@ -39,6 +39,17 @@ void AppWindowContentsImpl::Initialize(content::BrowserContext* context,
   Observe(web_contents_.get());
   web_contents_->GetMutableRendererPrefs()->
       browser_handles_all_top_level_requests = true;
+
+#if defined(OS_WEBOS)
+  web_contents_->GetMutableRendererPrefs()->application_id =
+      host_->GetApplicationId();
+  web_contents_->GetMutableRendererPrefs()->media_codec_capability =
+      host_->GetMediaCodecCapability();
+#endif
+#if defined(USE_NEVA_APPRUNTIME)
+  web_contents_->GetMutableRendererPrefs()->is_enact_browser = true;
+#endif
+
   web_contents_->SyncRendererPrefs();
 }
 

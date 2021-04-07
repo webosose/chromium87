@@ -110,6 +110,11 @@ class COMPONENT_EXPORT(UI_BASE_IME) TextInputClient {
   // Returns the current text direction.
   virtual base::i18n::TextDirection GetTextDirection() const = 0;
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+  virtual bool SystemKeyboardDisabled() const;
+///@}
+
   // Returns the current text input flags, which is a bit map of
   // WebTextInputType defined in blink. This is valid only for web input fileds;
   // it will return TEXT_INPUT_FLAG_NONE for native input fields.

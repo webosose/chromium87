@@ -117,6 +117,11 @@ class MEDIA_EXPORT AudioDecoderConfig {
   void set_profile(AudioCodecProfile profile) { profile_ = profile; }
   AudioCodecProfile profile() const { return profile_; }
 
+#if defined(USE_NEVA_MEDIA)
+  bool is_dolby_atmos() const { return is_dolby_atmos_; }
+  void set_is_dolby_atmos(bool dolby_atmos) { is_dolby_atmos_ = dolby_atmos; }
+#endif
+
  private:
   AudioCodec codec_ = kUnknownAudioCodec;
   AudioCodecProfile profile_ = AudioCodecProfile::kUnknown;
@@ -146,6 +151,10 @@ class MEDIA_EXPORT AudioDecoderConfig {
   // Indicates if a decoder should implicitly discard decoder delay without it
   // being explicitly marked in discard padding.
   bool should_discard_decoder_delay_ = true;
+
+#if defined(USE_NEVA_MEDIA)
+  bool is_dolby_atmos_ = false;
+#endif
 
   // Not using DISALLOW_COPY_AND_ASSIGN here intentionally to allow the compiler
   // generated copy constructor and assignment operator. Since the extra data is

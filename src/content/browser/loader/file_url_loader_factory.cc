@@ -477,11 +477,20 @@ class FileURLLoader : public network::mojom::URLLoader {
       return;
     }
 
+#if defined(USE_FILESCHEME_CODECACHE)
+    head->request_time = base::Time::Now();
+#endif
+
     base::File::Info info;
     if (!base::GetFileInfo(path, &info)) {
       OnClientComplete(net::ERR_FILE_NOT_FOUND, std::move(observer));
       return;
     }
+
+#if defined(USE_FILESCHEME_CODECACHE)
+    head->response_time = base::Time::Now();
+    head->file_last_modified_time = info.last_modified;
+#endif
 
     if (info.is_directory) {
       if (directory_loading_policy == DirectoryLoadingPolicy::kFail) {

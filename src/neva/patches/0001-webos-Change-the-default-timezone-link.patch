@@ -1,0 +1,45 @@
+From c74426e3a53458c272a42cc612541572892404ed Mon Sep 17 00:00:00 2001
+From: Vlad Mukulov <vladislav.mukulov@lge.com>
+Date: Mon, 23 Sep 2019 07:22:40 +0300
+Subject: [PATCH] [webos] Change the default timezone link
+
+:Release Notes:
+Change the default timezone link for webos
+
+:Detailed Notes:
+ICU expects that the /etc/localtime is a link which points to current system
+timezone. But under WebOS this link points to other link
+/var/luna/preferences/localtime, which in turn points to system timezone.
+This patch changes the default link file for WebOS.
+
+:Test Scenario:
+1. Start the Settings app and change the Time Zone to Asia/Korea Republic of.../ Seoul
+2. Verify that the time is displayed correctly
+
+:QA Notes:
+
+:Issues Addressed:
+[NEVA-2889] The time zone is displayed differently.
+---
+ source/common/putil.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/source/common/putil.cpp b/source/common/putil.cpp
+index 532a090..62632e3 100644
+--- a/source/common/putil.cpp
++++ b/source/common/putil.cpp
+@@ -704,7 +704,11 @@ extern U_IMPORT char *U_TZNAME[];
+ #define TZZONEINFO      "/usr/share/lib/zoneinfo/"
+ #define TZ_ENV_CHECK    "localtime"
+ #else
++#if defined(OS_WEBOS)
++#define TZDEFAULT       "/var/luna/preferences/localtime"
++#else
+ #define TZDEFAULT       "/etc/localtime"
++#endif
+ #define TZZONEINFO      "/usr/share/zoneinfo/"
+ #endif
+ #define TZZONEINFOTAIL  "/zoneinfo/"
+-- 
+2.7.4
+

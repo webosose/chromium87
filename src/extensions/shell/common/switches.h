@@ -21,6 +21,9 @@ extern const char kAppShellPreferredNetwork[];
 extern const char kCrashDumpsDir[];
 extern const char kEnableReporting[];
 #endif
+#if defined(USE_NEVA_APPRUNTIME)
+extern const char kLaunchArgs[];
+#endif
 
 }  // namespace switches
 }  // namespace extensions

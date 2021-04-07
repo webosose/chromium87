@@ -3,6 +3,41 @@
 # found in the LICENSE file.
 
 import("//build/config/ui.gni")
+import("//mojo/public/tools/bindings/mojom.gni")
+import("//neva/neva.gni")
+
+if (use_neva_media) {
+  mojom("mojom") {
+    sources = [ "neva/mojom/video_window_controller.mojom" ]
+    public_deps = [
+      "//mojo/public/mojom/base",
+      "//ui/gfx/geometry/mojom",
+      "//ui/gfx/mojom",
+    ]
+
+    cpp_typemaps = [
+      {
+        types = [
+          {
+            mojom = "ui.mojom.VideoWindowInfo"
+            cpp = "::ui::VideoWindowInfo"
+          },
+          {
+            mojom = "ui.mojom.VideoWindowParams"
+            cpp = "::ui::VideoWindowParams"
+          },
+        ]
+        traits_headers = [
+          "neva/video_window_info.h",
+          "neva/mojom/video_window_controller_mojom_traits.h",
+        ]
+        traits_sources =
+            [ "neva/mojom/video_window_controller_mojom_traits.cc" ]
+        traits_public_deps = [ "//base" ]
+      },
+    ]
+  }
+}
 
 component("platform_window") {
   sources = [
@@ -26,6 +61,34 @@ component("platform_window") {
     "//ui/base",
     "//ui/gfx",
   ]
+
+  #@name USE_NEVA_APPRUNTIME
+  #@{
+  sources += [
+    "neva/platform_window.h",
+    "neva/platform_window_delegate.h",
+    "neva/ui_utils.cc",
+    "neva/ui_utils.h",
+    "neva/window_group_configuration.cc",
+    "neva/window_group_configuration.h",
+    "neva/window_group_configuration_param_traits.cc",
+    "neva/window_group_configuration_param_traits.h",
+    "neva/window_group_configuration_param_traits_macros.h",
+    "neva/window_group_ipc_export.h",
+    "neva/xinput_types.h",
+  ]
+
+  deps += [ "//ipc" ]
+
+  #@}
+
+  if (use_neva_media) {
+    sources += [
+      "neva/video_window_controller.h",
+      "neva/video_window_controller_host.h",
+    ]
+    deps += [ "//ui/platform_window:mojom" ]
+  }
 
   if (is_fuchsia) {
     sources += [

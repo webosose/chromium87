@@ -243,6 +243,15 @@ class CORE_EXPORT WebLocalFrameImpl final
   void ReplaceSelection(const WebString&) override;
   void DeleteSurroundingText(int before, int after) override;
   void DeleteSurroundingTextInCodePoints(int before, int after) override;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  void ResetStateToMarkNextPaintForContainer() override;
+#endif
+#if defined(USE_NEVA_MEDIA)
+  void SetSuppressMediaPlay(bool suppress) override;
+  bool IsSuppressedMediaPlay() const override;
+#endif
+
   void ExtractSmartClipData(WebRect rect_in_viewport,
                             WebString& clip_text,
                             WebString& clip_html,
@@ -324,6 +333,9 @@ class CORE_EXPORT WebLocalFrameImpl final
   void CommitNavigation(
       std::unique_ptr<WebNavigationParams> navigation_params,
       std::unique_ptr<WebDocumentLoader::ExtraData> extra_data) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void UpdateForSameDocumentNavigation(const std::string&) override;
+#endif
   blink::mojom::CommitResult CommitSameDocumentNavigation(
       const WebURL&,
       WebFrameLoadType,
@@ -548,6 +560,11 @@ class CORE_EXPORT WebLocalFrameImpl final
   WebTextCheckClient* text_check_client_;
 
   WebSpellCheckPanelHostClient* spell_check_panel_host_client_;
+
+#if defined(USE_NEVA_MEDIA)
+  // Suppress media player under this frame.
+  bool suppress_media_play_;
+#endif
 
   // Oilpan: WebLocalFrameImpl must remain alive until close() is called.
   // Accomplish that by keeping a self-referential Persistent<>. It is

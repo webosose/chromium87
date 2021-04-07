@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=@@NAME@@
+Exec=@@EXENAME@@
+Type=static

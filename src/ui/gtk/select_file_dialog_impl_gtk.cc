@@ -63,12 +63,15 @@ void OnFileFilterDataDestroyed(std::string* file_extension) {
   delete file_extension;
 }
 
+// Disabled for external ozone wayland port
+#if !(defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL))
 // Runs DesktopWindowTreeHostLinux::EnableEventListening() when the file-picker
 // is closed.
 void OnFilePickerDestroy(base::OnceClosure* callback_raw) {
   std::unique_ptr<base::OnceClosure> callback = base::WrapUnique(callback_raw);
   std::move(*callback).Run();
 }
+#endif  // !(defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL))
 
 }  // namespace
 
@@ -184,6 +187,8 @@ void SelectFileDialogImplGTK::SelectFileImpl(
 
   params_map_[dialog] = params;
 
+// Disabled for external ozone wayland port
+#if !(defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL))
   // Disable input events handling in the host window to make this dialog modal.
   if (owning_window) {
     views::DesktopWindowTreeHostLinux* host =
@@ -205,6 +210,7 @@ void SelectFileDialogImplGTK::SelectFileImpl(
       gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     }
   }
+#endif  // !(defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL))
 
 #if !GTK_CHECK_VERSION(3, 90, 0)
   gtk_widget_show_all(dialog);

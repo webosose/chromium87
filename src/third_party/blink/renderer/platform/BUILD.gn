@@ -16,6 +16,7 @@ import("//third_party/blink/renderer/build/scripts/scripts.gni")
 import("//third_party/blink/renderer/config.gni")
 import("//third_party/blink/renderer/platform/platform_generated.gni")
 import("//v8/gni/v8.gni")
+import("//neva/neva.gni")
 
 # This file depends on the legacy global sources assignment filter. It should
 # be converted to check target platform before assigning source files to the
@@ -1706,6 +1707,10 @@ component("platform") {
       "text/hyphenation/hyphenator_aosp.cc",
       "text/hyphenation/hyphenator_aosp.h",
     ]
+  }
+
+  if (use_memory_trace) {
+    deps += [ "//third_party/blink/renderer/platform/neva" ]
   }
 
   if (enable_av1_decoder) {

@@ -97,6 +97,10 @@ class VIZ_HOST_EXPORT GpuHostImpl : public mojom::GpuHost {
     virtual void TerminateGpuProcess(const std::string& message) = 0;
 #endif
 
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+    virtual void SendGpuProcessMessage(IPC::Message* message) = 0;
+#endif  // defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
    protected:
     virtual ~Delegate() {}
   };

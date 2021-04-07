@@ -22,6 +22,11 @@ class CommandLine;
 
 namespace content {
 class BrowserContext;
+#if defined(USE_NEVA_APPRUNTIME)
+struct GlobalRequestID;
+class LoginDelegate;
+class WebContents;
+#endif
 }
 
 namespace extensions {
@@ -95,6 +100,27 @@ class ShellContentBrowserClient : public content::ContentBrowserClient {
       bool* bypass_redirect_checks,
       bool* disable_secure_dns,
       network::mojom::URLLoaderFactoryOverridePtr* factory_override) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  content::StoragePartitionConfig GetStoragePartitionConfigForSite(
+      content::BrowserContext* browser_context,
+      const GURL& site) override;
+  void ConfigureNetworkContextParams(
+      content::BrowserContext* context,
+      bool in_memory,
+      const base::FilePath& relative_partition_path,
+      network::mojom::NetworkContextParams* network_context_params,
+      network::mojom::CertVerifierCreationParams* cert_verifier_creation_params)
+      override;
+  std::unique_ptr<content::LoginDelegate> CreateLoginDelegate(
+      const net::AuthChallengeInfo& auth_info,
+      content::WebContents* web_contents,
+      const content::GlobalRequestID& request_id,
+      bool is_request_for_main_frame,
+      const GURL& url,
+      scoped_refptr<net::HttpResponseHeaders> response_headers,
+      bool first_auth_attempt,
+      LoginAuthRequiredCallback auth_required_callback) override;
+#endif
   bool HandleExternalProtocol(
       const GURL& url,
       content::WebContents::OnceGetter web_contents_getter,
@@ -132,6 +158,11 @@ class ShellContentBrowserClient : public content::ContentBrowserClient {
 
   // Owned by ShellBrowserMainParts.
   ShellBrowserMainDelegate* browser_main_delegate_;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  // Store the path of V8 snapshot blob for app_shell.
+  std::pair<int, std::string> v8_snapshot_path_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(ShellContentBrowserClient);
 };

@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//neva/neva.gni")
 import("//testing/test.gni")
 import("//tools/v8_context_snapshot/v8_context_snapshot.gni")
 import("//v8/gni/v8.gni")
@@ -79,7 +80,16 @@ component("gin") {
     "//base",
     "//v8",
   ]
+
   deps = [ "//base/third_party/dynamic_annotations" ]
+
+  if (use_neva_appruntime) {
+    public_deps += [ "//base/neva" ]
+  }
+
+  if (use_memory_trace) {
+    deps += [ "//gin/neva" ]
+  }
 
   if (is_mac) {
     frameworks = [ "CoreFoundation.framework" ]

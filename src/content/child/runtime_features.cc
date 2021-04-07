@@ -248,6 +248,10 @@ void SetRuntimeFeaturesFromChromiumFeatures() {
      features::kLazyImageVisibleLoadTimeMetrics},
     {wf::EnablePictureInPicture, media::kPictureInPicture},
     {wf::EnableCacheInlineScriptCode, features::kCacheInlineScriptCode},
+#if defined(USE_FILESCHEME_CODECACHE)
+    {wf::EnableLocalResourceCodeCache,
+     blink::features::kLocalResourceCodeCache},
+#endif
     {wf::EnableExperimentalProductivityFeatures,
      features::kExperimentalProductivityFeatures},
     {wf::EnableFeaturePolicyForSandbox, features::kFeaturePolicyForSandbox},

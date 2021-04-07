@@ -183,7 +183,14 @@ gfx::Rect WebViewFrameWidget::ViewportVisibleRect() {
 }
 
 bool WebViewFrameWidget::ShouldHandleImeEvents() {
+// TODO(neva): Since Enact-based browser doesn't set initial focus
+// all main frame IME events are blocked.
+// Such case must be handled on .js-side, this is temporary solution.
+#if defined(USE_NEVA_APPRUNTIME)
+  return true;
+#else
   return HasFocus();
+#endif
 }
 
 void WebViewFrameWidget::SetWindowRect(const gfx::Rect& window_rect) {

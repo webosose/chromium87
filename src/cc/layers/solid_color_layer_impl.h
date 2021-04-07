@@ -30,7 +30,8 @@ class CC_EXPORT SolidColorLayerImpl : public LayerImpl {
                                SkColor color,
                                bool force_anti_aliasing_off,
                                SkBlendMode effect_blend_mode,
-                               AppendQuadsData* append_quads_data);
+                               AppendQuadsData* append_quads_data
+                               );
 
   ~SolidColorLayerImpl() override;
 
@@ -44,6 +45,7 @@ class CC_EXPORT SolidColorLayerImpl : public LayerImpl {
 
  private:
   const char* LayerTypeAsString() const override;
+
 };
 
 }  // namespace cc

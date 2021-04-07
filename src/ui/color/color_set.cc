@@ -10,9 +10,12 @@ ColorSet::ColorSet(ColorSetId id, ColorMap&& colors)
     : id(id), colors(std::move(colors)) {}
 
 ColorSet::ColorSet(ColorSet&&) noexcept = default;
-
+// (neva) GCC 8.x.x
+#if !defined(__clang__)
+ColorSet& ColorSet::operator=(ColorSet&&) = default;
+#else
 ColorSet& ColorSet::operator=(ColorSet&&) noexcept = default;
-
+#endif
 ColorSet::~ColorSet() = default;
 
 }  // namespace ui

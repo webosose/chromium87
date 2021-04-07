@@ -265,7 +265,13 @@ struct VectorMover<true, T, Allocator> {
 
   static void SwapImpl(T* src, T* src_end, T* dst) {
     if (Allocator::kIsGarbageCollected) {
+// (neva) GCC 8.x.x
+#if !defined(__clang__)
+      constexpr size_t kAlignment = std::max(alignof(T), sizeof(size_t));
+      alignas(kAlignment) char buf[sizeof(T)];
+#else
       alignas(std::max(alignof(T), sizeof(size_t))) char buf[sizeof(T)];
+#endif
       for (; src < src_end; ++src, ++dst) {
         memcpy(buf, dst, sizeof(T));
         AtomicWriteMemcpy<sizeof(T)>(dst, src);

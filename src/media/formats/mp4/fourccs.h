@@ -18,6 +18,9 @@ enum FourCC {
   FOURCC_AC3 = 0x61632d33,   // "ac-3"
   FOURCC_EAC3 = 0x65632d33,  // "ec-3"
 #endif
+#if defined(USE_NEVA_MEDIA)
+  FOURCC_DEC3 = 0x64656333,  // "dec3"
+#endif
 #if BUILDFLAG(ENABLE_AV1_DECODER)
   FOURCC_AV01 = 0x61763031,  // "av01"
   FOURCC_AV1C = 0x61763143,  // "av1C"

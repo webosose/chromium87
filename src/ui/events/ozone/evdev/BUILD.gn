@@ -5,10 +5,15 @@
 import("//build/config/chromeos/args.gni")
 import("//build/config/linux/pkg_config.gni")
 import("//build/config/ui.gni")
+import("//neva/neva.gni")
 
 assert(use_ozone && (is_linux || is_chromeos))
 
 visibility = [ ":*" ]
+
+if (ozone_platform_wayland_external) {
+  visibility += [ "//ozone:ozone_wayland" ]
+}
 
 declare_args() {
   # Support ChromeOS touchpad gestures with ozone.
@@ -155,6 +160,18 @@ component("evdev") {
     "//ui/ozone/*",
     "//ui/chromeos/*",
   ]
+}
+
+source_set("events_ozone_evdev_neva") {
+  sources = [
+    "neva/keyboard_evdev_neva.h",
+  ]
+
+  sources += [
+    "neva/keyboard_evdev_neva_create.cc",
+  ]
+
+  deps = [ ":evdev" ]
 }
 
 source_set("unittests") {

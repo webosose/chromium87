@@ -399,7 +399,10 @@ template <typename Dst,
           template <typename> class Bounds = std::numeric_limits,
           typename Src>
 constexpr RangeCheck DstRangeRelationToSrcRange(Src value) {
+// TODO(neva): GCC 8.x.x required for older 8.2.0 version
+#if defined(__clang__)
   static_assert(std::is_arithmetic<Src>::value, "Argument must be numeric.");
+#endif
   static_assert(std::is_arithmetic<Dst>::value, "Result must be numeric.");
   static_assert(Bounds<Dst>::lowest() < Bounds<Dst>::max(), "");
   return DstRangeRelationToSrcRangeImpl<Dst, Src, Bounds>::Check(value);

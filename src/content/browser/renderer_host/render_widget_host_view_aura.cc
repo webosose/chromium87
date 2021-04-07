@@ -124,6 +124,10 @@
 #include "ui/wm/core/ime_util_chromeos.h"
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/public/platform/web_text_input_type.h"
+#endif
+
 #if defined(OS_FUCHSIA)
 #include "ui/base/ime/input_method_keyboard_controller.h"
 #endif
@@ -375,7 +379,7 @@ void RenderWidgetHostViewAura::InitAsPopup(
     old_child->popup_parent_host_view_ = nullptr;
   }
   popup_parent_host_view_->SetPopupChild(this);
-  CreateAuraWindow(aura::client::WINDOW_TYPE_MENU);
+  CreateAuraWindow(aura::client::WINDOW_TYPE_POPUP);
 
   // Setting the transient child allows for the popup to get mouse events when
   // in a system modal dialog. Do this before calling ParentWindowWithContext
@@ -1355,9 +1359,13 @@ bool RenderWidgetHostViewAura::SetEditableSelectionRange(
 }
 
 bool RenderWidgetHostViewAura::DeleteRange(const gfx::Range& range) {
-  // TODO(suzhe): implement this method when fixing http://crbug.com/55130.
-  NOTIMPLEMENTED_LOG_ONCE();
-  return false;
+  // This is implementation for neva ozone-wayland ime
+  if (!text_input_manager_ || !text_input_manager_->GetActiveWidget())
+    return false;
+
+  text_input_manager_->GetActiveWidget()->ImeSetComposition(
+      base::string16(), std::vector<ui::ImeTextSpan>(), range, 0, 0);
+  return true;
 }
 
 bool RenderWidgetHostViewAura::GetTextFromRange(
@@ -2453,6 +2461,12 @@ void RenderWidgetHostViewAura::OnUpdateTextInputStateCalled(
   const ui::mojom::TextInputState* state =
       text_input_manager_->GetTextInputState();
 
+#if defined(USE_NEVA_APPRUNTIME)
+  if (state && enable_html_systemkeyboard_attr_ &&
+      (state->flags & blink::kWebTextInputFlagSystemKeyboardOff))
+    return;
+#endif
+
   // Show the virtual keyboard if needed.
   if (state && state->type != ui::TEXT_INPUT_TYPE_NONE &&
       state->mode != ui::TEXT_INPUT_MODE_NONE) {
@@ -2506,6 +2520,31 @@ void RenderWidgetHostViewAura::OnImeCancelComposition(
     GetInputMethod()->CancelComposition(this);
   has_composition_text_ = false;
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+void RenderWidgetHostViewAura::SetEnableHtmlSystemKeyboardAttr(bool enable) {
+  enable_html_systemkeyboard_attr_ = enable;
+}
+
+bool RenderWidgetHostViewAura::SystemKeyboardDisabled() const {
+  if (text_input_manager_ && text_input_manager_->GetTextInputState() &&
+      enable_html_systemkeyboard_attr_ &&
+      (text_input_manager_->GetTextInputState()->flags &
+       blink::kWebTextInputFlagSystemKeyboardOff))
+    return true;
+
+  return false;
+}
+#endif
+
+#if defined(USE_NEVA_MEDIA)
+gfx::AcceleratedWidget RenderWidgetHostViewAura::GetAcceleratedWidget() {
+  aura::WindowTreeHost* host = window_->GetHost();
+  if (host)
+    return host->GetAcceleratedWidget();
+  return gfx::kNullAcceleratedWidget;
+}
+#endif  // defined(USE_NEVA_MEDIA)
 
 void RenderWidgetHostViewAura::OnSelectionBoundsChanged(
     TextInputManager* text_input_manager,

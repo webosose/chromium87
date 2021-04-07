@@ -38,6 +38,12 @@ class WaylandWindowDragController;
 
 using WidgetSubsurfaceSet = base::flat_set<std::unique_ptr<WaylandSubsurface>>;
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+class SurfaceGroupWrapper;
+class WaylandInputMethodContext;
+///@}
+
 class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
  public:
   ~WaylandWindow() override;
@@ -154,6 +160,43 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
                                       bool is_activated);
   virtual void HandlePopupConfigure(const gfx::Rect& bounds);
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  WaylandInputMethodContext* GetInputMethodContext();
+  SurfaceGroupWrapper* surface_group() const { return surface_group_.get(); }
+
+  virtual void HandleStateChanged(PlatformWindowState state);
+  virtual void HandleActivationChanged(bool is_activated);
+
+  void HandleCursorVisibilityChanged(bool is_visible);
+  void HandleExposed();
+  void HandleStateAboutToChange(PlatformWindowState state);
+
+  void CreateGroup(const ui::WindowGroupConfiguration& config) override;
+  void AttachToGroup(const std::string& group_name,
+                     const std::string& layer_name) override;
+  void FocusGroupOwner() override;
+  void FocusGroupLayer() override;
+  void DetachGroup() override;
+
+  void ShowInputPanel() override;
+  void HideInputPanel() override;
+  void SetInputContentType(TextInputType text_input_type,
+                           int text_input_flags) override;
+  void SetSurroundingText(const std::string& text,
+                          std::size_t cursor_position,
+                          std::size_t anchor_position) override;
+
+  void XInputActivate(const std::string& type) override;
+  void XInputDeactivate() override;
+  void XInputInvokeAction(std::uint32_t keysym,
+                          XInputKeySymbolType symbol_type,
+                          XInputEventType event_type) override;
+
+  void HandleKeyboardEnter();
+  void HandleKeyboardLeave();
+  ///@}
+
   // Handles close requests.
   virtual void OnCloseRequest();
 
@@ -238,6 +281,12 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
   // Subsurface at the front of the list is the closest to the parent.
   std::list<WaylandSubsurface*> subsurface_stack_above_;
   std::list<WaylandSubsurface*> subsurface_stack_below_;
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // Wrapper around surface group object.
+  std::unique_ptr<SurfaceGroupWrapper> surface_group_;
+  ///@}
 
   // The current cursor bitmap (immutable).
   scoped_refptr<BitmapCursorOzone> bitmap_;

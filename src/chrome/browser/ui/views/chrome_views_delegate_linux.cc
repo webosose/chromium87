@@ -14,6 +14,11 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/views/linux_ui/linux_ui.h"
 
+#if defined(OS_WEBOS)
+#include "ui/aura/env.h"
+#include "ui/aura/window.h"
+#endif
+
 namespace {
 
 bool IsDesktopEnvironmentUnity() {
@@ -47,6 +52,15 @@ views::NativeWidget* ChromeViewsDelegate::CreateNativeWidget(
        params->type != views::Widget::InitParams::TYPE_TOOLTIP)
           ? NativeWidgetType::NATIVE_WIDGET_AURA
           : NativeWidgetType::DESKTOP_NATIVE_WIDGET_AURA;
+#if defined(OS_WEBOS)
+  // On WebOS we should use aura native window for all widgets.
+  // LSM supports only fullscreen native window and all popups and menu
+  // must created as aura native widget. ozone-wayland crashes if desktop native
+  // popup window will not have parent.
+  if (!params->parent && !params->context)
+    params->parent = aura::Env::GetRootWindow();
+  native_widget_type = NativeWidgetType::NATIVE_WIDGET_AURA;
+#endif
   return ::CreateNativeWidget(native_widget_type, params, delegate);
 }
 

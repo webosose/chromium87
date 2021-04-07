@@ -103,7 +103,7 @@ CacheCreator::CacheCreator(
 CacheCreator::~CacheCreator() = default;
 
 net::Error CacheCreator::Run() {
-#if defined(OS_ANDROID) || defined(OS_FUCHSIA)
+#if defined(OS_ANDROID) || defined(OS_FUCHSIA) || defined(OS_WEBOS)
   static const bool kSimpleBackendIsDefault = true;
 #else
   static const bool kSimpleBackendIsDefault = false;

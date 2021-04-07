@@ -178,6 +178,9 @@ class Origin;
 
 namespace storage {
 class FileSystemBackend;
+#if defined(USE_NEVA_APPRUNTIME)
+struct QuotaSettings;
+#endif
 }  // namespace storage
 
 namespace content {
@@ -582,6 +585,17 @@ class CONTENT_EXPORT ContentBrowserClient {
                                    const base::FilePath& absolute_path,
                                    const base::FilePath& profile_path);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // Indicates whether a file path should be accessible via file URL given a
+  // request from a browser context which lives within |profile_path|. Request,
+  // process_id and frame_tree_node_id are added to passed parameters.
+  virtual bool IsFileAccessAllowedForRequest(
+      const base::FilePath& path,
+      const base::FilePath& absolute_path,
+      const base::FilePath& profile_path,
+      const network::ResourceRequest& request);
+#endif
+
   // Indicates whether to force the MIME sniffer to sniff file URLs for HTML.
   // By default, disabled. May be called on either the UI or IO threads.
   // See https://crbug.com/777737
@@ -806,6 +820,15 @@ class CONTENT_EXPORT ContentBrowserClient {
 
   // Create and return a new quota permission context.
   virtual scoped_refptr<QuotaPermissionContext> CreateQuotaPermissionContext();
+
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual bool HasQuotaSettings() const;
+  virtual void GetQuotaSettings(
+      content::BrowserContext* context,
+      content::StoragePartition* partition,
+      base::OnceCallback<void(base::Optional<storage::QuotaSettings>)> callback)
+      const {}
+#endif
 
   // Allows the embedder to provide settings that determine if generated code
   // can be cached and the amount of disk space used for caching generated code.

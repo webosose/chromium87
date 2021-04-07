@@ -15,6 +15,11 @@
 #include "ui/ozone/platform_selection.h"
 #include "ui/ozone/public/platform_screen.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include <cstring>
+///@}
+
 namespace ui {
 
 namespace {
@@ -88,6 +93,34 @@ OzonePlatform* OzonePlatform::GetInstance() {
 const char* OzonePlatform::GetPlatformName() {
   return GetOzonePlatformName();
 }
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+// static
+bool OzonePlatform::IsWayland() {
+  static bool result = std::strcmp(GetOzonePlatformName(), "wayland") == 0;
+  return result;
+}
+
+// static
+bool OzonePlatform::IsWaylandExternal() {
+  static bool result =
+      std::strcmp(GetOzonePlatformName(), "wayland_external") == 0;
+  return result;
+}
+///@}
+
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+ui::GpuPlatformSupport* OzonePlatform::GetGpuPlatformSupport() {
+  return nullptr;
+}
+#endif
+
+#if defined(USE_NEVA_MEDIA)
+ui::VideoWindowController* OzonePlatform::GetVideoWindowController() {
+  return nullptr;
+}
+#endif
 
 PlatformClipboard* OzonePlatform::GetPlatformClipboard() {
   // Platforms that support system clipboard must override this method.

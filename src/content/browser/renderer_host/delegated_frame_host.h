@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "content/browser/renderer_host/delegated_frame_host_neva.h"
+#endif
 #ifndef CONTENT_BROWSER_RENDERER_HOST_DELEGATED_FRAME_HOST_H_
 #define CONTENT_BROWSER_RENDERER_HOST_DELEGATED_FRAME_HOST_H_
 
@@ -31,7 +34,16 @@
 #include "ui/events/event.h"
 #include "ui/gfx/geometry/rect_conversions.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
 namespace content {
+class DelegatedFrameHost;
+}
+
+namespace neva_wrapped {
+using namespace content;
+#else
+namespace content {
+#endif
 
 class DelegatedFrameHost;
 
@@ -173,6 +185,9 @@ class CONTENT_EXPORT DelegatedFrameHost
 
  private:
   friend class DelegatedFrameHostClient;
+#if defined(USE_NEVA_APPRUNTIME)
+  friend class content::DelegatedFrameHost;
+#endif
   FRIEND_TEST_ALL_PREFIXES(RenderWidgetHostViewAuraBrowserTest,
                            StaleFrameContentOnEvictionNormal);
   FRIEND_TEST_ALL_PREFIXES(RenderWidgetHostViewAuraBrowserTest,
@@ -236,6 +251,10 @@ class CONTENT_EXPORT DelegatedFrameHost
   DISALLOW_COPY_AND_ASSIGN(DelegatedFrameHost);
 };
 
+#if defined(USE_NEVA_APPRUNTIME)
+}  // namespace neva_wrapped
+#else
 }  // namespace content
+#endif
 
 #endif  // CONTENT_BROWSER_RENDERER_HOST_DELEGATED_FRAME_HOST_H_

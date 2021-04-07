@@ -78,6 +78,11 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerDelegate {
     // controls and go fullscreen.
     virtual void OnBecamePersistentVideo(bool value) = 0;
 
+#if defined(USE_NEVA_MEDIA)
+    virtual void OnMediaActivationPermitted() {}
+    virtual void OnSuspend() {}
+#endif
+
     // Notify the player that it is now eligible to start recording power
     // measurements if |state| is true, else it is no longer eligible.
     virtual void OnPowerExperimentState(bool state) {}
@@ -177,6 +182,13 @@ class BLINK_PLATFORM_EXPORT WebMediaPlayerDelegate {
   virtual void SetIsEffectivelyFullscreen(
       int player_id,
       blink::WebFullscreenVideoStatus fullscreen_video_status) = 0;
+
+#if defined(USE_NEVA_MEDIA)
+  virtual void DidMediaCreated(int player_id, bool will_use_media_resource) = 0;
+  virtual void DidMediaActivated(int player_id) = 0;
+  virtual void DidMediaActivationNeeded(int player_id) = 0;
+  virtual void DidMediaSuspended(int player_id) = 0;
+#endif
 
  protected:
   WebMediaPlayerDelegate() = default;

@@ -34,6 +34,11 @@
 #include "third_party/blink/renderer/platform/windows_keyboard_codes.h"
 #include "ui/events/keycodes/dom/keycode_converter.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
+#include "third_party/blink/public/mojom/neva/app_runtime_blink_delegate.mojom-blink.h"
+#endif
+
 #if defined(OS_WIN)
 #include <windows.h>
 #elif defined(OS_MAC)
@@ -291,6 +296,32 @@ WebInputEventResult KeyboardEventManager::KeyEvent(
   if (matched_an_access_key)
     keydown->preventDefault();
   keydown->SetTarget(node);
+
+#if defined(USE_NEVA_APPRUNTIME)
+  if (keydown->key() == "GoBack") {
+    DCHECK_EQ(keydown->type(), event_type_names::kKeydown);
+    AssociatedInterfaceProvider* provider =
+        frame_->Client()->GetRemoteNavigationAssociatedInterfaces();
+    bool is_back_history_key_disabled = false;
+    if (provider) {
+      mojo::AssociatedRemote<mojom::blink::AppRuntimeBlinkDelegate>
+          app_runtime_blink_delegate;
+      provider->GetInterface(&app_runtime_blink_delegate);
+      if (app_runtime_blink_delegate.is_bound())
+        app_runtime_blink_delegate->IsBackHistoryKeyDisabled(
+            &is_back_history_key_disabled);
+    }
+
+    if (!is_back_history_key_disabled) {
+      bool handledEvent =
+          frame_->Client()->NavigateBackForward(keydown->shiftKey() ? 1 : -1);
+      if (handledEvent) {
+        keydown->SetDefaultHandled();
+        return WebInputEventResult::kHandledSystem;
+      }
+    }
+  }
+#endif
 
   keydown->SetStopPropagation(!send_key_event);
 

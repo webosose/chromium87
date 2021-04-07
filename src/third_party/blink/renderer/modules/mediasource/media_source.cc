@@ -32,6 +32,11 @@
 #include "third_party/blink/renderer/platform/privacy_budget/identifiability_digest_helpers.h"
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 
+#if defined(USE_NEVA_MEDIA)
+#include "base/optional.h"
+#include "third_party/blink/public/platform/neva/web_media_codec_capability.h"
+#endif
+
 using blink::WebMediaSource;
 using blink::WebSourceBuffer;
 
@@ -347,6 +352,33 @@ bool MediaSource::isTypeSupported(ExecutionContext* context,
   // 5. If the MediaSource does not support the specified combination of media
   //    type, media subtype, and codecs then return false.
   // 6. Return true.
+
+#if defined(USE_NEVA_MEDIA)
+  // Below lines depends on a thing that ToInt() will returns 0 if we try to
+  // do that using empty WTFString.
+  int width = content_type.Parameter("width").ToInt();
+  int height = content_type.Parameter("height").ToInt();
+  int frame_rate = content_type.Parameter("framerate").ToInt();
+  int bit_rate = content_type.Parameter("bitrate").ToInt();
+  int channels = content_type.Parameter("channels").ToInt();
+
+  if (RuntimeEnabledFeatures::MediaSourceIsSupportedExtensionEnabled()) {
+    base::Optional<WebMediaCodecCapability> capability;
+    if (width > 0 || height > 0 || frame_rate > 0 || bit_rate > 0 ||
+        channels > 0) {
+      WebMediaCodecCapability web_media_type_capability(
+          width, height, frame_rate, bit_rate, channels);
+      capability = web_media_type_capability;
+    }
+    bool result = MIMETypeRegistry::kIsSupported ==
+                  MIMETypeRegistry::IsSupportedMediaSourceMIMEType(
+                      content_type.GetType(), codecs, capability);
+    DVLOG(1) << __func__ << "(" << type << ") -> "
+             << (result ? "true" : "false");
+    return result;
+  }
+#endif
+
   // For incompletely specified mime-type and codec combinations, we also return
   // false, complying with the non-normative guidance being incubated for the
   // MSE vNext codec switching feature at

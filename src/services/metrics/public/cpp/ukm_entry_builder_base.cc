@@ -30,7 +30,11 @@ UkmEntryBuilderBase::~UkmEntryBuilderBase() = default;
 
 void UkmEntryBuilderBase::SetMetricInternal(uint64_t metric_hash,
                                             int64_t value) {
+#if defined(OS_WEBOS)
+  entry_->metrics.insert(std::make_pair(metric_hash, value));
+#else
   entry_->metrics.emplace(metric_hash, value);
+#endif
 }
 
 void UkmEntryBuilderBase::Record(UkmRecorder* recorder) {

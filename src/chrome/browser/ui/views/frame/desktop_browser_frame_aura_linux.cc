@@ -70,7 +70,9 @@ bool DesktopBrowserFrameAuraLinux::UseCustomFrame() const {
 
 void DesktopBrowserFrameAuraLinux::TabDraggingKindChanged(
     TabDragKind tab_drag_kind) {
+#if !(defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL))
   host_->TabDraggingKindChanged(tab_drag_kind);
+#endif  // !(defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL))
 }
 
 void DesktopBrowserFrameAuraLinux::OnUseCustomChromeFrameChanged() {

@@ -61,6 +61,14 @@
 #include "ui/base/buildflags.h"
 #include "ui/base/ui_base_features.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "neva/pal_service/neva_pal_manifest.h"
+#endif
+
+#if defined(USE_NEVA_MEDIA)
+#include "neva/neva_media_service/neva_media_manifest.h"
+#endif
+
 namespace content {
 
 namespace {
@@ -83,6 +91,15 @@ const service_manager::Manifest& GetContentBrowserManifest() {
                            .Build())
           .RequireCapability("*", "app")
           .RequireCapability("*", "multizone")
+#if defined(USE_NEVA_APPRUNTIME)
+          .RequireCapability("pal", "pal:memorymanager")
+          .RequireCapability("pal", "pal:pal_service")
+          .RequireCapability("pal", "pal:sample")
+          .RequireCapability("pal", "pal:system_servicebridge")
+#endif
+#if defined(USE_NEVA_MEDIA)
+          .RequireCapability("neva_media", "neva_media:neva_media_service")
+#endif
           .Build()};
   return *manifest;
 }
@@ -344,6 +361,12 @@ ServiceManagerContext::ServiceManagerContext(
   std::vector<service_manager::Manifest> manifests;
   manifests.push_back(GetContentBrowserManifest());
   manifests.push_back(GetContentSystemManifest());
+#if defined(USE_NEVA_APPRUNTIME)
+  manifests.push_back(pal::GetNevaPalManifest());
+#endif
+#if defined(USE_NEVA_MEDIA)
+  manifests.push_back(neva_media::GetNevaMediaManifest());
+#endif
   for (auto& manifest : manifests) {
     base::Optional<service_manager::Manifest> overlay =
         GetContentClient()->browser()->GetServiceManifestOverlay(

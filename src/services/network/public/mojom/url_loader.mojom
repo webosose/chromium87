@@ -318,6 +318,14 @@ struct URLRequest {
   //   frame tree node ID for other requests.
   int32 render_frame_id;
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // The caller process id. Now could be only kBrowserProcessId or
+  // kInvalidProcessId.
+  [EnableIf=neva_appruntime]
+  uint32 process_id;
+  ///@}
+
   // True if |frame_id| is the main frame of a RenderView.
   bool is_main_frame;
 

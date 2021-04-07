@@ -96,7 +96,12 @@ base::Optional<TransformationMatrix> XRReferenceSpace::MojoFromNative() {
         // it's not tracked; but for any other type if it's not locatable, we
         // return nullopt.
         return type_ == ReferenceSpaceType::kViewer
+// TODO(neva): GCC 8.x.x
+#if defined(__clang__)
                    ? base::Optional<TransformationMatrix>({})
+#else
+                   ? base::Optional<TransformationMatrix>()
+#endif
                    : base::nullopt;
       }
 

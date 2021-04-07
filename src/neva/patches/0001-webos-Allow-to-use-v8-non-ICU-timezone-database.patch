@@ -1,0 +1,56 @@
+From 91c74599f11078508c920115a7c5d993d96e07f9 Mon Sep 17 00:00:00 2001
+From: Eugeny Aristov <eugeny.aristov@lge.com>
+Date: Fri, 28 Feb 2020 12:48:50 +0300
+Subject: [PATCH] Allow to use v8 non-ICU timezone database
+
+:Release Notes:
+Allowing to use v8 non-ICU timezone database
+
+:Detailed Notes:
+When v8 has internationalization support (as it does in chromium68 by
+default), by default it uses the ICU timezone database. But this
+implementation is different, and would bypass our specific changes for
+webOS.
+
+:Testing Performed:
+Build WebOS
+Test 1:
+ - Go to settings time&date
+ - Unset automatic time&date
+ - Change to a daylight saving time that will shift 1 hour current time.
+ - Close settings, restart webapp-mgr (restart webapp-mgr) and open settings
+ - Time is shifted 1 hour both in settings time&date view and on LSM.
+Test 2:
+ - Through control manager set timezone to Fiji, automatic.
+ - Check time&zone in LSM, device settings time&zone and control manager
+   are the same.
+
+:QA Notes:
+
+:Issues Addressed:
+[NEVA-3559] Migrate [neva_upstreamable] patches from RP back, part 13
+[NEVA-3526] ([open][neva_upstreamable][dst] Allow to use v8 non-ICU timezone database.)
+---
+ src/flags/flag-definitions.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/flags/flag-definitions.h b/src/flags/flag-definitions.h
+index 2eb2bbc80e..b24b979eb9 100644
+--- a/src/flags/flag-definitions.h
++++ b/src/flags/flag-definitions.h
+@@ -279,8 +279,12 @@ HARMONY_SHIPPING(FLAG_SHIPPING_FEATURES)
+ #undef FLAG_SHIPPING_FEATURES
+ 
+ #ifdef V8_INTL_SUPPORT
++#if defined(OS_WEBOS)
++DEFINE_BOOL(icu_timezone_data, false, "get information about timezones from ICU")
++#else
+ DEFINE_BOOL(icu_timezone_data, true, "get information about timezones from ICU")
+ #endif
++#endif
+ 
+ #ifdef V8_ENABLE_DOUBLE_CONST_STORE_CHECK
+ #define V8_ENABLE_DOUBLE_CONST_STORE_CHECK_BOOL true
+-- 
+2.17.1
+

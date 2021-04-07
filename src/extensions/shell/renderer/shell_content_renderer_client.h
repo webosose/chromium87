@@ -11,6 +11,12 @@
 #include "base/macros.h"
 #include "content/public/renderer/content_renderer_client.h"
 
+#if defined(OS_WEBOS)
+#include "webos/renderer/webos_content_renderer_client.h"
+#elif defined(USE_NEVA_APPRUNTIME)
+#include "neva/app_runtime/renderer/app_runtime_content_renderer_client.h"
+#endif
+
 namespace blink {
 class WebURL;
 }  // namespace blink
@@ -22,7 +28,14 @@ class ExtensionsGuestViewContainerDispatcher;
 class ShellExtensionsRendererClient;
 
 // Renderer initialization and runtime support for app_shell.
-class ShellContentRendererClient : public content::ContentRendererClient {
+class ShellContentRendererClient
+#if defined(OS_WEBOS)
+    : public webos::WebOSContentRendererClient {
+#elif defined(USE_NEVA_APPRUNTIME)
+    : public neva_app_runtime::AppRuntimeContentRendererClient {
+#else
+    : public content::ContentRendererClient {
+#endif
  public:
   ShellContentRendererClient();
   ~ShellContentRendererClient() override;

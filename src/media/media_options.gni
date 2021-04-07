@@ -7,6 +7,7 @@ import("//build/config/chromecast_build.gni")
 import("//build/config/chromeos/args.gni")
 import("//build/config/features.gni")
 import("//media/gpu/args.gni")
+import("//neva/neva.gni")
 import("//testing/libfuzzer/fuzzer_test.gni")
 import("//third_party/libaom/options.gni")
 import("//third_party/libgav1/options.gni")
@@ -93,7 +94,7 @@ declare_args() {
   # Enable logging override, e.g. enable DVLOGs at build time.
   enable_logging_override = is_chromecast
 
-  enable_dav1d_decoder = !is_android && !is_ios
+  enable_dav1d_decoder = !is_android && !is_ios && !is_webos
 
   # Enable browser managed persistent metadata storage for EME persistent
   # session and persistent usage record session.

@@ -126,6 +126,17 @@
     [RuntimeEnabled=TouchEventFeatureDetection] attribute EventHandler ontouchmove;
     [RuntimeEnabled=TouchEventFeatureDetection] attribute EventHandler ontouchstart;
 
+    ///@name USE_NEVA_MEDIA
+    ///@{
+    // Neva media extensions
+    [RuntimeEnabled=UMSExtension] attribute EventHandler onumsmediainfo;
+    [RuntimeEnabled=AudioFocusExtension] attribute EventHandler onwebosmediafocuschange;
+    [RuntimeEnabled=CustomEventExtension] attribute EventHandler onbroadcasterrormsg;
+    [RuntimeEnabled=CustomEventExtension] attribute EventHandler ondvrerrormsg;
+    [RuntimeEnabled=CustomEventExtension] attribute EventHandler onupdatecamerastate;
+    [RuntimeEnabled=CustomEventExtension] attribute EventHandler onpipelinestarted;
+    ///@}
+
     // Selection API
     // https://w3c.github.io/selection-api/#extensions-to-globaleventhandlers
     attribute EventHandler onselectstart;

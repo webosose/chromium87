@@ -59,7 +59,8 @@ class SecurityOrigin;
 // in isolated worlds). An instance can be obtained by using
 // LocalDOMWindow::GetScriptController().
 class CORE_EXPORT ScriptController final
-    : public GarbageCollected<ScriptController> {
+    : public GarbageCollected<ScriptController>
+    {
  public:
   enum ExecuteScriptPolicy {
     kExecuteScriptWhenScriptsDisabled,
@@ -69,6 +70,7 @@ class CORE_EXPORT ScriptController final
   ScriptController(LocalDOMWindow& window,
                    LocalWindowProxyManager& window_proxy_manager)
       : window_(&window), window_proxy_manager_(&window_proxy_manager) {}
+
   void Trace(Visitor*) const;
 
   // This returns an initialized window proxy. (If the window proxy is not

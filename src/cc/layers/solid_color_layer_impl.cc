@@ -33,7 +33,8 @@ void SolidColorLayerImpl::AppendSolidQuads(
     SkColor color,
     bool force_anti_aliasing_off,
     SkBlendMode effect_blend_mode,
-    AppendQuadsData* append_quads_data) {
+    AppendQuadsData* append_quads_data
+    ) {
   // Transparent, solid quads can be omitted if the effect blend mode is
   // kSrcOver. Note that |effect_blend_mode| may be different than
   // |shared_quad_state->blend_mode|, if the blend is applied by a render
@@ -76,7 +77,8 @@ void SolidColorLayerImpl::AppendQuads(viz::CompositorRenderPass* render_pass,
   AppendSolidQuads(render_pass, draw_properties().occlusion_in_content_space,
                    shared_quad_state, gfx::Rect(bounds()), background_color(),
                    !layer_tree_impl()->settings().enable_edge_anti_aliasing,
-                   effect_node->blend_mode, append_quads_data);
+                   effect_node->blend_mode, append_quads_data
+                   );
 }
 
 const char* SolidColorLayerImpl::LayerTypeAsString() const {

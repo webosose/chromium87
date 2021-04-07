@@ -531,4 +531,42 @@ void RendererWebMediaPlayerDelegate::OnDestruct() {
   delete this;
 }
 
+#if defined(USE_NEVA_MEDIA)
+// WebMediaPlayerDelegate implementation.
+void RendererWebMediaPlayerDelegate::DidMediaActivated(int player_id) {
+  Send(
+      new MediaPlayerDelegateHostMsg_OnMediaActivated(routing_id(), player_id));
+}
+
+void RendererWebMediaPlayerDelegate::DidMediaActivationNeeded(int player_id) {
+  Send(new MediaPlayerDelegateHostMsg_OnMediaActivationRequested(routing_id(),
+                                                                 player_id));
+}
+
+void RendererWebMediaPlayerDelegate::DidMediaCreated(
+    int player_id,
+    bool will_use_media_resource) {
+  Send(new MediaPlayerDelegateHostMsg_OnMediaCreated(routing_id(), player_id,
+                                                     will_use_media_resource));
+}
+
+void RendererWebMediaPlayerDelegate::DidMediaSuspended(int player_id) {
+  Send(
+      new MediaPlayerDelegateHostMsg_OnMediaSuspended(routing_id(), player_id));
+}
+
+// content::RenderFrameObserver implementation.
+void RendererWebMediaPlayerDelegate::OnMediaActivationPermitted(int player_id) {
+  Observer* observer = id_map_.Lookup(player_id);
+  if (observer)
+    observer->OnMediaActivationPermitted();
+}
+
+void RendererWebMediaPlayerDelegate::OnSuspendMedia(int player_id) {
+  Observer* observer = id_map_.Lookup(player_id);
+  if (observer)
+    observer->OnSuspend();
+}
+#endif  // defined(USE_NEVA_MEDIA)
+
 }  // namespace media

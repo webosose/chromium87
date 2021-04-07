@@ -754,6 +754,12 @@ void RenderWidgetHostViewBase::SynchronizeVisualProperties() {
     host()->SynchronizeVisualProperties();
 }
 
+#if defined(USE_NEVA_MEDIA)
+gfx::AcceleratedWidget RenderWidgetHostViewBase::GetAcceleratedWidget() {
+  return gfx::kNullAcceleratedWidget;
+}
+#endif
+
 void RenderWidgetHostViewBase::DidNavigate() {
   if (host())
     host()->SynchronizeVisualProperties();

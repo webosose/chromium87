@@ -37,6 +37,10 @@
 #include "ui/events/keycodes/dom/dom_code.h"
 #include "ui/touch_selection/touch_selection_controller.h"
 
+#if defined(OS_WEBOS)
+#include "base/strings/utf_string_conversions.h"
+#endif  // defined(OS_WEBOS)
+
 #if defined(OS_WIN)
 #include "content/browser/renderer_host/render_frame_host_impl.h"
 #include "ui/aura/window_tree_host.h"
@@ -333,6 +337,18 @@ void RenderWidgetHostViewEventHandler::OnKeyEvent(ui::KeyEvent* event) {
       // Accept return key character events between press and release events.
       accept_return_character_ = event->type() == ui::ET_KEY_PRESSED;
     }
+
+#if defined(OS_WEBOS)
+    // The IME composition (e.g., for the Korean language) needs to be finished
+    // if either LEFT, RIGHT, UP or DOWN arrow key is pressed.
+    if ((event->key_code() == ui::VKEY_LEFT ||
+         event->key_code() == ui::VKEY_RIGHT ||
+         event->key_code() == ui::VKEY_UP ||
+         event->key_code() == ui::VKEY_DOWN) &&
+        host_view_->GetTextInputClient() &&
+        host_view_->GetTextInputClient()->HasCompositionText())
+      FinishImeCompositionSession();
+#endif
 
     // Call SetKeyboardFocus() for not only ET_KEY_PRESSED but also
     // ET_KEY_RELEASED. If a user closed the hotdog menu with ESC key press,
@@ -760,6 +776,32 @@ void RenderWidgetHostViewEventHandler::FinishImeCompositionSession() {
   // call to finish composition text should be made through the RWHVA itself
   // otherwise the following call to cancel composition will lead to an extra
   // IPC for finishing the ongoing composition (see https://crbug.com/723024).
+#if defined(OS_WEBOS)
+  TextInputManager* input_manager = host_view_->GetTextInputManager();
+  if (input_manager) {
+    const ui::mojom::TextInputState* input_state =
+        input_manager->GetTextInputState();
+    // input value inconsistency is possible if text is composed only
+    if (input_state && input_state->composition &&
+          input_state->composition.value().start() >= 0 &&
+          input_state->composition.value().end() >= 0) {
+      base::string16 composition_str = *input_state->value;
+      if (composition_str.length() > 0 &&
+          input_state->composition.value().end() >
+              input_state->composition.value().start()) {
+        composition_str = composition_str.substr(
+            input_state->composition.value().start(),
+            input_state->composition.value().end() -
+                input_state->composition.value().start());
+
+        host_view_->ImeCancelComposition();
+        host_view_->GetTextInputClient()->InsertText(composition_str);
+        return;
+      }
+    }
+  }
+#endif
+
   host_view_->GetTextInputClient()->ConfirmCompositionText(
       /* keep_selection */ false);
   host_view_->ImeCancelComposition();

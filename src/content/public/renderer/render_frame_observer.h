@@ -267,6 +267,20 @@ class CONTENT_EXPORT RenderFrameObserver : public IPC::Listener,
       const std::string& interface_name,
       mojo::ScopedMessagePipeHandle* interface_pipe) {}
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void DidResetStateToMarkNextPaintForContainer() {}
+#endif
+
+#if defined(USE_NEVA_MEDIA)
+  // Called when a compositor frame has committed.
+  virtual void OnMediaActivationPermitted(int player_id) {}
+  virtual void OnSuspendMedia(int player_id) {}
+
+  // Called when this RenderFrame is suspended or resumed.
+  // This interface is used for supporting legacy implementation.
+  virtual void OnSuppressedMediaPlay(bool suppressed) {}
+#endif
+
   // Similar to above but for handling Channel-associated interface requests.
   // Returns |true| if the request is handled by the implementation (taking
   // ownership of |*handle|) and |false| otherwise (leaving |*handle|

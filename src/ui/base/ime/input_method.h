@@ -29,6 +29,11 @@ class InputMethodObserver;
 class KeyEvent;
 class TextInputClient;
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+class LinuxInputMethodContext;
+///@}
+
 // An interface implemented by an object that encapsulates a native input method
 // service provided by the underlying operating system, and acts as a "system
 // wide" input method for all Chrome windows. A class that implements this
@@ -168,6 +173,12 @@ class InputMethod {
 
   // Return the keyboard controller; used only on Windows.
   virtual InputMethodKeyboardController* GetInputMethodKeyboardController() = 0;
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  // Returns input method context.
+  virtual LinuxInputMethodContext* GetInputMethodContext() = 0;
+  ///@}
 };
 
 }  // namespace ui

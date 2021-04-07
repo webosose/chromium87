@@ -1,0 +1,54 @@
+# Copyright 2019 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+import("//neva/neva.gni")
+import("//neva/pal_service/pal_service.gni")
+
+config("luna_service") {
+  libs = [ "luna-service2" ]
+}
+
+source_set("pal_service_webos") {
+  sources = [
+    "luna/luna_client.cc",
+    "luna/luna_client.h",
+    "luna/luna_client_impl.cc",
+    "luna/luna_client_impl.h",
+    "luna/luna_names.cc",
+    "luna/luna_names.h",
+    "memorymanager_delegate_webos.cc",
+    "memorymanager_delegate_webos.h",
+    "network_error_page_controller_delegate_webos.cc",
+    "network_error_page_controller_delegate_webos.h",
+    "pal_platform_factory_webos.cc",
+    "platform_system_delegate_webos.cc",
+    "platform_system_delegate_webos.h",
+    "system_servicebridge_delegate_webos.cc",
+    "system_servicebridge_delegate_webos.h",
+  ]
+
+  deps = [
+    "//base",
+    "//neva/pal_service/public/mojom",
+  ]
+
+  defines = pal_service_defines
+
+  configs += [
+    ":luna_service",
+    "//build/config/linux:glib",
+  ]
+}

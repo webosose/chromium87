@@ -183,6 +183,12 @@ source_set("common_sources") {
     "widget_type.h",
   ]
 
+  # Neva's files
+  sources += [
+    "content_neva_switches.cc",
+    "content_neva_switches.h",
+  ]
+
   configs += [
     "//build/config:precompiled_headers",
     "//content:content_implementation",
@@ -285,6 +291,10 @@ source_set("common_sources") {
 
   if (use_clang_profiling_inside_sandbox) {
     sources += [ "profiling_utils.h" ]
+  }
+
+  if (use_neva_media) {
+    deps += [ ":frame_video_window_factory_mojom" ]
   }
 }
 
@@ -392,4 +402,11 @@ mojom("renderer_type") {
 
 mojom("service_names") {
   sources = [ "service_names.mojom" ]
+}
+
+if (use_neva_media) {
+  mojom("frame_video_window_factory_mojom") {
+    sources = [ "neva/frame_video_window_factory.mojom" ]
+    deps = [ "//ui/platform_window:mojom" ]
+  }
 }

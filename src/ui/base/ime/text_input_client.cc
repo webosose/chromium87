@@ -9,4 +9,11 @@ namespace ui {
 TextInputClient::~TextInputClient() {
 }
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+bool TextInputClient::SystemKeyboardDisabled() const {
+  return false;
+}
+///@}
+
 }  // namespace ui

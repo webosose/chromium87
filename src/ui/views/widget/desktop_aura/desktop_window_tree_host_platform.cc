@@ -34,6 +34,12 @@
 
 DEFINE_UI_CLASS_PROPERTY_TYPE(views::DesktopWindowTreeHostPlatform*)
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "ui/platform_window/neva/ui_utils.h"
+#include "ui/views/widget/desktop_aura/neva/native_event_delegate.h"
+///@}
+
 namespace views {
 
 DEFINE_UI_CLASS_PROPERTY_KEY(DesktopWindowTreeHostPlatform*,
@@ -72,6 +78,10 @@ ui::PlatformWindowType GetPlatformWindowType(
     Widget::InitParams::Type window_type) {
   switch (window_type) {
     case Widget::InitParams::TYPE_WINDOW:
+    ///@name USE_NEVA_APPRUNTIME
+    ///@{
+    case Widget::InitParams::TYPE_WINDOW_FRAMELESS:
+    ///@}
       return ui::PlatformWindowType::kWindow;
     case Widget::InitParams::TYPE_MENU:
       return ui::PlatformWindowType::kMenu;
@@ -182,6 +192,14 @@ void DesktopWindowTreeHostPlatform::Init(const Widget::InitParams& params) {
   WindowTreeHost::OnAcceleratedWidgetAvailable();
   InitHost();
   window()->Show();
+
+#if defined(OS_WEBOS)
+  if (compositor()) {
+    compositor()->SetVisible(false);
+    // Transparent background shall be always supported.
+    compositor()->SetBackgroundColor(SK_ColorTRANSPARENT);
+  }
+#endif  // defined(OS_WEBOS)
 }
 
 void DesktopWindowTreeHostPlatform::OnNativeWidgetCreated(
@@ -683,6 +701,55 @@ void DesktopWindowTreeHostPlatform::OnClosed() {
   desktop_native_widget_aura_->OnHostClosed();
 }
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+void DesktopWindowTreeHostPlatform::OnKeyboardEnter() {
+#if defined(USE_NEVA_APPRUNTIME)
+  NativeEventDelegate* delegate =
+      desktop_native_widget_aura_->GetNativeEventDelegate();
+  if (delegate)
+    delegate->KeyboardEnter();
+#endif  // defined(USE_NEVA_APPRUNTIME)
+}
+
+void DesktopWindowTreeHostPlatform::OnKeyboardLeave() {
+#if defined(USE_NEVA_APPRUNTIME)
+  NativeEventDelegate* delegate =
+      desktop_native_widget_aura_->GetNativeEventDelegate();
+  if (delegate)
+    delegate->KeyboardLeave();
+#endif  // defined(USE_NEVA_APPRUNTIME)
+}
+
+void DesktopWindowTreeHostPlatform::OnWindowExposed() {
+#if defined(USE_NEVA_APPRUNTIME)
+  NativeEventDelegate* delegate =
+      desktop_native_widget_aura_->GetNativeEventDelegate();
+  if (delegate)
+    delegate->WindowHostExposed();
+#endif  // defined(USE_NEVA_APPRUNTIME)
+}
+
+void DesktopWindowTreeHostPlatform::OnWindowStateAboutToChange(
+    ui::PlatformWindowState state) {
+#if defined(USE_NEVA_APPRUNTIME)
+  NativeEventDelegate* delegate =
+      desktop_native_widget_aura_->GetNativeEventDelegate();
+  if (delegate)
+    delegate->WindowHostStateAboutToChange(ToWidgetState(state));
+#endif  // defined(USE_NEVA_APPRUNTIME)
+}
+
+void DesktopWindowTreeHostPlatform::OnCursorVisibilityChanged(bool visible) {
+#if defined(USE_NEVA_APPRUNTIME)
+  NativeEventDelegate* delegate =
+      desktop_native_widget_aura_->GetNativeEventDelegate();
+  if (delegate)
+    delegate->CursorVisibilityChanged(visible);
+#endif  // defined(USE_NEVA_APPRUNTIME)
+}
+///@}
+
 void DesktopWindowTreeHostPlatform::OnWindowStateChanged(
     ui::PlatformWindowState new_state) {
   bool was_minimized = old_state_ == ui::PlatformWindowState::kMinimized;
@@ -707,6 +774,13 @@ void DesktopWindowTreeHostPlatform::OnWindowStateChanged(
   // window. (The windows code doesn't need this because their window change is
   // synchronous.)
   ScheduleRelayout();
+
+#if defined(USE_NEVA_APPRUNTIME)
+  NativeEventDelegate* delegate =
+      desktop_native_widget_aura_->GetNativeEventDelegate();
+  if (delegate)
+    delegate->WindowHostStateChanged(ToWidgetState(new_state));
+#endif  // defined(USE_NEVA_APPRUNTIME)
 }
 
 void DesktopWindowTreeHostPlatform::OnCloseRequest() {

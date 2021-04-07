@@ -9,6 +9,11 @@
 #include "ui/ozone/platform/wayland/host/xdg_popup_wrapper_impl.h"
 #include "ui/ozone/platform/wayland/host/xdg_surface_wrapper_impl.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "ui/ozone/platform/wayland/host/wayland_extension.h"
+///@}
+
 namespace ui {
 
 ShellObjectFactory::ShellObjectFactory() = default;
@@ -17,6 +22,16 @@ ShellObjectFactory::~ShellObjectFactory() = default;
 std::unique_ptr<ShellSurfaceWrapper>
 ShellObjectFactory::CreateShellSurfaceWrapper(WaylandConnection* connection,
                                               WaylandWindow* wayland_window) {
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (connection->extension()) {
+    auto surface = connection->extension()->CreateShellSurface(wayland_window);
+    if (surface)
+      return surface->Initialize(true /* with_top_level */) ? std::move(surface)
+                                                            : nullptr;
+  }
+  ///@}
+
   if (connection->shell() || connection->shell_v6()) {
     auto surface =
         std::make_unique<XDGSurfaceWrapperImpl>(wayland_window, connection);
@@ -31,6 +46,22 @@ std::unique_ptr<ShellPopupWrapper> ShellObjectFactory::CreateShellPopupWrapper(
     WaylandConnection* connection,
     WaylandWindow* wayland_window,
     const gfx::Rect& bounds) {
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (connection->extension()) {
+    auto surface = connection->extension()->CreateShellSurface(wayland_window);
+    if (surface) {
+      if (!surface->Initialize(false /* with_top_level */))
+        return nullptr;
+
+      auto popup = connection->extension()->CreateShellPopup(wayland_window);
+      if (popup)
+        return popup->Initialize(connection, bounds) ? std::move(popup)
+                                                     : nullptr;
+    }
+  }
+  ///@}
+
   if (connection->shell() || connection->shell_v6()) {
     auto surface =
         std::make_unique<XDGSurfaceWrapperImpl>(wayland_window, connection);

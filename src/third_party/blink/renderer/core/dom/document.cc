@@ -5139,6 +5139,20 @@ bool Document::SetFocusedElement(Element* new_focused_element,
       last_focus_type_ = params.type;
 
     focused_element_->SetFocused(true, params.type);
+
+    // FIXME(neva): Check if we still need it or not for GCC 8.x.x
+#if defined(USE_NEVA_APPRUNTIME)
+    // Fix app_shell crash built by GCC 6.4.0
+    // focused_element_->SetFocused(true, params.type) can call
+    // SetFocusedElement and clear
+    // focused_element_.
+    if (focused_element_ != new_focused_element) {
+      UpdateStyleAndLayoutTree();
+      if (LocalFrame* frame = GetFrame())
+        frame->Selection().DidChangeFocus();
+      return false;
+    }
+#endif
     focused_element_->SetHasFocusWithinUpToAncestor(true, ancestor);
     DisplayLockUtilities::ElementGainedFocus(focused_element_.Get());
 

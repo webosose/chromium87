@@ -47,7 +47,12 @@ enum class RendererFactoryType {
   kMediaFoundation = 6,  // MediaFoundationRendererClientFactory
   kFuchsia = 7,          // FuchsiaRendererFactory
   kRemoting = 8,         // RemotingRendererFactory
+#if defined(USE_NEVA_MEDIA)
+  kNevaMediaPlayer = 9,  // NevaMediaPlayerRendererFactory
+  kMaxValue = kNevaMediaPlayer,
+#else
   kMaxValue = kRemoting,
+#endif
 };
 
 class MEDIA_EXPORT RendererFactorySelector {

@@ -892,6 +892,25 @@
       name: "navigatorPlatformOverride",
       type: "String",
     },
+    ///@name USE_NEVA_MEDIA
+    ///@{
+    {
+      name: "maxTimeupdateEventFrequency",
+      initial: "250",
+      type: "int",
+    },
+    ///@}
+    ///@name USE_NEVA_APPRUNTIME
+    ///@{
+    {
+      name: "disallowScrollbarsInMainFrame",
+      initial: "false",
+    },
+    {
+      name: "allowLocalResourceLoad",
+      initial: "false",
+    },
+    ///@}
     {
       name: "lowPriorityIframesThreshold",
       initial: "WebEffectiveConnectionType::kTypeUnknown",

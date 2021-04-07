@@ -376,6 +376,15 @@ struct MEDIA_EXPORT OpusSpecificBox : Box {
   uint32_t sample_rate;
 };
 
+#if defined(USE_NEVA_MEDIA)
+struct MEDIA_EXPORT EC3SpecificBox : Box {
+  DECLARE_BOX_METHODS(EC3SpecificBox);
+
+  FourCC format;
+  bool is_dolby_atmos;  // flag_ec3_extension_type_a
+};
+#endif
+
 struct MEDIA_EXPORT AudioSampleEntry : Box {
   DECLARE_BOX_METHODS(AudioSampleEntry);
 
@@ -389,6 +398,9 @@ struct MEDIA_EXPORT AudioSampleEntry : Box {
   ElementaryStreamDescriptor esds;
   FlacSpecificBox dfla;
   OpusSpecificBox dops;
+#if defined(USE_NEVA_MEDIA)
+  EC3SpecificBox ec3_box;
+#endif
 };
 
 struct MEDIA_EXPORT SampleDescription : Box {

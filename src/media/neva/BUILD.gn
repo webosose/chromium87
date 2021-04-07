@@ -1,0 +1,92 @@
+# Copyright 2020 LG Electronics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+import("//neva/neva.gni")
+
+if (is_webos) {
+  import ("//media/neva/webos/build.gni")
+}
+
+source_set("media_player_neva") {
+  public_configs = []
+  public_deps = [
+    "//base",
+    "//third_party/jsoncpp",
+  ]
+  deps = [ "//media/base" ]
+  sources = [
+    "media_player_neva_factory.h",
+    "media_player_neva_interface.cc",
+    "media_player_neva_interface.h",
+    "media_player_neva_types.h",
+    "media_track_info.cc",
+    "media_track_info.h",
+  ]
+  if (is_webos) {
+    configs += media_player_neva_webos.configs
+    public_configs += media_player_neva_webos.public_configs
+    deps += media_player_neva_webos.deps
+    public_deps += media_player_neva_webos.public_deps
+    sources += media_player_neva_webos.sources
+  } else if (use_neva_media_for_testing) {
+    sources += [
+      "fake_media_player_neva_factory.cc",
+      "fake_url_media_player.cc",
+      "fake_url_media_player.h",
+    ]
+  } else {
+    sources += [
+      "media_player_neva_factory_stub.cc",
+    ]
+  }
+}
+
+source_set("media_platform_api") {
+  public_configs = []
+  public_deps = [
+    "//base",
+    "//third_party/jsoncpp",
+  ]
+  deps = [ "//media/base" ]
+  sources = [
+    "media_codec_capability.cc",
+    "media_codec_capability.h",
+    "media_constants.h",
+    "media_platform_api.cc",
+    "media_platform_api.h",
+    "media_preferences.cc",
+    "media_preferences.h",
+  ]
+  if (is_webos) {
+    configs += media_platform_api_webos.configs
+    public_configs += media_platform_api_webos.public_configs
+    deps += media_platform_api_webos.deps
+    public_deps += media_platform_api_webos.public_deps
+    sources += media_platform_api_webos.sources
+  } else if (use_neva_media_for_testing) {
+    sources += [
+      "media_platform_api_mock.cc",
+      "media_platform_api_mock.h",
+      "media_preferences_stub.cc",
+    ]
+  } else {
+    sources += [
+      "media_platform_api_stub.cc",
+      "media_platform_api_stub.h",
+      "media_preferences_stub.cc",
+    ]
+  }
+}

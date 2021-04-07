@@ -758,6 +758,13 @@ struct BLINK_COMMON_EXPORT StructTraits<blink::mojom::WebPreferencesDataView,
     return r.do_not_update_selection_on_mutating_selection_range;
   }
 
+#if defined(USE_NEVA_MEDIA)
+  static uint32_t max_timeupdate_event_frequency(
+      const blink::web_pref::WebPreferences& r) {
+    return r.max_timeupdate_event_frequency;
+  }
+#endif
+
   static blink::web_pref::AutoplayPolicy autoplay_policy(
       const blink::web_pref::WebPreferences& r) {
     return r.autoplay_policy;

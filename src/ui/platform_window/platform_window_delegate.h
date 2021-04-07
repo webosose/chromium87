@@ -9,6 +9,11 @@
 #include "base/optional.h"
 #include "ui/gfx/native_widget_types.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "ui/platform_window/neva/platform_window_delegate.h"
+///@}
+
 namespace gfx {
 class Rect;
 class Size;
@@ -18,6 +23,11 @@ namespace ui {
 
 class Event;
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+class LinuxInputMethodContext;
+///@}
+
 enum class PlatformWindowState {
   kUnknown,
   kMaximized,
@@ -26,7 +36,12 @@ enum class PlatformWindowState {
   kFullScreen,
 };
 
-class COMPONENT_EXPORT(PLATFORM_WINDOW) PlatformWindowDelegate {
+class COMPONENT_EXPORT(PLATFORM_WINDOW) PlatformWindowDelegate
+    ///@name USE_NEVA_APPRUNTIME
+    ///@{
+    : public neva::PlatformWindowDelegate
+    ///@}
+{
  public:
   PlatformWindowDelegate();
   virtual ~PlatformWindowDelegate();
@@ -67,6 +82,11 @@ class COMPONENT_EXPORT(PLATFORM_WINDOW) PlatformWindowDelegate {
   // different from ui::ET_MOUSE_ENTERED which may not be generated when mouse
   // is captured either by implicitly or explicitly.
   virtual void OnMouseEnter() = 0;
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  virtual LinuxInputMethodContext* GetInputMethodContext();
+  ///@}
 };
 
 }  // namespace ui

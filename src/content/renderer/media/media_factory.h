@@ -123,6 +123,9 @@ class MediaFactory {
       const RenderFrameMediaPlaybackOptions& renderer_media_playback_options,
       media::DecoderFactory* decoder_factory,
       std::unique_ptr<media::RemotePlaybackClientWrapper> client_wrapper,
+#if defined(USE_NEVA_MEDIA)
+      bool use_neva_media,
+#endif
       base::WeakPtr<media::MediaObserver>* out_media_observer);
 
   blink::WebMediaPlayer* CreateWebMediaPlayerForMediaStream(

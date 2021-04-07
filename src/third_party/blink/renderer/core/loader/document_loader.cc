@@ -119,6 +119,11 @@
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
+#include "third_party/blink/public/mojom/neva/app_runtime_blink_delegate.mojom-blink.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -1966,6 +1971,22 @@ const AtomicString& DocumentLoader::MimeType() const {
 void DocumentLoader::BlockParser() {
   parser_blocked_count_++;
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+void DocumentLoader::CommitNonFirstMeaningfulPaintAfterLoad() {
+  if (frame_ && frame_->IsMainFrame() && state_ >= kCommitted) {
+    AssociatedInterfaceProvider* provider =
+        GetLocalFrameClient().GetRemoteNavigationAssociatedInterfaces();
+    if (provider) {
+      mojo::AssociatedRemote<mojom::blink::AppRuntimeBlinkDelegate>
+          app_runtime_blink_delegate;
+      provider->GetInterface(&app_runtime_blink_delegate);
+      if (app_runtime_blink_delegate.is_bound())
+        app_runtime_blink_delegate->DidNonFirstMeaningPaintAfterLoad();
+    }
+  }
+}
+#endif
 
 void DocumentLoader::ResumeParser() {
   parser_blocked_count_--;

@@ -16,6 +16,12 @@ if (is_linux || is_chromeos) {
   import("//build/linux/extract_symbols.gni")
 }
 
+import("//neva/neva.gni")
+import("//extensions/shell/neva/extensions_shell.gni")
+if (use_neva_extensions) {
+  import("//extensions/shell/neva_extensions.gni")
+}
+
 # This file depends on the legacy global sources assignment filter. It should
 # be converted to check target platform before assigning source files to the
 # sources variable. Remove this import and set_sources_assignment_filter call
@@ -238,6 +244,54 @@ source_set("app_shell_lib") {
     ]
   }
 
+  if (use_neva_appruntime) {
+    deps += [
+      "//neva/app_runtime",
+      "//neva/app_runtime/public/mojom:mojom_app_runtime_blink",
+      "//neva/injection/public/renderer",
+      "//neva/pal_service/public/mojom",
+      "//services/network/public/mojom",
+     ]
+  }
+
+  if (is_webos) {
+    sources += [
+      "neva/webos_language_listener.cc",
+      "neva/webos_language_listener.h",
+      "neva/webos_register_app.cc",
+      "neva/webos_register_app.h",
+    ]
+
+    deps += [
+      "//third_party/blink/public/mojom:mojom_platform",
+      "//webos:webos_impl",
+    ]
+  }
+
+  if (use_ozone && ozone_platform_wayland_external) {
+    deps += [
+      "//ozone/ui/webui",
+    ]
+  }
+
+  if (use_neva_media) {
+    deps += [
+      "//components/cdm/common",
+      "//components/cdm/renderer",
+    ]
+  }
+
+  if (use_neva_extensions && !use_cbe) {
+    sources -= webview_sources
+  }
+
+  if (use_neva_extensions && !use_cbe && is_desktop_linux) {
+    sources -= [
+      "browser/api/file_system/shell_file_system_delegate.cc",
+      "browser/api/file_system/shell_file_system_delegate.h",
+    ]
+  }
+
   if (enable_nacl) {
     sources += [
       "browser/shell_nacl_browser_delegate.cc",
@@ -263,7 +317,7 @@ source_set("app_shell_lib") {
   }
 }
 
-executable("app_shell") {
+app_shell_executable("app_shell") {
   # testonly because :app_shell_lib is testonly. See :app_shell_lib comment.
   testonly = true
   sources = [ "app/shell_main.cc" ]

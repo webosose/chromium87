@@ -59,11 +59,18 @@ class CORE_EXPORT V8CodeCache final {
   static std::tuple<v8::ScriptCompiler::CompileOptions,
                     ProduceCacheOptions,
                     v8::ScriptCompiler::NoCacheReason>
+#if defined(USE_FILESCHEME_CODECACHE)
+  GetCompileOptions(mojom::blink::V8CacheOptions,
+                    const SingleCachedMetadataHandler*,
+                    size_t source_text_length,
+                    ScriptSourceLocationType,
+                    bool is_local);
+#else
   GetCompileOptions(mojom::blink::V8CacheOptions,
                     const SingleCachedMetadataHandler*,
                     size_t source_text_length,
                     ScriptSourceLocationType);
-
+#endif
   static v8::ScriptCompiler::CachedData* CreateCachedData(
       const SingleCachedMetadataHandler*);
 

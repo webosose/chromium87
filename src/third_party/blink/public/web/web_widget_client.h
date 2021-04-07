@@ -99,6 +99,12 @@ class WebWidgetClient {
   // Called to show the widget according to the given policy.
   virtual void Show(WebNavigationPolicy) {}
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // FIXME(neva): To check if we still need it.
+  // SetVisibleState functionality was refactored after v.81
+  virtual void SetVisible(bool) {}
+#endif
+
   // Called to set the position of the widget's window in screen
   // coordinates. Note, the window includes any decorations such as borders,
   // scrollbars, URL bar, tab strip, etc. if they exist.

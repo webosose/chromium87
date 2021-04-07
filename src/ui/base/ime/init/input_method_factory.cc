@@ -29,6 +29,15 @@
 #include "ui/base/ime/input_method_minimal.h"
 #endif
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#if defined(USE_AURA)
+#include "ui/base/ime/linux/input_method_auralinux.h"
+#include "ui/base/ime/linux/neva/input_method_auralinux_neva.h"
+#include "ui/base/ui_base_neva_switches.h"
+#endif  // defined(USE_AURA)
+///@}
+
 namespace {
 
 ui::InputMethod* g_input_method_for_testing = nullptr;
@@ -69,6 +78,19 @@ std::unique_ptr<InputMethod> CreateInputMethod(
   return std::make_unique<InputMethodMac>(delegate);
 #elif defined(USE_X11) || defined(USE_OZONE)
 #if defined(USE_OZONE)
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (ui::OzonePlatform::IsWaylandExternal()) {
+#if defined(USE_AURA)
+    if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+            switches::kEnableNevaIme))
+      return std::make_unique<InputMethodAuraLinuxNeva>(delegate, widget);
+    else
+      return std::make_unique<InputMethodAuraLinux>(delegate);
+#endif  // defined(USE_AURA)
+  }
+  ///@}
+
   if (features::IsUsingOzonePlatform()) {
     return ui::OzonePlatform::GetInstance()->CreateInputMethod(delegate,
                                                                widget);

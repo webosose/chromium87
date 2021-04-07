@@ -1165,6 +1165,12 @@ void WebFrameWidgetBase::SetHandlingInputEvent(bool handling) {
   widget_base_->input_handler().set_handling_input_event(handling);
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+bool WebFrameWidgetBase::HasImeEventGuard() const {
+  return widget_base_->HasImeEventGuard();
+}
+#endif
+
 void WebFrameWidgetBase::ProcessInputEventSynchronouslyForTesting(
     const WebCoalescedInputEvent& event,
     HandledEventCallback callback) {

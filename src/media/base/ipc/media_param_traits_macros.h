@@ -45,6 +45,12 @@
 #include "media/base/media_drm_key_type.h"
 #endif  // BUILDFLAG(ENABLE_MEDIA_DRM_STORAGE)
 
+#if defined(USE_NEVA_MEDIA)
+#include "media/neva/media_platform_api.h"
+#include "media/neva/media_player_neva_types.h"
+#include "media/neva/media_track_info.h"
+#endif
+
 // Enum traits.
 
 IPC_ENUM_TRAITS_MAX_VALUE(media::AudioCodec, media::AudioCodec::kAudioCodecMax)
@@ -203,5 +209,20 @@ IPC_STRUCT_TRAITS_BEGIN(media::OverlayInfo)
   IPC_STRUCT_TRAITS_MEMBER(is_fullscreen)
   IPC_STRUCT_TRAITS_MEMBER(is_persistent_video)
 IPC_STRUCT_TRAITS_END()
+
+#if defined(USE_NEVA_MEDIA)
+IPC_ENUM_TRAITS_MAX_VALUE(media::MediaTrackType,
+                          media::MediaTrackType::kMaxValue)
+IPC_ENUM_TRAITS_MAX_VALUE(media::MediaPlayerType,
+                          media::MediaPlayerType::kMaxValue)
+IPC_ENUM_TRAITS_MAX_VALUE(media::MediaEventType,
+                          media::MediaEventType::kMaxValue)
+IPC_ENUM_TRAITS_MAX_VALUE(media::SuspendReason, media::SuspendReason::kMaxValue)
+IPC_ENUM_TRAITS_MAX_VALUE(media::FeedType, media::FeedType::kMaxValue)
+IPC_ENUM_TRAITS_MAX_VALUE(media::PlayerEvent, media::PlayerEvent::kMaxValue)
+IPC_ENUM_TRAITS_MAX_VALUE(media::RestorePlaybackMode,
+                          media::RestorePlaybackMode::kMaxValue)
+
+#endif  // USE_NEVA_MEDIA
 
 #endif  // MEDIA_BASE_IPC_MEDIA_PARAM_TRAITS_MACROS_H_

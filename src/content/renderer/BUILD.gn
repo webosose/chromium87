@@ -7,6 +7,7 @@ import("//build/config/features.gni")
 import("//build/config/ui.gni")
 import("//content/common/features.gni")
 import("//media/media_options.gni")
+import("//neva/neva.gni")
 import("//ppapi/buildflags/buildflags.gni")
 import("//third_party/webrtc/webrtc.gni")
 import("//tools/ipc_fuzzer/ipc_fuzzer.gni")
@@ -377,6 +378,32 @@ target(link_target_type, "renderer") {
     "//url",
     "//v8",
   ]
+
+  if (use_neva_media) {
+    import("//content/renderer/neva/build.gni")
+    sources += rebase_path(neva.sources,".")
+    import("//content/renderer/gpu/neva/build.gni")
+    sources += rebase_path(neva_gpu.sources,".")
+    import("//content/renderer/media/neva/build.gni")
+    sources += rebase_path(neva_media.sources,".")
+    deps += neva_media.deps
+    # Added deps
+    # //media/neva:media_platform_api
+    #  . For media::MediaPlatformAPI::SetMediaCodecCapability
+    #    from content/renderer/render_view_impl.cc
+    # //neva/neva_media_service
+    #  . For neva_media::MojoMediaPlayer and neva_media::MojoMediaPlatformAPI::Create
+    #    from content/renderer/media/neva/mojo_media_player_factory.cc
+    deps += [
+      "//media/neva:media_platform_api",
+      "//neva/neva_media_service",
+    ]
+  }
+
+  if (use_neva_suspend_media_capture) {
+    deps += [ "//content/renderer/media/audio/neva" ]
+  }
+
   allow_circular_includes_from = []
 
   if (is_android) {

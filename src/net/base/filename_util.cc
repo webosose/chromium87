@@ -114,7 +114,15 @@ bool FileURLToFilePath(const GURL& url, base::FilePath* file_path) {
   // https://crbug.com/585422 that this represents a potential security risk).
   // It isn't correct to keep it as "%2F", so this just fails. This is fine,
   // because '/' is not a valid filename character on either POSIX or Windows.
+#if defined(OS_WEBOS)
+  // For WebOS the local paths what have '../../' are encoded to '..%2f..%2f..',
+  // thus we need to exclude the '/' symbols from illegal set.
+  // For the browser the local files do not matter. So, this part can be applied
+  // to all applications, web applications and browser.
+  std::set<unsigned char> illegal_encoded_bytes;
+#else
   std::set<unsigned char> illegal_encoded_bytes{'/'};
+#endif
 
 #if defined(OS_WIN)
   // "%5C" ('\\') on Windows results in failure, for the same reason as '/'

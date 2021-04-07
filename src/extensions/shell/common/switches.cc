@@ -26,5 +26,9 @@ const char kCrashDumpsDir[] = "crash-dumps-dir";
 const char kEnableReporting[] = "enable-reporting";
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+const char kLaunchArgs[] = "launch-args";
+#endif
+
 }  // namespace switches
 }  // namespace extensions

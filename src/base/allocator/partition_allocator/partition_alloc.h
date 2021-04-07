@@ -1180,6 +1180,13 @@ ALWAYS_INLINE size_t PartitionRoot<thread_safe>::ActualSize(size_t size) {
 #endif
 }
 
+#if defined(USE_MEMORY_TRACE)
+template <bool thread_safe>
+BASE_EXPORT void PartitionDumpBucketStats(
+    PartitionBucketMemoryStats* stats_out,
+    const internal::PartitionBucket<thread_safe>* bucket);
+#endif
+
 namespace internal {
 template <bool thread_safe>
 struct BASE_EXPORT PartitionAllocator {

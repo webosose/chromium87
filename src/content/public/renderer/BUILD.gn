@@ -4,6 +4,7 @@
 
 import("//build/config/features.gni")
 import("//media/media_options.gni")
+import("//neva/neva.gni")
 import("//ppapi/buildflags/buildflags.gni")
 
 # This file depends on the legacy global sources assignment filter. It should
@@ -102,6 +103,17 @@ target(link_target_type, "renderer_sources") {
     # include headers from each other.
     "//content/renderer",
   ]
+
+  if (use_neva_appruntime) {
+    deps += [
+      "//neva/injection/public/renderer",
+      "//neva/injection/renderer:resources"
+    ]
+  }
+
+  if (use_neva_media) {
+    deps += [ "//content/public/common:frame_video_window_factory_mojom" ]
+  }
 
   if (is_android) {
     # For seccomp_sandbox_status_android.h.

@@ -55,6 +55,12 @@ struct StructTraits<media::mojom::AudioDecoderConfigDataView,
     return input.profile();
   }
 
+#if defined(USE_NEVA_MEDIA)
+  static bool is_dolby_atmos(const media::AudioDecoderConfig& input) {
+    return input.is_dolby_atmos();
+  }
+#endif
+
   static bool Read(media::mojom::AudioDecoderConfigDataView input,
                    media::AudioDecoderConfig* output);
 };

@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+    <title>Slow Application</title>
+</head>
+<body>
+<p id="out"></p>
+<script>
+setTimeout(function () {
+  document.getElementById("out").innerText = "ok";
+}, parseInt(window.location.search.substring(1)));
+</script>
+</body>
+</html>

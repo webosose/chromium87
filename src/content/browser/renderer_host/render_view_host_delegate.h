@@ -195,6 +195,11 @@ class CONTENT_EXPORT RenderViewHostDelegate {
   // navigation for the page.  Returns nullptr if there is no such navigation.
   virtual RenderFrameHostImpl* GetPendingMainFrame();
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  virtual void OverrideWebkitPrefs(blink::web_pref::WebPreferences* prefs) {}
+  ///@}
+
   // The RenderView finished the first visually non-empty paint.
   virtual void DidFirstVisuallyNonEmptyPaint(RenderViewHostImpl* source) {}
 

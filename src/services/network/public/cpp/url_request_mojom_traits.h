@@ -203,6 +203,11 @@ struct COMPONENT_EXPORT(NETWORK_CPP_BASE)
   static int32_t render_frame_id(const network::ResourceRequest& request) {
     return request.render_frame_id;
   }
+#if defined(USE_NEVA_APPRUNTIME)
+  static uint32_t process_id(const network::ResourceRequest& request) {
+    return request.process_id;
+  }
+#endif
   static bool is_main_frame(const network::ResourceRequest& request) {
     return request.is_main_frame;
   }

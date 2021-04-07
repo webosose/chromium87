@@ -33,6 +33,12 @@ OverlayStrategy OverlayProcessorUsingStrategy::Strategy::GetUMAEnum() const {
 OverlayProcessorUsingStrategy::OverlayProcessorUsingStrategy()
     : OverlayProcessorInterface() {}
 
+#if defined(USE_NEVA_MEDIA)
+OverlayProcessorUsingStrategy::OverlayProcessorUsingStrategy(
+    gpu::SurfaceHandle surface_handle)
+    : OverlayProcessorInterface(), neva_processor_(surface_handle) {}
+#endif
+
 OverlayProcessorUsingStrategy::~OverlayProcessorUsingStrategy() = default;
 
 gfx::Rect OverlayProcessorUsingStrategy::GetPreviousFrameOverlaysBoundingRect()
@@ -79,8 +85,20 @@ void OverlayProcessorUsingStrategy::ProcessForOverlays(
     previous_frame_underlay_was_unoccluded_ = false;
     NotifyOverlayPromotion(resource_provider, *candidates,
                            render_pass->quad_list);
+#if defined(USE_NEVA_MEDIA)
+    neva_processor_.ClearOverlayState();
+#endif
     return;
   }
+
+#if defined(USE_NEVA_MEDIA)
+  // TODO(neva, sync-to-87): RenderPassList changed to AggregatedRenderPassList.
+  // We don't investigate this change yet. Need to confirm NevaLayerOverlay
+  // works as before.
+  neva_processor_.Process(resource_provider,
+                          gfx::RectF(render_passes->back()->output_rect),
+                          render_passes, &overlay_damage_rect_, damage_rect);
+#endif
 
   // Only if that fails, attempt hardware overlay strategies.
   bool success = AttemptWithStrategies(

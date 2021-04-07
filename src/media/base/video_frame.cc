@@ -439,6 +439,9 @@ scoped_refptr<VideoFrame> VideoFrame::WrapExternalDataWithLayout(
 
   for (size_t i = 0; i < layout.planes().size(); ++i) {
     frame->data_[i] = data + layout.planes()[i].offset;
+#if defined(USE_NEVA_WEBRTC)
+    frame->data_size_[i] = data_size;
+#endif
   }
 
   return frame;
@@ -894,6 +897,7 @@ scoped_refptr<VideoFrame> VideoFrame::CreateBlackFrame(const gfx::Size& size) {
   const uint8_t kBlackY = 0x00;
   const uint8_t kBlackUV = 0x80;
   const base::TimeDelta kZero;
+
   return CreateColorFrame(size, kBlackY, kBlackUV, kBlackUV, kZero);
 }
 

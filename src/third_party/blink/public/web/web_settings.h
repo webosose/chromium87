@@ -255,6 +255,12 @@ class WebSettings {
   virtual void SetWideViewportQuirkEnabled(bool) = 0;
   virtual void SetMediaControlsEnabled(bool) = 0;
   virtual void SetDoNotUpdateSelectionOnMutatingSelectionRange(bool) = 0;
+#if defined(USE_NEVA_MEDIA)
+  virtual void SetMaxTimeupdateEventFrequency(int) = 0;
+#endif
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void SetDisallowScrollbarsInMainFrame(bool) = 0;
+#endif
   virtual void SetLowPriorityIframesThreshold(WebEffectiveConnectionType) = 0;
   virtual void SetLazyLoadEnabled(bool) = 0;
   virtual void SetLazyFrameLoadingDistanceThresholdPxUnknown(int) = 0;

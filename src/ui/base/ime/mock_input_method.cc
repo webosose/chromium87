@@ -134,4 +134,11 @@ MockInputMethod::GetInputMethodKeyboardController() {
   return &keyboard_controller_;
 }
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+LinuxInputMethodContext* MockInputMethod::GetInputMethodContext() {
+  return nullptr;
+}
+///@}
+
 }  // namespace ui

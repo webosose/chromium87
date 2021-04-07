@@ -21,6 +21,16 @@ clang_toolchain("clang_arm") {
   }
 }
 
+clang_toolchain("clang_webos_arm") {
+  toolprefix = "arm-starfishmllib32-linux-gnueabi-"
+  toolchain_args = {
+    current_cpu = "arm"
+    current_os = "linux"
+    is_clang = true
+    use_custom_libcxx = true
+  }
+}
+
 clang_toolchain("clang_arm64") {
   toolprefix = "aarch64-linux-gnu-"
   toolchain_args = {

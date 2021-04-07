@@ -54,7 +54,13 @@ void NoOpCacheStorageErrorCallback(CacheStorageCacheHandle cache_handle,
 // Case 4. base::nullopt otherwise.
 base::Optional<GURL> GetSecondaryKeyForCodeCache(const GURL& resource_url,
                                                  int render_process_id) {
+#if defined(USE_FILESCHEME_CODECACHE)
+  if (!resource_url.is_valid() ||
+      (!resource_url.SchemeIsHTTPOrHTTPS() &&
+       !content::neva::IsFileSchemeSupportedForCodeCache(resource_url)))
+#else
   if (!resource_url.is_valid() || !resource_url.SchemeIsHTTPOrHTTPS())
+#endif
     return base::nullopt;
 
   ProcessLock process_lock =
@@ -86,6 +92,10 @@ base::Optional<GURL> GetSecondaryKeyForCodeCache(const GURL& resource_url,
   // limit the cache to http/https/chrome processes.
   if (process_lock.matches_scheme(url::kHttpScheme) ||
       process_lock.matches_scheme(url::kHttpsScheme) ||
+#if defined(USE_FILESCHEME_CODECACHE)
+      content::neva::IsFileSchemeSupportedForCodeCache(
+          process_lock.lock_url()) ||
+#endif
       process_lock.matches_scheme(content::kChromeUIScheme)) {
     return process_lock.lock_url();
   }
@@ -119,7 +129,12 @@ void CodeCacheHostImpl::DidGenerateCacheableMetadata(
     const GURL& url,
     base::Time expected_response_time,
     mojo_base::BigBuffer data) {
+#if defined(USE_FILESCHEME_CODECACHE)
+  if (!url.SchemeIsHTTPOrHTTPS() &&
+      !content::neva::IsFileSchemeSupportedForCodeCache(url)) {
+#else
   if (!url.SchemeIsHTTPOrHTTPS()) {
+#endif
     mojo::ReportBadMessage("Invalid URL scheme for code cache.");
     return;
   }

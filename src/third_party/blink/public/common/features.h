@@ -35,6 +35,9 @@ BLINK_COMMON_EXPORT extern const base::Feature kForceSynchronousHTMLParsing;
 BLINK_COMMON_EXPORT extern const base::Feature kTopLevelAwait;
 BLINK_COMMON_EXPORT extern const base::Feature kEditingNG;
 BLINK_COMMON_EXPORT extern const base::Feature kLayoutNG;
+#if defined(USE_FILESCHEME_CODECACHE)
+BLINK_COMMON_EXPORT extern const base::Feature kLocalResourceCodeCache;
+#endif
 BLINK_COMMON_EXPORT extern const base::Feature kLayoutNGFieldset;
 BLINK_COMMON_EXPORT extern const base::Feature kLayoutNGRuby;
 BLINK_COMMON_EXPORT extern const base::Feature kFragmentItem;

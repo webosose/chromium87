@@ -12,6 +12,12 @@
 #include "ipc/ipc_listener.h"
 #include "ipc/ipc_sender.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+namespace blink {
+class WebLocalFrame;
+}
+#endif
+
 namespace content {
 class RenderView;
 class RenderViewImpl;
@@ -25,6 +31,10 @@ class CONTENT_EXPORT RenderViewObserver : public IPC::Listener,
   // always null-check each call to render_view() because the RenderView can
   // go away at any time.
   virtual void OnDestruct() = 0;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void DidClearWindowObject(blink::WebLocalFrame* frame) {}
+#endif
 
   // These match the WebKit API notifications
   virtual void DidCommitCompositorFrame() {}

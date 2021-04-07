@@ -1360,6 +1360,11 @@ class MODULES_EXPORT AXObject : public GarbageCollected<AXObject> {
   // not possible.
   LayoutObject* GetLayoutObjectForNativeScrollAction() const;
 
+  // TODO(neva): GCC 8.x.x
+#if !defined(__clang__)
+  bool IsAnyOfGrid() const;
+#endif
+
   // Max length for attributes such as aria-label.
   static const uint32_t kMaxStringAttributeLength = 10000;
   void TruncateAndAddStringAttribute(

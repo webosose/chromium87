@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/config/freetype/freetype.gni")
+import("//neva/neva.gni")
 import("//third_party/harfbuzz-ng/harfbuzz.gni")
 import("//third_party/libjpeg.gni")
 
@@ -15,6 +16,10 @@ config("system_libjpeg_config") {
 
 config("libjpeg_turbo_config") {
   defines = [ "USE_LIBJPEG_TURBO=1" ]
+# TODO(neva): Explicit specifying of the include_dirs is needed for clang_webos_arm
+  if (is_webos) {
+    include_dirs = [ "//third_party/libjpeg_turbo" ]
+  }
 }
 
 # This is a meta target that forwards to the system's libjpeg,
@@ -25,6 +30,11 @@ group("jpeg") {
     public_configs = [ ":system_libjpeg_config" ]
   } else if (use_libjpeg_turbo) {
     public_deps = [ "//third_party/libjpeg_turbo:libjpeg" ]
+    # TODO(neva): Compile libjpeg_turbo with clang for webOS
+    if (is_webos && current_cpu == "arm") {
+      public_deps -= [ "//third_party/libjpeg_turbo:libjpeg" ]
+      public_deps += [ "//third_party/libjpeg_turbo:libjpeg(//build/toolchain/linux:clang_webos_arm)" ]
+    }
     public_configs = [ ":libjpeg_turbo_config" ]
   } else {
     public_deps = [ "//third_party/libjpeg:libjpeg" ]

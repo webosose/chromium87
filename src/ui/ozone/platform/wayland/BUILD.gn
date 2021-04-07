@@ -8,6 +8,7 @@ import("//build/config/chromeos/ui_mode.gni")
 import("//build/config/linux/gtk/gtk.gni")
 import("//build/config/linux/pkg_config.gni")
 import("//gpu/vulkan/features.gni")
+import("//neva/neva.gni")
 import("//testing/libfuzzer/fuzzer_test.gni")
 import("//third_party/wayland/features.gni")
 import("//ui/ozone/platform/wayland/wayland.gni")
@@ -233,6 +234,43 @@ source_set("wayland") {
       "//third_party/minigbm",
       "//ui/gfx:memory_buffer",
       "//ui/gfx/linux:gbm",
+    ]
+  }
+
+  #@name USE_NEVA_APPRUNTIME
+  #@{
+  sources += [
+    "host/extended_input_wrapper.h",
+    "host/extended_input_device_wrapper.h",
+    "host/extended_seat_wrapper.h",
+    "host/input_manager_wrapper.h",
+    "host/input_panel.h",
+    "host/input_panel_manager.h",
+    "host/surface_group_compositor_wrapper.h",
+    "host/surface_group_wrapper.h",
+    "host/wayland_extension.h",
+    "host/wayland_extension_stub.cc",
+  ]
+
+  if (is_webos) {
+    sources -= [
+      "host/wayland_drm.cc",
+      "host/wayland_drm.h",
+      "host/wayland_extension_stub.cc",
+    ]
+
+    deps -= [ "//build/config/linux/libdrm" ]
+
+    deps += [ "extensions/webos" ]
+  }
+  #@}
+
+  if (use_neva_appruntime) {
+    sources += [
+      "host/wayland_seat.cc",
+      "host/wayland_seat.h",
+      "host/wayland_seat_manager.cc",
+      "host/wayland_seat_manager.h",
     ]
   }
 

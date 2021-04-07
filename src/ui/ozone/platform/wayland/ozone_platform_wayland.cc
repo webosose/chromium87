@@ -55,6 +55,10 @@
 #include "ui/ozone/platform/wayland/gpu/drm_render_node_handle.h"
 #endif
 
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+#include "ui/ozone/public/gpu_platform_support.h"
+#endif
+
 #if BUILDFLAG(USE_GTK)
 #include "ui/gtk/gtk_ui_delegate.h"  // nogncheck
 #include "ui/ozone/platform/wayland/host/gtk_ui_delegate_wayland.h"  //nogncheck
@@ -88,6 +92,12 @@ class OzonePlatformWayland : public OzonePlatform {
   InputController* GetInputController() override {
     return input_controller_.get();
   }
+
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  GpuPlatformSupport* GetGpuPlatformSupport() override {
+    return gpu_platform_support_.get();
+  }
+#endif
 
   GpuPlatformSupportHost* GetGpuPlatformSupportHost() override {
     return buffer_manager_connector_ ? buffer_manager_connector_.get()
@@ -194,6 +204,9 @@ class OzonePlatformWayland : public OzonePlatform {
 
   void InitializeGPU(const InitParams& args) override {
     buffer_manager_ = std::make_unique<WaylandBufferManagerGpu>();
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+    gpu_platform_support_.reset(CreateStubGpuPlatformSupport());
+#endif
     surface_factory_ = std::make_unique<WaylandSurfaceFactory>(
         connection_.get(), buffer_manager_.get());
     overlay_manager_ = std::make_unique<WaylandOverlayManager>();
@@ -275,6 +288,9 @@ class OzonePlatformWayland : public OzonePlatform {
   std::unique_ptr<CursorFactory> cursor_factory_;
   std::unique_ptr<InputController> input_controller_;
   std::unique_ptr<GpuPlatformSupportHost> gpu_platform_support_host_;
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  std::unique_ptr<GpuPlatformSupport> gpu_platform_support_;
+#endif
   std::unique_ptr<WaylandInputMethodContextFactory>
       input_method_context_factory_;
   std::unique_ptr<WaylandBufferManagerConnector> buffer_manager_connector_;

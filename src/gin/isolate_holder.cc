@@ -24,6 +24,10 @@
 #include "gin/v8_isolate_memory_dump_provider.h"
 #include "gin/v8_shared_memory_dump_provider.h"
 
+#if defined(USE_MEMORY_TRACE)
+#include "gin/neva/v8_isolate_memory_trace_provider.h"
+#endif
+
 namespace gin {
 
 namespace {
@@ -76,6 +80,11 @@ IsolateHolder::IsolateHolder(
     params.constraints.ConfigureDefaults(
         base::SysInfo::AmountOfPhysicalMemory(),
         base::SysInfo::AmountOfVirtualMemory());
+#if defined(USE_NEVA_APPRUNTIME)
+    // It passes now 0 values as params, but if each user/isolate wants to
+    // configure details for its own, the configured values have to be passed.
+    params.constraints.ConfigureDetails(0, 0, 0, 0);
+#endif
     params.array_buffer_allocator = allocator;
     params.allow_atomics_wait =
         atomics_wait_mode == AllowAtomicsWaitMode::kAllowAtomicsWait;
@@ -93,6 +102,9 @@ IsolateHolder::IsolateHolder(
 
   isolate_memory_dump_provider_.reset(
       new V8IsolateMemoryDumpProvider(this, task_runner));
+#if defined(USE_MEMORY_TRACE)
+  isolate_memory_trace_provider_.reset(new neva::V8IsolateMemoryTraceProvider(this));
+#endif
 }
 
 IsolateHolder::~IsolateHolder() {

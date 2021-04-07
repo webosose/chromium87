@@ -267,6 +267,27 @@
 #include "content/browser/media/key_system_support_impl.h"
 #endif
 
+#if defined(USE_MEMORY_TRACE) || defined(USE_NEVA_APPRUNTIME)
+#include "base/neva/base_switches.h"
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+#include "content/public/common/content_neva_switches.h"
+#include "neva/pal_service/pal_service.h"
+#include "neva/pal_service/public/mojom/memorymanager.mojom.h"
+#include "neva/pal_service/public/mojom/sample.mojom.h"
+#include "neva/pal_service/public/mojom/system_servicebridge.mojom.h"
+#if defined(ENABLE_NETWORK_ERROR_PAGE_CONTROLLER_WEBAPI)
+#include "neva/pal_service/public/mojom/network_error_page_controller.mojom.h"
+#endif  // defined(ENABLE_NETWORK_ERROR_PAGE_CONTROLLER_WEBAPI)
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
+#if defined(USE_NEVA_MEDIA)
+#include "media/base/media_switches_neva.h"
+#include "neva/neva_media_service/neva_media_service.h"
+#include "neva/neva_media_service/public/mojom/media_player.mojom.h"
+#endif
+
 #if BUILDFLAG(ENABLE_PLUGINS)
 #include "content/browser/plugin_service_impl.h"
 #include "ppapi/shared_impl/ppapi_switches.h"  // nogncheck
@@ -2259,6 +2280,12 @@ RenderProcessHostImpl::GetPeerConnectionTrackerHost() {
   return peer_connection_tracker_host_.get();
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void RenderProcessHostImpl::DropAllPeerConnections(base::OnceClosure cb) {
+  GetPeerConnectionTrackerHost()->DropAllConnections(cb);
+}
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
 // static
 void RenderProcessHostImpl::OverrideBatteryMonitorBinderForTesting(
     BatteryMonitorBinder binder) {
@@ -2267,6 +2294,52 @@ void RenderProcessHostImpl::OverrideBatteryMonitorBinderForTesting(
 
 void RenderProcessHostImpl::RegisterMojoInterfaces() {
   auto registry = std::make_unique<service_manager::BinderRegistry>();
+
+#if defined(USE_NEVA_APPRUNTIME)
+  AddUIThreadInterface(
+      registry.get(),
+      base::BindRepeating(
+          [](mojo::PendingReceiver<pal::mojom::MemoryManager> receiver) {
+            pal::GetPalService().BindMemoryManager(std::move(receiver));
+          }));
+
+  AddUIThreadInterface(
+      registry.get(),
+      base::BindRepeating(
+          [](mojo::PendingReceiver<pal::mojom::Sample> receiver) {
+            pal::GetPalService().BindSample(std::move(receiver));
+          }));
+
+  AddUIThreadInterface(
+      registry.get(),
+      base::BindRepeating(
+          [](mojo::PendingReceiver<pal::mojom::SystemServiceBridgeProvider>
+                 receiver) {
+            pal::GetPalService().BindSystemServiceBridgeProvider(
+                std::move(receiver));
+          }));
+#if defined(ENABLE_NETWORK_ERROR_PAGE_CONTROLLER_WEBAPI)
+  AddUIThreadInterface(
+      registry.get(),
+      base::BindRepeating(
+          [](mojo::PendingReceiver<pal::mojom::NetworkErrorPageController>
+                 receiver) {
+            pal::GetPalService().BindNetworkErrorPageController(
+                std::move(receiver));
+          }));
+#endif  // defined(ENABLE_NETWORK_ERROR_PAGE_CONTROLLER_WEBAPI)
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
+#if defined(USE_NEVA_MEDIA)
+  AddUIThreadInterface(
+      registry.get(),
+      base::BindRepeating(
+          [](mojo::PendingReceiver<neva_media::mojom::MediaServiceProvider>
+                 receiver) {
+            neva_media::GetNevaMediaService().BindMediaServiceProvider(
+                std::move(receiver));
+          }));
+#endif
 
   AddUIThreadInterface(registry.get(),
                        base::BindRepeating(&BindBatteryMonitor));
@@ -3364,6 +3437,9 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
     switches::kEnableOopRasterization,
     switches::kEnablePluginPlaceholderTesting,
     switches::kEnablePreciseMemoryInfo,
+#if defined(USE_NEVA_APPRUNTIME)
+    switches::kEnableSampleInjection,
+#endif
     switches::kEnableSkiaBenchmarking,
     switches::kEnableThreadedCompositing,
     switches::kEnableTouchDragDrop,
@@ -3490,6 +3566,25 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
 #if defined(USE_OZONE)
     switches::kOzonePlatform,
 #endif
+#if defined(USE_NEVA_MEDIA)
+    switches::kDisableWebMediaPlayerNeva,
+    switches::kEnableNevaMediaService,
+    switches::kFakeUrlMediaDuration,
+#endif
+#if defined(USE_NEVA_WEBRTC)
+    switches::kEnableWebRTCPlatformVideoDecoder,
+#endif
+#if defined(USE_NEVA_APPRUNTIME)
+    switches::kDecodedImageWorkingSetBudgetMB,
+    switches::kMemPressureGPUCacheSizeReductionFactor,
+    switches::kTileManagerLowMemPolicyBytesLimitReductionFactor,
+    blink::switches::kAllowScriptsToCloseWindows,
+    cc::switches::kEnableAggressiveReleasePolicy,
+#endif
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+    switches::kDisableSuspendAudioCapture,
+    switches::kDisableSuspendVideoCapture,
+#endif
 #if defined(ENABLE_IPC_FUZZER)
     switches::kIpcDumpDirectory,
     switches::kIpcFuzzerTestcase,
@@ -3500,6 +3595,43 @@ void RenderProcessHostImpl::PropagateBrowserCommandLineToRenderer(
 
   BrowserChildProcessHostImpl::CopyFeatureAndFieldTrialFlags(renderer_cmd);
   BrowserChildProcessHostImpl::CopyTraceStartupFlags(renderer_cmd);
+
+#if defined(USE_MEMORY_TRACE)
+  if (browser_cmd.HasSwitch(switches::kTraceMemoryRenderer)) {
+    // Pass kTraceMemoryRenderer switch to renderer
+    renderer_cmd->AppendSwitchASCII(
+        switches::kTraceMemoryRenderer,
+        browser_cmd.GetSwitchValueASCII(switches::kTraceMemoryRenderer));
+  }
+
+  if (browser_cmd.HasSwitch(switches::kTraceMemoryInterval)) {
+    // Pass kTraceMemoryInterval switch to renderer
+    renderer_cmd->AppendSwitchASCII(
+        switches::kTraceMemoryInterval,
+        browser_cmd.GetSwitchValueASCII(switches::kTraceMemoryInterval));
+  }
+
+  if (browser_cmd.HasSwitch(switches::kTraceMemoryToFile)) {
+    // Pass kTraceMemoryToFile switch to renderer
+    renderer_cmd->AppendSwitchASCII(
+        switches::kTraceMemoryToFile,
+        browser_cmd.GetSwitchValueASCII(switches::kTraceMemoryToFile));
+  }
+
+  if (browser_cmd.HasSwitch(switches::kTraceMemoryLogFormat)) {
+    // Pass kTraceMemoryLogFormat switch to renderer
+    renderer_cmd->AppendSwitchASCII(
+        switches::kTraceMemoryLogFormat,
+        browser_cmd.GetSwitchValueASCII(switches::kTraceMemoryLogFormat));
+  }
+
+  if (browser_cmd.HasSwitch(switches::kTraceMemoryByteUnit)) {
+    // Pass kTraceMemoryByteUnit switch to renderer
+    renderer_cmd->AppendSwitchASCII(
+        switches::kTraceMemoryByteUnit,
+        browser_cmd.GetSwitchValueASCII(switches::kTraceMemoryByteUnit));
+  }
+#endif
 
   // Only run the Stun trials in the first renderer.
   if (!has_done_stun_trials &&

@@ -115,6 +115,14 @@ class VIEWS_EXPORT DesktopWindowTreeHostPlatform
 
   // PlatformWindowDelegate:
   void OnClosed() override;
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  void OnKeyboardEnter() override;
+  void OnKeyboardLeave() override;
+  void OnWindowExposed() override;
+  void OnWindowStateAboutToChange(ui::PlatformWindowState state) override;
+  void OnCursorVisibilityChanged(bool visible) override;
+  ///@}
   void OnWindowStateChanged(ui::PlatformWindowState new_state) override;
   void OnCloseRequest() override;
   void OnWillDestroyAcceleratedWidget() override;

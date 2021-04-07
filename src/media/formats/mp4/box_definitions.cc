@@ -1424,6 +1424,50 @@ bool OpusSpecificBox::Parse(BoxReader* reader) {
   return true;
 }
 
+#if defined(USE_NEVA_MEDIA)
+EC3SpecificBox::EC3SpecificBox() : format(FOURCC_DEC3), is_dolby_atmos(false) {}
+
+EC3SpecificBox::EC3SpecificBox(const EC3SpecificBox& other) = default;
+
+EC3SpecificBox::~EC3SpecificBox() = default;
+
+FourCC EC3SpecificBox::BoxType() const {
+  return FOURCC_DEC3;
+}
+
+bool EC3SpecificBox::Parse(BoxReader* reader) {
+  uint16_t tmp_buf2 = 0;
+  uint8_t tmp_buf = 0;
+  uint8_t num_ind_sub = 0; // Number of independent substreams.
+  uint8_t num_dep_sub = 0; // Number of dependent substreams.
+
+  if (format != reader->type())
+    return false;
+
+  RCHECK(reader->Read2(&tmp_buf2));
+  num_ind_sub = tmp_buf2 & 0x07;
+  tmp_buf2 = 0;
+
+  for (int i = 0; i < num_ind_sub + 1; i++) {
+    RCHECK(reader->SkipBytes(2));
+    RCHECK(reader->Read1(&tmp_buf));
+    num_dep_sub = (tmp_buf >> 1) & 0x0f;
+    tmp_buf = 0;
+    if (num_dep_sub > 0)
+      RCHECK(reader->SkipBytes(1));
+  }
+
+  if (reader->HasBytes(2)) {
+    RCHECK(reader->Read2(&tmp_buf2));
+    is_dolby_atmos = (tmp_buf2 >> 8) & 0x01;
+  } else {
+    // Nothing to do : There is no information about Dolby ATMOS.
+  }
+
+  return true;
+}
+#endif
+
 AudioSampleEntry::AudioSampleEntry()
     : format(FOURCC_NULL),
       data_reference_index(0),
@@ -1462,6 +1506,11 @@ bool AudioSampleEntry::Parse(BoxReader* reader) {
         return false;
     }
   }
+
+#if defined(USE_NEVA_MEDIA)
+  if (!reader->MaybeReadChild(&ec3_box))
+    return false;
+#endif
 
   if (format == FOURCC_OPUS ||
       (format == FOURCC_ENCA && sinf.format.format == FOURCC_OPUS)) {

@@ -73,6 +73,9 @@ void RenderViewImpl::UpdateFontRenderingFromRendererPrefs() {
         blink::WebString::FromUTF8(prefs.system_font_family_name));
   }
 #endif
+#if defined(USE_NEVA_APPRUNTIME)
+  WebFontRenderStyle::SetAllowFakeBoldText(prefs.allow_fake_bold_text);
+#endif
 }
 
 }  // namespace content

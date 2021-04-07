@@ -4,6 +4,7 @@
 
 import("//build/config/ui.gni")
 import("//media/media_options.gni")
+import("//neva/neva.gni")
 import("//testing/test.gni")
 import("//tools/v8_context_snapshot/v8_context_snapshot.gni")
 
@@ -102,6 +103,21 @@ component("blink") {
     ]
 
     deps += [ "//media/remoting:remoting_constants" ]
+  }
+
+  if (use_neva_media) {
+    import ("//media/blink/neva/build.gni")
+    configs += neva.configs
+    if (!defined(public_configs)) {
+      public_configs = []
+    }
+    public_configs += neva.public_configs
+    deps += neva.deps
+    if (!defined(public_deps)) {
+      public_deps = []
+    }
+    public_deps += neva.public_deps
+    sources += rebase_path(neva.sources, ".")
   }
 }
 

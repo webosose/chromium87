@@ -24,7 +24,11 @@ bool PathProvider(int key, base::FilePath* result) {
   base::FilePath cur;
   switch (key) {
     case DIR_LOCALES:
+#if defined(USE_CBE)
+      if (!base::PathService::Get(base::DIR_ASSETS, &cur))
+#else
       if (!base::PathService::Get(base::DIR_MODULE, &cur))
+#endif  // defined(USE_CBE)
         return false;
 #if defined(OS_APPLE)
       // On Mac, locale files are in Contents/Resources, a sibling of the

@@ -17,6 +17,16 @@
 
 namespace content {
 
+#if defined(USE_FILESCHEME_CODECACHE)
+namespace neva {
+bool IsFileSchemeSupportedForCodeCache(const GURL& url) {
+  return base::FeatureList::IsEnabled(
+             blink::features::kLocalResourceCodeCache) &&
+         url.SchemeIsFile();
+}
+}  // namespace neva
+#endif
+
 namespace {
 
 constexpr char kPrefix[] = "_key";
@@ -31,15 +41,31 @@ constexpr char kSeparator[] = " \n";
 // enabled.
 void CheckValidKeys(const GURL& resource_url, const GURL& origin_lock) {
   // If the resource url is invalid don't cache the code.
+#if defined(USE_FILESCHEME_CODECACHE)
+  DCHECK(resource_url.is_valid() &&
+         (resource_url.SchemeIsHTTPOrHTTPS() ||
+          content::neva::IsFileSchemeSupportedForCodeCache(resource_url)));
+#else
   DCHECK(resource_url.is_valid() && resource_url.SchemeIsHTTPOrHTTPS());
+#endif
 
   // |origin_lock| should be either empty or should have Http/Https/chrome
   // schemes and it should not be a URL with opaque origin. Empty origin_locks
   // are allowed when the renderer is not locked to an origin.
+#if defined(USE_FILESCHEME_CODECACHE)
+  // |origin_lock| Should have file scheme when LocalResourceCodeCache feature
+  // is enabled
+  DCHECK(origin_lock.is_empty() ||
+         ((origin_lock.SchemeIsHTTPOrHTTPS() ||
+           origin_lock.SchemeIs(content::kChromeUIScheme) ||
+           content::neva::IsFileSchemeSupportedForCodeCache(origin_lock)) &&
+          !url::Origin::Create(origin_lock).opaque()));
+#else
   DCHECK(origin_lock.is_empty() ||
          ((origin_lock.SchemeIsHTTPOrHTTPS() ||
            origin_lock.SchemeIs(content::kChromeUIScheme)) &&
           !url::Origin::Create(origin_lock).opaque()));
+#endif
 }
 
 // Generates the cache key for the given |resource_url| and the |origin_lock|.

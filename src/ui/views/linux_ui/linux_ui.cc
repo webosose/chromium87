@@ -9,9 +9,27 @@
 #include "ui/gfx/skia_font_delegate.h"
 #include "ui/shell_dialogs/shell_dialog_linux.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#if defined(USE_OZONE)
+#include "ui/ozone/public/ozone_platform.h"
+#endif  // defined(USE_OZONE)
+///@}
+
 namespace {
 
 views::LinuxUI* g_linux_ui = nullptr;
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+bool IsWaylandExternal() {
+#if defined(USE_OZONE)
+  return ui::OzonePlatform::IsWaylandExternal();
+#else  // defined(USE_OZONE)
+  return false;
+#endif  // !defined(USE_OZONE)
+}
+///@}
 
 }  // namespace
 
@@ -23,8 +41,12 @@ void LinuxUI::SetInstance(LinuxUI* instance) {
   // Do not set IME instance for ozone as we delegate creating the input method
   // to OzonePlatforms instead. If this is set, OzonePlatform never sets a
   // context factory.
-  if (!features::IsUsingOzonePlatform())
+  ///@name USE_NEVA_APPRUNTIME
+  /// Added IsWaylandExternal() condition
+  ///@{
+  if (!features::IsUsingOzonePlatform() || IsWaylandExternal())
     LinuxInputMethodContextFactory::SetInstance(instance);
+  ///@}
   SkiaFontDelegate::SetInstance(instance);
   ShellDialogLinux::SetInstance(instance);
   ui::SetTextEditKeyBindingsDelegate(instance);

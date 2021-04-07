@@ -70,6 +70,11 @@ class COMPONENT_EXPORT(UI_BASE_IME) InputMethodBase
 
   InputMethodKeyboardController* GetInputMethodKeyboardController() override;
 
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  LinuxInputMethodContext* GetInputMethodContext() override;
+  ///@}
+
  protected:
   explicit InputMethodBase(internal::InputMethodDelegate* delegate);
   InputMethodBase(internal::InputMethodDelegate* delegate,

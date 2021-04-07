@@ -88,7 +88,6 @@
 #include "chrome/browser/ui/profile_picker.h"
 #include "chrome/browser/ui/user_manager.h"
 #endif
-
 #if defined(TOOLKIT_VIEWS) && defined(USE_X11)
 #include "ui/events/devices/x11/touch_factory_x11.h"  // nogncheck
 #endif

@@ -1024,6 +1024,19 @@ void ThreadableLoader::LoadRequest(
 
   request.SetRequestorOrigin(original_security_origin_);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  LocalFrame* frame = GetFrame();
+  if (frame) {
+    bool can_load_universal_access = false;
+    if (frame->GetSettings()->GetAllowUniversalAccessFromFileURLs() &&
+        frame->GetDocument()->Url().ProtocolIs("file"))
+      can_load_universal_access = true;
+
+    if (can_load_universal_access)
+      request.SetMode(network::mojom::RequestMode::kNoCors);
+  }
+#endif
+
   if (!actual_request_.IsNull())
     resource_loader_options.data_buffering_policy = kBufferData;
 

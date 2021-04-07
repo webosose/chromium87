@@ -2182,5 +2182,59 @@
       name: "XSLT",
       status: "stable",
     },
+///@name USE_FILESCHEME_CODECACHE
+///@{
+    {
+      name: "LocalResourceCodeCache",
+      status: "experimental",
+    },
+///@}
+///@name USE_NEVA_MEDIA
+///@{
+    {
+      name: "AudioFocusExtension",
+      status: "experimental",
+    },
+    {
+      name: "CustomEventExtension",
+      status: "experimental",
+    },
+    {
+      name: "MediaBlobAndDataURLSupportExtension",
+      status: "experimental",
+    },
+    {
+      name: "MediaSourceIsSupportedExtension",
+      status: "experimental",
+    },
+    {
+      name: "MediaTimelineOffset",
+      status: "experimental",
+    },
+    {
+      name: "NegativePlaybackRate",
+      status: "experimental",
+    },
+    {
+      name: "NoAudioAttr",
+      status: "experimental",
+    },
+    {
+      name: "PreloadDefaultIsAuto",
+      status: "experimental",
+    },
+    {
+      name: "SupportPreloadNoneOnMSE",
+      status: "experimental",
+    },
+    {
+      name: "UMSExtension",
+      status: "experimental",
+    },
+    {
+      name: "VideoTexture",
+      status: "experimental",
+    },
+///@}
   ],
 }

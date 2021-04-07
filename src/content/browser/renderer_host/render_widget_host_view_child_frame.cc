@@ -967,6 +967,15 @@ void RenderWidgetHostViewChildFrame::OnDidUpdateVisualPropertiesComplete(
   host()->SynchronizeVisualProperties();
 }
 
+#if defined(USE_NEVA_MEDIA)
+gfx::AcceleratedWidget RenderWidgetHostViewChildFrame::GetAcceleratedWidget() {
+  auto* root_view = GetRootRenderWidgetHostView();
+  if (root_view)
+    return root_view->GetAcceleratedWidget();
+  return gfx::kNullAcceleratedWidget;
+}
+#endif  // defined(USE_NEVA_MEDIA)
+
 void RenderWidgetHostViewChildFrame::DidNavigate() {
   host()->SynchronizeVisualProperties();
 }

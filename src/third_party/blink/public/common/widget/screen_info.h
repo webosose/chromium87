@@ -35,6 +35,10 @@
 #include "ui/gfx/display_color_spaces.h"
 #include "ui/gfx/geometry/rect.h"
 
+#if defined(USE_NEVA_MEDIA)
+#include "ui/gfx/geometry/point_f.h"
+#endif
+
 namespace blink {
 
 struct ScreenInfo {
@@ -76,6 +80,10 @@ struct ScreenInfo {
   //   some of the rectangle's coordinates may be negative values".
   gfx::Rect available_rect;
 
+#if defined(USE_NEVA_MEDIA)
+  gfx::PointF additional_contents_scale{1.f, 1.f};
+#endif
+
   // This is the orientation 'type' or 'name', as in landscape-primary or
   // portrait-secondary for examples.
   // See public/mojom/screen_orientation.mojom for the full list.
@@ -98,6 +106,9 @@ struct ScreenInfo {
            this->display_frequency == other.display_frequency &&
            this->rect == other.rect &&
            this->available_rect == other.available_rect &&
+#if defined(USE_NEVA_MEDIA)
+           this->additional_contents_scale == other.additional_contents_scale &&
+#endif
            this->orientation_type == other.orientation_type &&
            this->orientation_angle == other.orientation_angle;
   }

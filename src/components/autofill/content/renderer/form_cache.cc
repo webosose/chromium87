@@ -438,13 +438,23 @@ void FormCache::SaveInitialValues(
       const WebSelectElement select_element =
           element.ToConst<WebSelectElement>();
       initial_select_values_.insert(
+// (neva) GCC 8.x.x
+#if !defined(__clang__)
+          std::make_pair(FieldRendererId(select_element.UniqueRendererFormControlId()),
+#else
           std::make_pair(select_element.UniqueRendererFormControlId(),
+#endif
                          select_element.Value().Utf16()));
     } else {
       const WebInputElement* input_element = ToWebInputElement(&element);
       if (form_util::IsCheckableElement(input_element)) {
         initial_checked_state_.insert(
+// (neva) GCC 8.x.x
+#if !defined(__clang__)
+            std::make_pair(FieldRendererId(input_element->UniqueRendererFormControlId()),
+#else
             std::make_pair(input_element->UniqueRendererFormControlId(),
+#endif
                            input_element->IsChecked()));
       }
     }

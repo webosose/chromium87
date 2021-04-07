@@ -761,6 +761,10 @@ void RenderThreadImpl::Init() {
 
   variations_observer_ = std::make_unique<VariationsRenderThreadObserver>();
   AddObserver(variations_observer_.get());
+
+#if defined(USE_NEVA_MEDIA) || defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  neva::RenderThreadImpl<RenderThreadImpl>::Init();
+#endif
 }
 
 RenderThreadImpl::~RenderThreadImpl() {
@@ -1434,6 +1438,25 @@ void RenderThreadImpl::SetProcessState(
   background_state_ = background_state;
   visible_state_ = visible_state;
 }
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+void RenderThreadImpl::ProcessSuspend() {
+#if defined(USE_NEVA_APPRUNTIME)
+  page_pauser_ = blink::WebScopedPagePauser::Create();
+  ++suspension_count_;
+#endif
+}
+
+void RenderThreadImpl::ProcessResume() {
+#if defined(USE_NEVA_APPRUNTIME)
+  if (suspension_count_ > 0) {
+    page_pauser_.reset();
+    --suspension_count_;
+  }
+#endif
+}
+///@}
 
 void RenderThreadImpl::SetIsLockedToSite() {
   DCHECK(blink_platform_impl_);

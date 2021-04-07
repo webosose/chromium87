@@ -561,6 +561,9 @@ bool MimeUtil::IsCodecSupportedOnAndroid(
     // ----------------------------------------------------------------------
     // The following codecs are never supported.
     // ----------------------------------------------------------------------
+#if defined(USE_NEVA_MEDIA)
+    case VALID_CODEC:
+#endif
     case INVALID_CODEC:
     case THEORA:
       return false;

@@ -154,10 +154,19 @@ struct is_trivially_copy_constructible
 
 template <typename... T>
 struct is_trivially_copy_constructible<std::vector<T...>> : std::false_type {};
+
+template <typename T>
+struct is_trivially_move_constructible
+    : std::is_trivially_move_constructible<T> {};
+
+template <typename... T>
+struct is_trivially_move_constructible<std::vector<T...>> : std::false_type {};
 #else
 // Otherwise use std::is_trivially_copy_constructible as is.
 template <typename T>
 using is_trivially_copy_constructible = std::is_trivially_copy_constructible<T>;
+template <typename T>
+using is_trivially_move_constructible = std::is_trivially_move_constructible<T>;
 #endif
 
 // base::in_place_t is an implementation of std::in_place_t from

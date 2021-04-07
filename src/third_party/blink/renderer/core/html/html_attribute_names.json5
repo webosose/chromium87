@@ -314,6 +314,12 @@
     "step",
     "style",
     "summary",
+///@name USE_NEVA_APPRUNTIME
+///@{
+    "sensitive",
+    // Neva system keyboard
+    "systemkeyboard",
+///@}
     "tabindex",
     "target",
     "text",
@@ -334,5 +340,17 @@
     "webkitdirectory",
     "width",
     "wrap",
+
+///@name USE_NEVA_MEDIA
+///@{
+    // added for Neva HTMLMediaElement
+    "noaudio",
+    "onumsmediainfo",
+    "onbroadcasterrormsg",
+    "ondvrerrormsg",
+    "onupdatecamerastate",
+    "onpipelinestarted",
+    "texture",
+///@}
   ],
 }

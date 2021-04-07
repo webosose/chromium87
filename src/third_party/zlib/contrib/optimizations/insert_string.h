@@ -12,7 +12,7 @@
 #endif
 
 #include "cpu_features.h"
-
+#if !defined(OS_WEBOS)
 // clang-format off
 #if defined(CRC32_SIMD_SSE42_PCLMUL)
   #include <smmintrin.h>  /* Required to make MSVC bot build pass. */
@@ -70,8 +70,8 @@ local INLINE Pos insert_string_simd(deflate_state* const s, const Pos str) {
   s->prev[str & s->w_mask] = ret;
   return ret;
 }
-
 #endif // TARGET_CPU_WITH_CRC
+#endif  // !defined(OS_WEBOS)
 
 /* ===========================================================================
  * Update a hash value with the given input byte
@@ -112,6 +112,7 @@ local INLINE Pos insert_string(deflate_state* const s, const Pos str) {
  * Note: the generated compressed output is a valid DEFLATE stream but will
  * differ from vanilla zlib output ...
  */
+#if !defined(OS_WEBOS)
 #if defined(CHROMIUM_ZLIB_NO_CASTAGNOLI)
 /* ... so this build-time option can used to disable the SIMD symbol hasher
  * if matching vanilla zlib DEFLATE output is required.
@@ -123,5 +124,6 @@ local INLINE Pos insert_string(deflate_state* const s, const Pos str) {
   if (arm_cpu_enable_crc32)
     return insert_string_simd(s, str);
 #endif
+#endif  // !defined(OS_WEBOS)
   return insert_string_c(s, str);
 }

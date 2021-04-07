@@ -2100,6 +2100,9 @@ void WebView::ApplyWebPreferences(const web_pref::WebPreferences& prefs,
   settings->SetImmersiveModeEnabled(prefs.immersive_mode_enabled);
   settings->SetDoNotUpdateSelectionOnMutatingSelectionRange(
       prefs.do_not_update_selection_on_mutating_selection_range);
+#if defined(USE_NEVA_MEDIA)
+  settings->SetMaxTimeupdateEventFrequency(prefs.max_timeupdate_event_frequency);
+#endif
   WebRuntimeFeatures::EnableCSSHexAlphaColor(prefs.css_hex_alpha_color_enabled);
   WebRuntimeFeatures::EnableScrollTopLeftInterop(
       prefs.scroll_top_left_interop_enabled);

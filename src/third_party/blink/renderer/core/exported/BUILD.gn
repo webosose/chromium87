@@ -4,6 +4,8 @@
 import("//build/config/dcheck_always_on.gni")
 import("//third_party/blink/renderer/core/core.gni")
 
+import("//neva/neva.gni")
+
 blink_core_sources("exported") {
   sources = [
     "local_frame_client_impl.cc",
@@ -91,6 +93,10 @@ blink_core_sources("exported") {
     "//ui/base/cursor:cursor_base",
     "//ui/base/cursor/mojom:cursor_type_blink",
   ]
+
+  if (use_neva_appruntime) {
+    deps += [ "//third_party/blink/public/mojom:mojom_platform" ]
+  }
 
   defines = [ "BLINK_IMPLEMENTATION=1" ]
 }

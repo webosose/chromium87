@@ -45,6 +45,11 @@ bool StructTraits<media::mojom::AudioDecoderConfigDataView,
                      input.samples_per_second(), extra_data, encryption_scheme,
                      seek_preroll, input.codec_delay());
   output->set_profile(profile);
+
+#if defined(USE_NEVA_MEDIA)
+  output->set_is_dolby_atmos(input.is_dolby_atmos());
+#endif
+
   return output->IsValidConfig();
 }
 

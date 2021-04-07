@@ -159,6 +159,11 @@
 #include "media/mojo/mojom/remoting.mojom-forward.h"
 #endif
 
+#if defined(USE_NEVA_MEDIA)
+#include "content/browser/media/neva/frame_video_window_factory_impl.h"
+#include "content/common/media/neva/frame_media_controller.mojom.h"
+#endif
+
 class GURL;
 
 namespace blink {
@@ -1130,6 +1135,14 @@ class CONTENT_EXPORT RenderFrameHostImpl
   }
 
   bool is_mhtml_document() { return is_mhtml_document_; }
+
+#if defined(USE_NEVA_MEDIA)
+  // content::RendererFrameHost implementation
+  void PermitMediaActivation(int player_id) override;
+  void SetSuppressed(bool is_suppressed) override;
+  void SuspendMedia(int player_id) override;
+  gfx::AcceleratedWidget GetAcceleratedWidget() override;
+#endif
 
   // Notifies the render frame that |frame_tree_node_| has had the sticky
   // user activation bit set for the first time.
@@ -2556,6 +2569,17 @@ class CONTENT_EXPORT RenderFrameHostImpl
   void RecordDocumentCreatedUkmEvent(const url::Origin& origin,
                                      const ukm::SourceId document_ukm_source_id,
                                      ukm::UkmRecorder* ukm_recorder);
+
+#if defined(USE_NEVA_MEDIA)
+  // Lazily initializes and returns the mojom::FrameMediaController
+  // interface for this frame.
+  mojom::FrameMediaController* GetFrameMediaController();
+  mojo::AssociatedRemote<mojom::FrameMediaController> frame_media_controller_;
+
+  FrameVideoWindowFactoryImpl frame_video_window_factory_impl_{this};
+  mojo::AssociatedReceiver<content::mojom::FrameVideoWindowFactory>
+      frame_video_window_factory_receiver_{&frame_video_window_factory_impl_};
+#endif
 
   // The RenderViewHost that this RenderFrameHost is associated with.
   //

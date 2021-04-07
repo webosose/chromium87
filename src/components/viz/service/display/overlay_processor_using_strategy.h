@@ -18,6 +18,10 @@
 #include "components/viz/service/viz_service_export.h"
 #include "gpu/ipc/common/surface_handle.h"
 
+#if defined(USE_NEVA_MEDIA)
+#include "components/viz/service/display/neva/neva_layer_overlay.h"
+#endif
+
 namespace cc {
 class DisplayResourceProvider;
 }
@@ -63,6 +67,10 @@ class VIZ_SERVICE_EXPORT OverlayProcessorUsingStrategy
     virtual OverlayStrategy GetUMAEnum() const;
   };
   using StrategyList = std::vector<std::unique_ptr<Strategy>>;
+
+#if defined(USE_NEVA_MEDIA)
+  OverlayProcessorUsingStrategy(gpu::SurfaceHandle surface_handle);
+#endif
 
   ~OverlayProcessorUsingStrategy() override;
 
@@ -148,6 +156,10 @@ class VIZ_SERVICE_EXPORT OverlayProcessorUsingStrategy
       DisplayResourceProvider* display_resource_provider,
       const OverlayCandidateList& candidate_list,
       const QuadList& quad_list);
+
+#if defined(USE_NEVA_MEDIA)
+  NevaLayerOverlayProcessor neva_processor_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(OverlayProcessorUsingStrategy);
 };

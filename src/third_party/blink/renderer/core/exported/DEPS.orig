@@ -1,0 +1,23 @@
+include_rules = [
+  # Files in exported are allowed to take dependencies on other files in
+  # exported.
+  "+third_party/blink/renderer/core/exported",
+  "+third_party/blink/public/web",
+<<<<<<< HEAD
+  "+ui/base/mojom/ui_base_types.mojom-shared.h",
+  "+ui/gfx/transform.h",
+
+  "+neva/npapi",
+  "+ui/gfx",
+=======
+>>>>>>> e153cbfb40125... [oe][ds][drop_features][npapi] Revert "[npapi] In-process NPAPI plugins support"
+]
+
+specific_include_rules = {
+  "web_view_impl\.cc": [
+    "+base/command_line.h",
+    "+components/viz/common/features.h",
+    "+media/base/media_switches.h",
+    "+third_party/icu/source/common/unicode/uscript.h",
+  ],
+}

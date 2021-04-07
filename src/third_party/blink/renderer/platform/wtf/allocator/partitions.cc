@@ -118,6 +118,21 @@ void Partitions::DumpMemoryStats(
   LayoutPartition()->DumpStats("layout", is_light_dump, partition_stats_dumper);
 }
 
+#if defined(USE_MEMORY_TRACE)
+void Partitions::TraceMemoryStats(
+    base::neva::PartitionStatsTracer* partition_stats_tracer) {
+  // Object model and rendering partitions are not thread safe and can be
+  // accessed only on the main thread.
+  DCHECK(IsMainThread());
+
+  DecommitFreeableMemory();
+  PartitionTraceStatsGeneric(FastMallocPartition(), "fast_malloc", partition_stats_tracer);
+  PartitionTraceStatsGeneric(ArrayBufferPartition(), "array_buffer", partition_stats_tracer);
+  PartitionTraceStatsGeneric(BufferPartition(), "buffer", partition_stats_tracer);
+  PartitionTraceStats(LayoutPartition(), "layout", partition_stats_tracer);
+}
+#endif
+
 namespace {
 
 class LightPartitionStatsDumperImpl : public base::PartitionStatsDumper {

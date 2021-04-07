@@ -119,6 +119,21 @@ IPC_MESSAGE_ROUTED2(MediaPlayerDelegateHostMsg_OnMediaSizeChanged,
                     int /* delegate_id, distinguishes instances */,
                     gfx::Size /* new size of video */)
 
+#if defined(USE_NEVA_MEDIA)
+IPC_MESSAGE_ROUTED1(MediaPlayerDelegateHostMsg_OnMediaActivated,
+                    int /* delegate_id */)
+
+IPC_MESSAGE_ROUTED1(MediaPlayerDelegateHostMsg_OnMediaActivationRequested,
+                    int /* delegate_id */)
+
+IPC_MESSAGE_ROUTED2(MediaPlayerDelegateHostMsg_OnMediaCreated,
+                    int /* delegate_id */,
+                    bool /* will_use_media_resource */)
+
+IPC_MESSAGE_ROUTED1(MediaPlayerDelegateHostMsg_OnMediaSuspended,
+                    int /* delegate_id */)
+#endif  // defined(USE_NEVA_MEDIA)
+
 IPC_MESSAGE_ROUTED2(
     MediaPlayerDelegateHostMsg_OnPictureInPictureAvailabilityChanged,
     int /* delegate_id, distinguishes instances */,

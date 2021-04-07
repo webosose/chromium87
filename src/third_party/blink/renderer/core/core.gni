@@ -60,7 +60,9 @@ template("blink_core_sources") {
     # invoker defined it.
     visibility = [ "//third_party/blink/renderer/core/*" ]
 
-    deps = [ "//third_party/blink/renderer/core:prerequisites" ]
+    deps = [
+      "//third_party/blink/renderer/core:prerequisites",
+    ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
@@ -69,6 +71,7 @@ template("blink_core_sources") {
       "//third_party/blink/renderer/core:all_generators",
       "//third_party/blink/renderer/core:core_common",
     ]
+
     if (defined(invoker.public_deps)) {
       public_deps += invoker.public_deps
     }

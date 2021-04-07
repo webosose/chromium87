@@ -634,6 +634,12 @@ void GpuProcessHost::TerminateGpuProcess(const std::string& message) {
 }
 #endif  // defined(USE_OZONE)
 
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+void GpuProcessHost::SendGpuProcessMessage(IPC::Message* message) {
+  Send(message);
+}
+#endif  // defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
 // static
 GpuProcessHost* GpuProcessHost::FromID(int host_id) {
   DCHECK_CURRENTLY_ON(BrowserThread::IO);
@@ -852,6 +858,9 @@ bool GpuProcessHost::Init() {
     // WGL needs to create its own window and pump messages on it.
     options.message_pump_type = base::MessagePumpType::UI;
 #endif
+#if defined(USE_OZONE)
+    options.message_pump_type = gpu_preferences.message_pump_type;
+#endif
     if (base::FeatureList::IsEnabled(features::kGpuUseDisplayThreadPriority))
       options.priority = base::ThreadPriority::DISPLAY;
     in_process_gpu_thread_->StartWithOptions(options);
@@ -919,6 +928,13 @@ bool GpuProcessHost::Send(IPC::Message* msg) {
 
 bool GpuProcessHost::OnMessageReceived(const IPC::Message& message) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  ui::OzonePlatform::GetInstance()
+      ->GetGpuPlatformSupportHost()
+      ->OnMessageReceived(message);
+#endif  // defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
   return true;
 }
 

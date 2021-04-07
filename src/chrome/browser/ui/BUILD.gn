@@ -20,6 +20,7 @@ import("//components/offline_pages/buildflags/features.gni")
 import("//components/signin/features.gni")
 import("//device/vr/buildflags/buildflags.gni")
 import("//extensions/buildflags/buildflags.gni")
+import("//neva/neva.gni")
 import("//ppapi/buildflags/buildflags.gni")
 import("//printing/buildflags/buildflags.gni")
 import("//rlz/buildflags/buildflags.gni")
@@ -3257,6 +3258,29 @@ static_library("ui") {
         "views/frame/browser_desktop_window_tree_host_linux.h",
       ]
     }
+    #{neva
+    # Added for ozone wayland external port
+    if (use_ozone && ozone_platform_wayland_external) {
+      if (!is_desktop_linux) {
+        sources -= [
+          "views/frame/browser_desktop_window_tree_host_platform.cc",
+          "views/frame/browser_desktop_window_tree_host_platform.h",
+        ]
+      } else {
+        sources -= [
+          "views/frame/browser_desktop_window_tree_host_linux.cc",
+          "views/frame/browser_desktop_window_tree_host_linux.h",
+        ]
+      }
+      sources += [
+        "views/frame/browser_desktop_window_tree_host_ozone_wayland_external.cc",
+        "views/frame/browser_desktop_window_tree_host_ozone_wayland_external.h",
+      ]
+      deps += [
+        "//ozone/ui/webui",
+      ]
+    }
+    #neva}
     if (use_gtk) {
       # This is the only component that can interact with gtk.
       deps += [ "//ui/gtk" ]

@@ -141,8 +141,10 @@ void TaskQueue::ShutdownTaskQueueGracefully() {
 
   // If we've not been unregistered then this must occur on the main thread.
   DCHECK_CALLED_ON_VALID_THREAD(associated_thread_->thread_checker);
-  impl_->SetObserver(nullptr);
-  impl_->sequence_manager()->ShutdownTaskQueueGracefully(TakeTaskQueueImpl());
+  // Fix for GCC 6.4.0
+  internal::TaskQueueImpl* impl = impl_.get();
+  impl->SetObserver(nullptr);
+  impl->sequence_manager()->ShutdownTaskQueueGracefully(TakeTaskQueueImpl());
 }
 
 TaskQueue::TaskTiming::TaskTiming(bool has_wall_time, bool has_thread_time)

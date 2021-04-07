@@ -70,8 +70,14 @@ OverlayProcessorOzone::OverlayProcessorOzone(
     bool overlay_enabled,
     std::unique_ptr<ui::OverlayCandidatesOzone> overlay_candidates,
     std::vector<OverlayStrategy> available_strategies,
+#if defined(USE_NEVA_MEDIA)
+    gpu::SharedImageInterface* shared_image_interface,
+    gpu::SurfaceHandle surface_handle)
+    : OverlayProcessorUsingStrategy(surface_handle),
+#else
     gpu::SharedImageInterface* shared_image_interface)
     : OverlayProcessorUsingStrategy(),
+#endif
       overlay_enabled_(overlay_enabled),
       overlay_candidates_(std::move(overlay_candidates)),
       available_strategies_(std::move(available_strategies)),

@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <string>
 
-#include "base/check_op.h"
 #include "base/run_loop.h"
 #include "components/keep_alive_registry/keep_alive_registry.h"
 #include "extensions/browser/app_window/app_window.h"
@@ -47,6 +46,15 @@
 #else
 #include "ui/views/widget/desktop_aura/desktop_screen.h"
 #endif  // defined(OS_CHROMEOS)
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+// FIXME(neva): Added for switches::kEnableNevaIme usage
+// in CreateRootWindowControllerForDisplay() below.
+// Need to revise whole kEnableNevaIme usage.
+#include "base/command_line.h"
+#include "ui/base/ui_base_neva_switches.h"
+///@}
 
 namespace extensions {
 namespace {
@@ -186,11 +194,32 @@ void ShellDesktopControllerAura::AddAppWindow(AppWindow* app_window,
         CreateRootWindowControllerForDisplay(display);
   }
   root_window_controllers_[display.id()]->AddAppWindow(app_window, window);
+
+#if defined(OS_WEBOS)
+  const char kAppId[] = "appId";
+  const char kWebOSAccessPolicyKeysBack[] = "_WEBOS_ACCESS_POLICY_KEYS_BACK";
+  std::string app_id = app_window->GetApplicationId();
+  if (!app_id.empty()) {
+    aura::WindowTreeHost* window_tree_host =
+        root_window_controllers_[display.id()]->host();
+    window_tree_host->SetWindowProperty(kAppId, app_id);
+    window_tree_host->SetWindowProperty(kWebOSAccessPolicyKeysBack, "true");
+  }
+#endif
+#if defined(USE_NEVA_APPRUNTIME)
+  display::Screen::GetScreen()->AddObserver(this);
+  if (display::Screen::GetScreen()->GetNumDisplays() > 0)
+    current_rotation_ =
+        display::Screen::GetScreen()->GetPrimaryDisplay().RotationAsDegree();
+#endif
 }
 
 void ShellDesktopControllerAura::CloseAppWindows() {
   for (auto& pair : root_window_controllers_)
     pair.second->CloseAppWindows();
+#if defined(USE_NEVA_APPRUNTIME)
+  display::Screen::GetScreen()->RemoveObserver(this);
+#endif
 }
 
 void ShellDesktopControllerAura::CloseRootWindowController(
@@ -225,6 +254,50 @@ void ShellDesktopControllerAura::OnDisplayModeChanged(
     auto it = root_window_controllers_.find(display_mode->display_id());
     if (it != root_window_controllers_.end())
       it->second->UpdateSize(display_mode->current_mode()->size());
+  }
+}
+#endif
+
+#if defined(USE_NEVA_APPRUNTIME)
+namespace {
+bool IsLandscape(int rotation) {
+  return rotation == 0 || rotation == 180;
+}
+
+bool IsPortrait(int rotation) {
+  return rotation == 90 || rotation == 270;
+}
+}  // namespace
+
+void ShellDesktopControllerAura::OnDisplayMetricsChanged(
+    const display::Display& display,
+    uint32_t metrics) {
+  if (metrics & display::DisplayObserver::DISPLAY_METRIC_ROTATION) {
+    // Get new rotation from primary display
+    int screen_rotation =
+        display::Screen::GetScreen()->GetPrimaryDisplay().RotationAsDegree();
+
+    if (screen_rotation == current_rotation_)
+      return;
+
+    auto it = root_window_controllers_.find(display.id());
+    if (it != root_window_controllers_.end()) {
+      const gfx::Rect& rect =
+          it->second->GetDefaultParent(nullptr, gfx::Rect())->bounds();
+      if (!rect.IsEmpty()) {
+        if (IsLandscape(current_rotation_)) {
+          if (IsPortrait(screen_rotation)) {
+            it->second->UpdateSize(gfx::Size(rect.height(), rect.width()));
+          }
+        } else if (IsPortrait(current_rotation_)) {
+          if (IsLandscape(screen_rotation)) {
+            it->second->UpdateSize(gfx::Size(rect.height(), rect.width()));
+          }
+        }
+      }
+    }
+
+    current_rotation_ = screen_rotation;
   }
 }
 #endif
@@ -378,7 +451,8 @@ ShellDesktopControllerAura::CreateRootWindowControllerForDisplay(
   wm::SetActivationClient(root_window, focus_controller_.get());
   aura::client::SetCursorClient(root_window, cursor_manager_.get());
 
-  if (!input_method_) {
+  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
+  if (!command_line->HasSwitch(switches::kEnableNevaIme) && !input_method_) {
     // Create an input method and become its delegate.
     input_method_ = ui::CreateInputMethod(
         this, root_window_controller->host()->GetAcceleratedWidget());

@@ -481,6 +481,10 @@ class PLATFORM_EXPORT Resource : public GarbageCollected<Resource>,
 
   CachedMetadataHandler* CacheHandler() { return cache_handler_.Get(); }
 
+#if defined(USE_FILESCHEME_CODECACHE)
+  virtual bool CanCreateCachedMetadataHandler();
+#endif
+
  private:
   friend class ResourceLoader;
 

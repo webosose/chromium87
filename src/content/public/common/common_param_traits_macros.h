@@ -158,6 +158,17 @@ IPC_STRUCT_TRAITS_BEGIN(blink::mojom::RendererPreferences)
   IPC_STRUCT_TRAITS_MEMBER(arrow_bitmap_height_vertical_scroll_bar_in_dips)
   IPC_STRUCT_TRAITS_MEMBER(arrow_bitmap_width_horizontal_scroll_bar_in_dips)
 #endif
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  IPC_STRUCT_TRAITS_MEMBER(application_id)
+  IPC_STRUCT_TRAITS_MEMBER(media_codec_capability)
+  IPC_STRUCT_TRAITS_MEMBER(media_preferences)
+  IPC_STRUCT_TRAITS_MEMBER(board_type)
+  IPC_STRUCT_TRAITS_MEMBER(allow_fake_bold_text)
+  IPC_STRUCT_TRAITS_MEMBER(file_security_origin)
+  IPC_STRUCT_TRAITS_MEMBER(use_unlimited_media_policy)
+  IPC_STRUCT_TRAITS_MEMBER(is_enact_browser)
+  ///@}
 IPC_STRUCT_TRAITS_END()
 
 IPC_ENUM_TRAITS(blink::DragOperation)  // Bitmask.

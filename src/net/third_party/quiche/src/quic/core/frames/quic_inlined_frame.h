@@ -12,6 +12,11 @@
 
 namespace quic {
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
 // QuicInlinedFrame is the base class of all frame types that is inlined in the
 // QuicFrame class. It gurantees all inlined frame types contain a 'type' field
 // at offset 0, such that QuicFrame.type can get the correct frame type for both
@@ -28,6 +33,10 @@ struct QUIC_EXPORT_PRIVATE QuicInlinedFrame {
                   "Frames larger than 24 bytes should not be inlined.");
   }
 };
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 }  // namespace quic
 

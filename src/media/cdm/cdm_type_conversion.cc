@@ -93,12 +93,19 @@ cdm::HdcpVersion ToCdmHdcpVersion(HdcpVersion hdcp_version) {
       return cdm::kHdcpVersion2_1;
     case HdcpVersion::kHdcpVersion2_2:
       return cdm::kHdcpVersion2_2;
+#if defined(OS_WEBOS)
+  }
+
+  NOTREACHED();
+  return cdm::kHdcpVersion2_2;
+#else
     case HdcpVersion::kHdcpVersion2_3:
       return cdm::kHdcpVersion2_3;
   }
 
   NOTREACHED() << "Unexpected HdcpVersion";
   return cdm::kHdcpVersion2_3;
+#endif
 }
 
 cdm::SessionType ToCdmSessionType(CdmSessionType session_type) {
@@ -360,8 +367,10 @@ cdm::VideoCodec ToCdmVideoCodec(VideoCodec codec) {
       return cdm::kCodecH264;
     case kCodecVP9:
       return cdm::kCodecVp9;
+#if !defined(OS_WEBOS)
     case kCodecAV1:
       return cdm::kCodecAv1;
+#endif
     default:
       DVLOG(1) << "Unsupported VideoCodec " << codec;
       return cdm::kUnknownVideoCodec;
@@ -388,6 +397,32 @@ VideoCodec ToMediaVideoCodec(cdm::VideoCodec codec) {
 
 cdm::VideoCodecProfile ToCdmVideoCodecProfile(VideoCodecProfile profile) {
   switch (profile) {
+#if defined(OS_WEBOS)
+    case VP8PROFILE_ANY:
+    // TODO(servolk): See crbug.com/592074. We'll need to update this code to
+    // handle different VP9 profiles properly after adding VP9 profiles in
+    // media/cdm/api/content_decryption_module.h in a separate CL.
+    // For now return kProfileNotNeeded to avoid breaking unit tests.
+    case VP9PROFILE_PROFILE0:
+    case VP9PROFILE_PROFILE1:
+    case VP9PROFILE_PROFILE2:
+    case VP9PROFILE_PROFILE3:
+      return cdm::kProfileNotNeeded;
+    case H264PROFILE_BASELINE:
+      return cdm::kH264ProfileBaseline;
+    case H264PROFILE_MAIN:
+      return cdm::kH264ProfileMain;
+    case H264PROFILE_EXTENDED:
+      return cdm::kH264ProfileExtended;
+    case H264PROFILE_HIGH:
+      return cdm::kH264ProfileHigh;
+    case H264PROFILE_HIGH10PROFILE:
+      return cdm::kH264ProfileHigh10;
+    case H264PROFILE_HIGH422PROFILE:
+      return cdm::kH264ProfileHigh422;
+    case H264PROFILE_HIGH444PREDICTIVEPROFILE:
+      return cdm::kH264ProfileHigh444Predictive;
+#else
     case VP8PROFILE_ANY:
       return cdm::kProfileNotNeeded;
     case VP9PROFILE_PROFILE0:
@@ -418,6 +453,7 @@ cdm::VideoCodecProfile ToCdmVideoCodecProfile(VideoCodecProfile profile) {
       return cdm::kAv1ProfileHigh;
     case AV1PROFILE_PROFILE_PRO:
       return cdm::kAv1ProfilePro;
+#endif
     default:
       DVLOG(1) << "Unsupported VideoCodecProfile " << profile;
       return cdm::kUnknownVideoCodecProfile;
@@ -473,6 +509,7 @@ cdm::VideoFormat ToCdmVideoFormat(VideoPixelFormat format) {
       return cdm::kYv12;
     case PIXEL_FORMAT_I420:
       return cdm::kI420;
+#if !defined(OS_WEBOS)
     case PIXEL_FORMAT_YUV420P9:
       return cdm::kYUV420P9;
     case PIXEL_FORMAT_YUV420P10:
@@ -491,6 +528,7 @@ cdm::VideoFormat ToCdmVideoFormat(VideoPixelFormat format) {
       return cdm::kYUV422P12;
     case PIXEL_FORMAT_YUV444P12:
       return cdm::kYUV444P12;
+#endif
     default:
       DVLOG(1) << "Unsupported VideoPixelFormat " << format;
       return cdm::kUnknownVideoFormat;
@@ -620,4 +658,28 @@ void ToCdmInputBuffer(const DecoderBuffer& encrypted_buffer,
   }
 }
 
+#if defined(USE_NEVA_MEDIA)
+cdm::Exception ToCdmExceptionType(cdm::Error error) {
+  switch (error) {
+    case cdm::kNotSupportedError:
+      return cdm::kExceptionNotSupportedError;
+    case cdm::kInvalidStateError:
+      return cdm::kExceptionInvalidStateError;
+    case cdm::kInvalidAccessError:
+      return cdm::kExceptionTypeError;
+    case cdm::kQuotaExceededError:
+      return cdm::kExceptionQuotaExceededError;
+
+    // TODO(jrummell): Remove these once CDM_8 is no longer supported.
+    // https://crbug.com/737296.
+    case cdm::kUnknownError:
+    case cdm::kClientError:
+    case cdm::kOutputError:
+      return cdm::kExceptionNotSupportedError;
+  }
+
+  NOTREACHED() << "Unexpected cdm::Error " << error;
+  return cdm::kExceptionInvalidStateError;
+}
+#endif
 }  // namespace media

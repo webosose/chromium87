@@ -41,6 +41,9 @@ class CORE_EXPORT FirstMeaningfulPaintDetector
                                          int visible_height);
   void NotifyInputEvent();
   void NotifyPaint();
+#if defined(USE_NEVA_APPRUNTIME)
+  void ResetStateToMarkNextPaintForContainer();
+#endif
   void ReportSwapTime(PaintEvent, WebSwapResult, base::TimeTicks);
   void NotifyFirstContentfulPaint(base::TimeTicks swap_stamp);
   void OnNetwork2Quiet();
@@ -67,6 +70,9 @@ class CORE_EXPORT FirstMeaningfulPaintDetector
   void RegisterNotifySwapTime(PaintEvent);
   void SetFirstMeaningfulPaint(base::TimeTicks swap_stamp);
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void NotifyNonFirstMeaningfulPaint();
+#endif
   bool next_paint_is_meaningful_ = false;
   HadUserInput had_user_input_ = kNoUserInput;
   HadUserInput had_user_input_before_provisional_first_meaningful_paint_ =

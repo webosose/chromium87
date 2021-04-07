@@ -184,6 +184,10 @@ bool DevToolsAgentHost::IsDebuggerAttached(WebContents* web_contents) {
 void RenderFrameDevToolsAgentHost::AddAllAgentHosts(
     DevToolsAgentHost::List* result) {
   for (WebContentsImpl* wc : WebContentsImpl::GetAllWebContents()) {
+#if defined(USE_NEVA_APPRUNTIME)
+    if (!wc->IsInspectablePage())
+      continue;
+#endif
     for (FrameTreeNode* node : wc->GetFrameTree()->Nodes()) {
       if (!node->current_frame_host() || !ShouldCreateDevToolsForNode(node))
         continue;

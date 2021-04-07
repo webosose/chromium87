@@ -137,6 +137,20 @@ Resource* PreloadRequest::Start(Document* document) {
     // the async request to the blocked script here.
   }
 
+#if defined(USE_NEVA_APPRUNTIME)
+  auto* frame = document->Loader()->GetFrame();
+  if (frame) {
+    bool can_load_universal_access = false;
+    if (frame->GetSettings()->GetAllowUniversalAccessFromFileURLs() &&
+        document->Url().ProtocolIs("file"))
+      can_load_universal_access = true;
+
+    if (can_load_universal_access)
+      params.MutableResourceRequest().SetMode(
+          network::mojom::RequestMode::kNoCors);
+  }
+#endif
+
   return PreloadHelper::StartPreload(resource_type_, params, *document);
 }
 

@@ -14,6 +14,12 @@
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
 #include "third_party/blink/renderer/platform/wtf/cross_thread_functional.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/renderer/core/dom/document.h"
+#include "third_party/blink/renderer/core/loader/document_loader.h"
+#include "third_party/blink/renderer/core/loader/idleness_detector.h"
+#endif
+
 namespace blink {
 
 namespace {
@@ -109,9 +115,20 @@ void FirstMeaningfulPaintDetector::NotifyInputEvent() {
 }
 
 void FirstMeaningfulPaintDetector::OnNetwork2Quiet() {
+#if defined(USE_NEVA_APPRUNTIME)
+  if (!GetDocument() || network_quiet_reached_)
+    return;
+  if (paint_timing_->FirstContentfulPaintRendered().is_null()) {
+    // notify paint when First Meaningful Paint was not detected until loading
+    // resources
+    NotifyNonFirstMeaningfulPaint();
+    return;
+  }
+#else
   if (!GetDocument() || network_quiet_reached_ ||
       paint_timing_->FirstContentfulPaintRendered().is_null())
     return;
+#endif
   network_quiet_reached_ = true;
 
   if (!provisional_first_meaningful_paint_.is_null()) {
@@ -142,6 +159,13 @@ void FirstMeaningfulPaintDetector::OnNetwork2Quiet() {
       SetFirstMeaningfulPaint(first_meaningful_paint_swap);
     }
   }
+#if defined(USE_NEVA_APPRUNTIME)
+  else {
+    // notify paint when First Meaningful Paint was not detected until loading
+    // resources
+    NotifyNonFirstMeaningfulPaint();
+  }
+#endif
 }
 
 bool FirstMeaningfulPaintDetector::SeenFirstMeaningfulPaint() const {
@@ -220,6 +244,33 @@ void FirstMeaningfulPaintDetector::SetFirstMeaningfulPaint(
   paint_timing_->SetFirstMeaningfulPaint(
       swap_stamp, had_user_input_before_provisional_first_meaningful_paint_);
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+void FirstMeaningfulPaintDetector::ResetStateToMarkNextPaintForContainer() {
+  next_paint_is_meaningful_ = false;
+  had_user_input_ = kNoUserInput;
+  had_user_input_before_provisional_first_meaningful_paint_ = kNoUserInput;
+  max_significance_so_far_ = 0.0;
+  provisional_first_meaningful_paint_ = base::TimeTicks::Now();
+  provisional_first_meaningful_paint_swap_ = base::TimeTicks::Now();
+  accumulated_significance_while_having_blank_text_ = 0.0;
+  prev_layout_object_count_ = 0;
+  seen_first_meaningful_paint_candidate_ = false;
+  outstanding_swap_promise_count_ = 0;
+  defer_first_meaningful_paint_ = kDoNotDefer;
+
+  if (GetDocument() && GetDocument()->GetFrame() &&
+      GetDocument()->GetFrame()->GetIdlenessDetector())
+    GetDocument()->GetFrame()->GetIdlenessDetector()->DomContentLoadedEventFired();
+}
+
+void FirstMeaningfulPaintDetector::NotifyNonFirstMeaningfulPaint() {
+  DCHECK(GetDocument());
+
+  if (GetDocument() && GetDocument()->Loader())
+    GetDocument()->Loader()->CommitNonFirstMeaningfulPaintAfterLoad();
+}
+#endif
 
 // static
 void FirstMeaningfulPaintDetector::SetTickClockForTesting(

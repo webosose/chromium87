@@ -9,6 +9,12 @@
 #include "ui/views/widget/desktop_aura/desktop_screen.h"
 #include "ui/views/widget/desktop_aura/desktop_window_tree_host_platform.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "ui/ozone/public/ozone_platform.h"
+#include "ui/views/widget/desktop_aura/desktop_factory_ozone.h"
+///@}
+
 namespace views {
 
 DesktopScreenOzone::DesktopScreenOzone() = default;
@@ -17,6 +23,12 @@ DesktopScreenOzone::~DesktopScreenOzone() = default;
 
 gfx::NativeWindow DesktopScreenOzone::GetNativeWindowFromAcceleratedWidget(
     gfx::AcceleratedWidget widget) const {
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (ui::OzonePlatform::IsWaylandExternal())
+    return nullptr;
+  ///@}
+
   if (!widget)
     return nullptr;
   return views::DesktopWindowTreeHostPlatform::GetContentWindowForWidget(
@@ -28,6 +40,12 @@ gfx::NativeWindow DesktopScreenOzone::GetNativeWindowFromAcceleratedWidget(
 // screen to use based on IsUsingOzonePlatform feature flag.
 #if !defined(OS_LINUX) && !defined(OS_CHROMEOS)
 display::Screen* CreateDesktopScreen() {
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (ui::OzonePlatform::IsWaylandExternal())
+    return DesktopFactoryOzone::GetInstance()->CreateDesktopScreen();
+  ///@}
+
   return new DesktopScreenOzone();
 }
 #endif

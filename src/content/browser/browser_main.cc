@@ -10,6 +10,10 @@
 #include "content/browser/browser_main_runner_impl.h"
 #include "content/common/content_constants_internal.h"
 
+#if defined(USE_MEMORY_TRACE)
+#include "base/trace_event/neva/memory_trace/memory_trace_manager.h"
+#endif
+
 namespace content {
 
 namespace {
@@ -43,6 +47,13 @@ int BrowserMain(const MainFunctionParams& parameters) {
   int exit_code = main_runner->Initialize(parameters);
   if (exit_code >= 0)
     return exit_code;
+
+#if defined(USE_MEMORY_TRACE)
+  // Initialize MemoryTraceManager if --trace-memory-browser is on.
+  base::trace_event::neva::MemoryTraceManagerDelegate
+      memory_trace_manager_delegate;
+  memory_trace_manager_delegate.Initialize(true /* is_browser_process */);
+#endif
 
   exit_code = main_runner->Run();
 

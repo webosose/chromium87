@@ -18,6 +18,7 @@ namespace ui {
 
 class WaylandConnection;
 class WaylandWindow;
+class WaylandSeat;
 
 // Wraps the wl_pointer object and injects event data through
 // |WaylandPointer::Delegate| interface.

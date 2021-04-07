@@ -168,6 +168,10 @@ class CC_EXPORT LayerTreeSettings {
   // the device scale factor.
   bool use_painted_device_scale_factor = false;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  bool use_aggressive_release_policy = false;
+#endif
+
   // When true, LayerTreeHostImplClient will be posting a task to call
   // DidReceiveCompositorFrameAck, used by the Compositor but not the
   // LayerTreeView.

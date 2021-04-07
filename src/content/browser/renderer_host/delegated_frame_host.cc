@@ -28,7 +28,11 @@
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/gfx/geometry/dip_util.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+namespace neva_wrapped {
+#else
 namespace content {
+#endif
 namespace {
 
 // Normalized value [0..1] where 1 is full quality and 0 is empty. This sets

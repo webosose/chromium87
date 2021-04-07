@@ -377,7 +377,14 @@ class CONTENT_EXPORT RenderViewImpl : public blink::WebViewClient,
 
   // Misc private functions ----------------------------------------------------
 
-#if defined(OS_ANDROID)
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  // Make the audio capture devices (e.g. webcam) stop/resume delivering audio
+  // frames to their clients, depending on flag |suspend|. This is called in
+  // response to a RenderView PageHidden/Shown().
+  void SuspendAudioCaptureDevices(bool suspend);
+#endif
+
+#if defined(OS_ANDROID) || defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
   // Make the video capture devices (e.g. webcam) stop/resume delivering video
   // frames to their clients, depending on flag |suspend|. This is called in
   // response to a RenderView PageHidden/Shown().

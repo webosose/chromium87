@@ -28,6 +28,10 @@
 #include "ui/accessibility/ax_mode.h"
 #include "ui/accessibility/ax_tree_update.h"
 
+#if defined(USE_NEVA_MEDIA)
+#include "content/public/common/neva/frame_video_window_factory.mojom.h"
+#endif
+
 namespace blink {
 namespace web_pref {
 struct WebPreferences;
@@ -301,6 +305,14 @@ class CONTENT_EXPORT RenderFrame : public IPC::Listener,
 
   virtual scoped_refptr<network::SharedURLLoaderFactory>
   GetURLLoaderFactory() = 0;
+
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void ResetStateToMarkNextPaintForContainer() {}
+#endif
+#if defined(USE_NEVA_MEDIA)
+  virtual content::mojom::FrameVideoWindowFactory*
+  GetFrameVideoWindowFactory() = 0;
+#endif
 
   // Per-frame media playback options passed to each WebMediaPlayer.
   virtual const RenderFrameMediaPlaybackOptions&

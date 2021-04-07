@@ -80,6 +80,7 @@ class __thisIsHereToForceASemicolonAfterThisMacro;
 #define ANNOTATE_STACK_ALLOCATED
 #endif
 
+#if defined(__clang__)
 #define STACK_ALLOCATED()                                       \
  public:                                                        \
   using IsStackAllocatedTypeMarker [[maybe_unused]] = int;      \
@@ -88,6 +89,18 @@ class __thisIsHereToForceASemicolonAfterThisMacro;
   ANNOTATE_STACK_ALLOCATED void* operator new(size_t) = delete; \
   void* operator new(size_t, NotNullTag, void*) = delete;       \
   void* operator new(size_t, void*) = delete
+#else
+// TODO(neva): Workaround to get rid of the warnings flood because of [[maybe_unused]],
+// for GCC build.
+#define STACK_ALLOCATED()                                       \
+ public:                                                        \
+  using IsStackAllocatedTypeMarker = int;                       \
+                                                                \
+ private:                                                       \
+  ANNOTATE_STACK_ALLOCATED void* operator new(size_t) = delete; \
+  void* operator new(size_t, NotNullTag, void*) = delete;       \
+  void* operator new(size_t, void*) = delete
+#endif
 
 // Provides customizable overrides of fastMalloc/fastFree and operator
 // new/delete

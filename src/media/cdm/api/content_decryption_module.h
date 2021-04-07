@@ -643,6 +643,7 @@ class CDM_CLASS_API FileIOClient {
 class CDM_CLASS_API Host_10;
 class CDM_CLASS_API Host_11;
 
+#if !defined(USE_NEVA_MEDIA)
 // ContentDecryptionModule interface that all CDMs need to implement.
 // The interface is versioned for backward compatibility.
 // Note: ContentDecryptionModule implementations must use the allocator
@@ -862,6 +863,7 @@ class CDM_CLASS_API ContentDecryptionModule_10 {
   ContentDecryptionModule_10() {}
   virtual ~ContentDecryptionModule_10() {}
 };
+#endif  // !defined(USE_NEVA_MEDIA)
 
 // ----- Note: CDM interface(s) below still in development and not stable! -----
 

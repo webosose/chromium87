@@ -59,6 +59,11 @@ class AURA_EXPORT Env : public ui::EventTarget,
   static Env* GetInstance();
   static bool HasInstance();
 
+#if defined(OS_WEBOS)
+  static Window* GetRootWindow();
+  Window* RootWindow() const { return root_window_; }
+#endif
+
   void AddObserver(EnvObserver* observer);
   void RemoveObserver(EnvObserver* observer);
 
@@ -172,6 +177,9 @@ class AURA_EXPORT Env : public ui::EventTarget,
   // Location of last mouse event, in screen coordinates.
   mutable gfx::Point last_mouse_location_;
   bool is_touch_down_ = false;
+#if defined(OS_WEBOS)
+  Window* root_window_;
+#endif
 
   std::unique_ptr<ui::GestureRecognizer> gesture_recognizer_;
 

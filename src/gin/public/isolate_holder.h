@@ -21,6 +21,11 @@ namespace gin {
 
 class PerIsolateData;
 class V8IsolateMemoryDumpProvider;
+#if defined(USE_MEMORY_TRACE)
+namespace neva {
+class V8IsolateMemoryTraceProvider;
+}
+#endif
 
 // To embed Gin, first initialize gin using IsolateHolder::Initialize and then
 // create an instance of IsolateHolder to hold the v8::Isolate in which you
@@ -117,6 +122,10 @@ class GIN_EXPORT IsolateHolder {
   v8::Isolate* isolate_;
   std::unique_ptr<PerIsolateData> isolate_data_;
   std::unique_ptr<V8IsolateMemoryDumpProvider> isolate_memory_dump_provider_;
+#if defined(USE_MEMORY_TRACE)
+  std::unique_ptr<neva::V8IsolateMemoryTraceProvider>
+    isolate_memory_trace_provider_;
+#endif
   AccessMode access_mode_;
   IsolateType isolate_type_;
 

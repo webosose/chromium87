@@ -24,6 +24,12 @@ component("webrtc") {
     "//media:shared_memory_support",
     "//third_party/webrtc_overrides:webrtc_component",
   ]
+
+  if (use_neva_webrtc) {
+    deps += [ "//media/base" ]
+    import ("//media/webrtc/neva/build.gni")
+    sources += rebase_path(neva_webrtc.sources, ".")
+  }
 }
 
 source_set("unit_tests") {

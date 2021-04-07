@@ -82,6 +82,10 @@ class VIZ_COMMON_EXPORT DrawQuad {
            !shared_quad_state->rounded_corner_bounds.IsEmpty();
   }
 
+#if defined(USE_NEVA_MEDIA)
+  bool is_overlay_for_video_hole = false;
+#endif
+
   // Is the left edge of this tile aligned with the originating layer's
   // left edge?
   bool IsLeftEdge() const {

@@ -558,6 +558,21 @@ AttributeTriggers* HTMLElement::TriggersForAttributeName(
       {html_names::kOnwheelAttr, kNoWebFeature, event_type_names::kWheel,
        nullptr},
 
+#if defined(USE_NEVA_MEDIA)
+      // It looks like second attribute only used for UseCounter
+      {html_names::kOnumsmediainfoAttr, kNoWebFeature,
+       event_type_names::kUmsmediainfo, nullptr},
+      // TODO(neva): Doesn't need to add onwebosmediafocuschange at here?
+      {html_names::kOnbroadcasterrormsgAttr, kNoWebFeature,
+       event_type_names::kBroadcasterrormsg, nullptr},
+      {html_names::kOndvrerrormsgAttr, kNoWebFeature,
+       event_type_names::kDvrerrormsg, nullptr},
+      {html_names::kOnupdatecamerastateAttr, kNoWebFeature,
+       event_type_names::kUpdatecamerastate, nullptr},
+      {html_names::kOnpipelinestartedAttr, kNoWebFeature,
+       event_type_names::kPipelinestarted, nullptr},
+#endif
+
       {html_names::kAriaActivedescendantAttr,
        WebFeature::kARIAActiveDescendantAttribute, kNoEvent, nullptr},
       {html_names::kAriaAtomicAttr, WebFeature::kARIAAtomicAttribute, kNoEvent,

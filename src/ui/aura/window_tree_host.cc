@@ -350,7 +350,8 @@ WindowTreeHost::RequestUnadjustedMovement() {
 // WindowTreeHost, protected:
 
 WindowTreeHost::WindowTreeHost(std::unique_ptr<Window> window)
-    : window_(window.release()),  // See header for details on ownership.
+    :
+      window_(window.release()),  // See header for details on ownership.
       occlusion_state_(Window::OcclusionState::UNKNOWN),
       last_cursor_(ui::mojom::CursorType::kNull),
       input_method_(nullptr),
@@ -485,6 +486,28 @@ void WindowTreeHost::OnHostCloseRequested() {
   for (WindowTreeHostObserver& observer : observers_)
     observer.OnHostCloseRequested(this);
 }
+
+///@name USE_NEVA_APPRUNTIME {
+void WindowTreeHost::OnWindowHostStateChanged(ui::WidgetState new_state) {
+  for (WindowTreeHostObserver& observer : observers_)
+    observer.OnWindowHostStateChanged(this, new_state);
+}
+///@}
+
+#if defined(OS_WEBOS)
+void WindowTreeHost::OnInputPanelVisibilityChanged(bool visibility) {
+  for (WindowTreeHostObserver& observer : observers_)
+    observer.OnInputPanelVisibilityChanged(this, visibility);
+}
+
+void WindowTreeHost::OnInputPanelRectChanged(int32_t x,
+                                             int32_t y,
+                                             uint32_t width,
+                                             uint32_t height) {
+  for (WindowTreeHostObserver& observer : observers_)
+    observer.OnInputPanelRectChanged(this, x, y, width, height);
+}
+#endif
 
 void WindowTreeHost::OnHostLostWindowCapture() {
   // It is possible for this function to be called during destruction, after the

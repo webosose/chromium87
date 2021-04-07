@@ -770,6 +770,9 @@ bool QueryCancellationTraitsImpl(BindStateBase::CancellationQueryMode mode,
           functor, std::get<indices>(bound_args)...);
   }
   NOTREACHED();
+  // Workaround to get rid of the warnings flood because of
+  // 'control reaches end of non-void function' for GCC build.
+  return false;
 }
 
 // Relays |base| to corresponding CallbackCancellationTraits<>::Run(). Returns

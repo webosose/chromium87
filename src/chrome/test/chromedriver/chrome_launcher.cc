@@ -189,6 +189,11 @@ Status PrepareDesktopCommandLine(const Capabilities& capabilities,
     LOG(WARNING) << "excluding remote-debugging-port switch is not supported";
   }
   if (switches.HasSwitch("user-data-dir")) {
+#if defined(USE_NEVA_APPRUNTIME)
+    // Append arbitrary startup url for launching wam_demo properly.
+    // TODO(neva): Need to ensure this line don't disturb preference in profile.
+    command.AppendArg("data:,");
+#endif
     base::FilePath::StringType userDataDir =
       switches.GetSwitchValueNative("user-data-dir");
     if (userDataDir.empty())

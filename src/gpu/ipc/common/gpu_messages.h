@@ -278,6 +278,21 @@ IPC_MESSAGE_ROUTED0(GpuStreamTextureMsg_Destroy)
 
 #endif
 
+#if defined(USE_NEVA_MEDIA)
+//------------------------------------------------------------------------------
+// Stream Texture Messages
+// Tells the service-side instance to start sending frame available
+// notifications.
+IPC_MESSAGE_ROUTED0(GpuStreamTextureMsg_StartListening)
+
+// Inform the renderer that a new frame is available.
+IPC_MESSAGE_ROUTED0(GpuStreamTextureMsg_FrameAvailable)
+
+// Tells the GPU process to set the size of StreamTexture from the given
+// stream Id.
+IPC_MESSAGE_ROUTED1(GpuStreamTextureMsg_SetActiveRegion, gfx::Rect /* region */)
+#endif
+
 //------------------------------------------------------------------------------
 // GPU Command Buffer Messages
 // These are messages between a renderer process to the GPU process relating to

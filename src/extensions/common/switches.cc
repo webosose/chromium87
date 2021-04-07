@@ -84,6 +84,18 @@ const char kTraceAppSource[] = "enable-trace-app-source";
 // the one received from update manifest.
 const char kEnableCrxHashCheck[] = "enable-crx-hash-check";
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+// Create new process per <webview> regardless of a partition name
+const char kProcessPerGuestWebView[] =
+    "process-per-guest-webview";
+///@}
+
+// Pass application Id to browser
+#if defined(OS_WEBOS)
+const char kWebOSAppId[] = "webos-appid";
+#endif
+
 }  // namespace switches
 
 }  // namespace extensions

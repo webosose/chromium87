@@ -677,6 +677,10 @@ class CONTENT_EXPORT RenderProcessHostImpl
 
   PeerConnectionTrackerHost* GetPeerConnectionTrackerHost();
 
+#if defined(USE_NEVA_APPRUNTIME)
+  void DropAllPeerConnections(base::OnceClosure cb);
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
   // Allows tests to override how RenderProcessHosts bind incoming
   // BatteryMonitor receivers.
   using BatteryMonitorBinder = base::RepeatingCallback<void(

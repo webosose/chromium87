@@ -26,6 +26,12 @@ class ShellContentClient : public content::ContentClient {
   base::RefCountedMemory* GetDataResourceBytes(int resource_id) override;
   gfx::Image& GetNativeImageNamed(int resource_id) override;
 
+#if defined(USE_NEVA_MEDIA)
+  void AddContentDecryptionModules(
+      std::vector<content::CdmInfo>* cdms,
+      std::vector<media::CdmHostFilePath>* cdm_host_file_paths) override;
+#endif
+
  private:
   DISALLOW_COPY_AND_ASSIGN(ShellContentClient);
 };

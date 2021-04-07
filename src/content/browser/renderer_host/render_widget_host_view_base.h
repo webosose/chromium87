@@ -508,6 +508,10 @@ class CONTENT_EXPORT RenderWidgetHostViewBase : public RenderWidgetHostView {
     return is_currently_scrolling_viewport_;
   }
 
+#if defined(USE_NEVA_MEDIA)
+  virtual gfx::AcceleratedWidget GetAcceleratedWidget();
+#endif  // defined(USE_NEVA_MEDIA)
+
   virtual void DidNavigate();
 
   // Called when the RenderWidgetHostImpl has be initialized.

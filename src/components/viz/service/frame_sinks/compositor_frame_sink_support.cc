@@ -650,7 +650,12 @@ void CompositorFrameSinkSupport::DidPresentCompositorFrame(
   // We should only ever get one PresentationFeedback per frame_token.
   DCHECK(frame_timing_details_.find(frame_token) ==
          frame_timing_details_.end());
+  // Fix for GCC 8
+#if defined(OS_WEBOS)
+  frame_timing_details_.insert(std::make_pair(frame_token, details));
+#else
   frame_timing_details_.emplace(frame_token, details);
+#endif
 
   UpdateNeedsBeginFramesInternal();
 }

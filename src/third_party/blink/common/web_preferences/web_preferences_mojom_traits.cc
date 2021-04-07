@@ -520,6 +520,9 @@ bool StructTraits<blink::mojom::WebPreferencesDataView,
   out->media_controls_enabled = data.media_controls_enabled();
   out->do_not_update_selection_on_mutating_selection_range =
       data.do_not_update_selection_on_mutating_selection_range();
+#if defined(USE_NEVA_MEDIA)
+  out->max_timeupdate_event_frequency = data.max_timeupdate_event_frequency();
+#endif
   out->picture_in_picture_enabled = data.picture_in_picture_enabled();
   out->translate_service_available = data.translate_service_available();
   out->lazy_load_enabled = data.lazy_load_enabled();

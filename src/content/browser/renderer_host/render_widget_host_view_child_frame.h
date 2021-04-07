@@ -128,6 +128,9 @@ class CONTENT_EXPORT RenderWidgetHostViewChildFrame
       const gfx::PointF& point,
       RenderWidgetHostViewBase* target_view,
       gfx::PointF* transformed_point) override;
+#if defined(USE_NEVA_MEDIA)
+  gfx::AcceleratedWidget GetAcceleratedWidget() override;
+#endif
   void DidNavigate() override;
   gfx::PointF TransformRootPointToViewCoordSpace(
       const gfx::PointF& point) override;

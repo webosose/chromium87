@@ -25,6 +25,10 @@ namespace media {
 class AudioRendererSink;
 class VideoRendererSink;
 
+#if defined(USE_NEVA_MEDIA)
+class MediaPlatformAPI;
+#endif
+
 // A factory class for creating media::Renderer to be used by media pipeline.
 class MEDIA_EXPORT RendererFactory {
  public:
@@ -48,6 +52,11 @@ class MEDIA_EXPORT RendererFactory {
   // created by this factory.
   // NOTE: Returns Type::STREAM by default.
   virtual MediaResource::Type GetRequiredMediaResourceType();
+
+#if defined(USE_NEVA_MEDIA)
+  virtual void SetMediaPlatformAPI(
+      const scoped_refptr<MediaPlatformAPI>& media_platform_api) {}
+#endif
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RendererFactory);

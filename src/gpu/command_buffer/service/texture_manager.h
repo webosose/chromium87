@@ -428,6 +428,13 @@ class GPU_GLES2_EXPORT Texture final : public TextureBase {
                               GLenum internal_format,
                               bool immutable);
 
+#if defined(USE_NEVA_MEDIA)
+  // Neva uses SetStreamTextureServiceId method as public.
+  void SetVTGStreamTextureServiceId(GLuint service_id) {
+    SetStreamTextureServiceId(service_id);
+  }
+#endif
+
   // Marks a particular level as cleared or uncleared.
   void SetLevelCleared(GLenum target, GLint level, bool cleared);
 

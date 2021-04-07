@@ -35,6 +35,34 @@
   # this file to the base of your checkout.
   "SRCDIR": "../..",
 
+  # START app_runtime/ section.
+  "neva/app_runtime/browser/resources/app_runtime_inspector_resources.grd": {
+    "includes": [100],
+  },
+
+  "neva/app_runtime/browser/resources/app_runtime_network_error_resources.grd": {
+    "includes": [200],
+  },
+
+  "neva/app_runtime/browser/resources/app_runtime_network_error_strings.grd": {
+    "messages": [300],
+  },
+
+  "neva/injection/renderer/resources/injection_resources.grd": {
+    "includes": [400],
+  },
+  # END app_runtime/ section.
+
+  # START webos/ section.
+  "webos/browser/resources/webos_network_error_resources.grd": {
+    "includes": [500],
+  },
+
+  "webos/browser/resources/webos_network_error_strings.grd": {
+    "messages": [600],
+  },
+  # END webos/ section.
+
   # START chrome/app section.
   # Previous versions of this file started with resource id 400, so stick with
   # that.

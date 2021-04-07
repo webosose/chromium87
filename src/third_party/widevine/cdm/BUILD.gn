@@ -7,6 +7,7 @@ import("//build/config/chrome_build.gni")
 import("//build/config/features.gni")
 import("//media/cdm/library_cdm/cdm_paths.gni")
 import("//media/media_options.gni")
+import("//neva/neva.gni")
 import("//third_party/widevine/cdm/widevine.gni")
 
 buildflag_header("buildflags") {
@@ -58,6 +59,8 @@ if (bundle_widevine_cdm) {
   } else {
     assert(false, "Platform not supported to bundle Widevine CDM.")
   }
+} else if (enable_widevine && is_webos) {
+  widevine_cdm_version_h_file = "webos/widevine_cdm_version.h"
 } else {
   # No branding, use the default one.
   widevine_cdm_version_h_file = "widevine_cdm_version.h"

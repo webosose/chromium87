@@ -64,7 +64,7 @@ cros_toolchain("target") {
     needs_gomacc_path_arg = true
     clang_use_chrome_plugins = false
     current_cpu = target_cpu
-    current_os = "chromeos"
+    current_os = target_os
     is_clang = is_clang
     use_debug_fission = use_debug_fission
     use_gold = use_gold
@@ -99,7 +99,7 @@ cros_toolchain("nacl_bootstrap") {
     needs_gomacc_path_arg = true
     clang_use_chrome_plugins = false
     current_cpu = target_cpu
-    current_os = "chromeos"
+    current_os = target_os
     is_clang = is_clang
     use_debug_fission = false
     use_gold = false

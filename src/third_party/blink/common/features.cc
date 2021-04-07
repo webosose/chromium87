@@ -79,6 +79,12 @@ const base::Feature kEditingNG{"EditingNG", base::FEATURE_DISABLED_BY_DEFAULT};
 // Enable LayoutNG.
 const base::Feature kLayoutNG{"LayoutNG", base::FEATURE_ENABLED_BY_DEFAULT};
 
+#if defined(USE_FILESCHEME_CODECACHE)
+// Enabled the code cache for local resources
+const base::Feature kLocalResourceCodeCache{"LocalResourceCodeCache",
+                                            base::FEATURE_ENABLED_BY_DEFAULT};
+#endif
+
 // Enable LayoutNGFieldset by default. This feature is for a kill switch.
 const base::Feature kLayoutNGFieldset{"LayoutNGFieldset",
                                       base::FEATURE_ENABLED_BY_DEFAULT};

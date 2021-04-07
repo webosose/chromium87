@@ -522,6 +522,12 @@ void RenderWidget::Show(WebNavigationPolicy policy) {
   SetPendingWindowRect(initial_rect_);
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+void RenderWidget::SetVisible(bool is_shown) {
+  webwidget_->SetCompositorVisible(is_shown);
+}
+#endif
+
 void RenderWidget::InitCompositing(const blink::ScreenInfo& screen_info) {
   TRACE_EVENT0("blink", "RenderWidget::InitializeLayerTreeView");
 

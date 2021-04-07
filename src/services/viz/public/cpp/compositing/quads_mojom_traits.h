@@ -575,6 +575,7 @@ struct StructTraits<viz::mojom::DrawQuadDataView, DrawQuadWithSharedQuadState> {
     return input.quad->needs_blending;
   }
 
+
   static OptSharedQuadState sqs(const DrawQuadWithSharedQuadState& input) {
     return {input.shared_quad_state};
   }

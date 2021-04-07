@@ -30,6 +30,17 @@
 #include "ui/accessibility/platform/atk_util_auralinux.h"
 #endif
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+#include "ozone/ui/desktop_aura/desktop_factory_ozone_wayland.h"
+#endif  // defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
+#if defined(USE_OZONE)
+#include "ui/ozone/public/ozone_platform.h"
+#endif  // defined(USE_OZONE)
+///@}
+
 namespace views {
 
 std::list<gfx::AcceleratedWidget>* DesktopWindowTreeHostLinux::open_windows_ =
@@ -68,6 +79,19 @@ class SwapWithNewSizeObserverHelper : public ui::CompositorObserver {
 
   DISALLOW_COPY_AND_ASSIGN(SwapWithNewSizeObserverHelper);
 };
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+#if !defined(USE_X11)
+bool IsWaylandExternal() {
+#if defined(USE_OZONE)
+  return ui::OzonePlatform::IsWaylandExternal();
+#else  // defined(USE_OZONE)
+  return false;
+#endif  // !defined(USE_OZONE)
+}
+#endif  // !defined(USE_X11)
+///@}
 
 }  // namespace
 
@@ -370,6 +394,16 @@ std::list<gfx::AcceleratedWidget>& DesktopWindowTreeHostLinux::open_windows() {
 DesktopWindowTreeHost* DesktopWindowTreeHost::Create(
     internal::NativeWidgetDelegate* native_widget_delegate,
     DesktopNativeWidgetAura* desktop_native_widget_aura) {
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  if (IsWaylandExternal()) {
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+    return DesktopFactoryOzone::GetInstance()->CreateWindowTreeHost(
+        native_widget_delegate, desktop_native_widget_aura);
+#endif  // defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  }
+  ///@}
+
   return new DesktopWindowTreeHostLinux(native_widget_delegate,
                                         desktop_native_widget_aura);
 }

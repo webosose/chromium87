@@ -51,6 +51,13 @@ namespace remoting {
 class GstaticJsonFetcher;
 }
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+namespace emulator {
+class EmulatorDataSource;
+}
+///@}
+
 namespace net {
 class HttpResponseHeaders;
 class URLFetcherDelegate;
@@ -351,6 +358,11 @@ class NET_EXPORT URLFetcher {
   friend class cr_fuchsia::DevToolsListFetcher;
   friend class device::UsbTestGadgetImpl;
   friend class remoting::GstaticJsonFetcher;
+
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  friend class emulator::EmulatorDataSource;
+  ///@}
 
   // The unannotated Create() methods are not available on desktop Linux +
   // Windows. They are available on other platforms, since we only audit network

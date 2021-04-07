@@ -29,6 +29,7 @@ class CC_EXPORT SolidColorLayer : public Layer {
 
  private:
   ~SolidColorLayer() override;
+
 };
 
 }  // namespace cc

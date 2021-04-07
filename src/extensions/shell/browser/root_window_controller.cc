@@ -17,6 +17,29 @@
 #include "ui/platform_window/platform_window_init_properties.h"
 #include "ui/wm/core/default_screen_position_client.h"
 
+// neva include
+#include "components/guest_view/browser/guest_view_base.h"
+#include "content/common/renderer.mojom.h"
+#include "content/public/browser/browser_context.h"
+#include "content/public/browser/browser_plugin_guest_manager.h"
+#include "content/public/browser/render_frame_host.h"
+#include "content/public/browser/render_process_host.h"
+#include "content/public/browser/web_contents.h"
+#include "extensions/browser/guest_view/web_view/web_view_guest.h"
+
+#if defined(USE_NEVA_MEDIA)
+#include "content/public/browser/neva/media_state_manager.h"
+#endif
+
+#if defined(OS_WEBOS)
+#include "ui/base/ime/input_method.h"
+#include "ui/base/ime/text_input_client.h"
+#include "ui/display/screen.h"
+
+constexpr int kKeyboardAnimationTime = 600;
+constexpr int kKeyboardHeightMargin = 10;
+#endif
+
 namespace extensions {
 
 namespace {
@@ -91,6 +114,28 @@ class ScreenPositionClient : public wm::DefaultScreenPositionClient {
   DISALLOW_COPY_AND_ASSIGN(ScreenPositionClient);
 };
 
+#if defined(OS_WEBOS)
+void DispatchSetInsetY(int height, content::WebContents* web_contents) {
+  content::RenderFrameHost* rfh = web_contents->GetMainFrame();
+  if (rfh && rfh->IsRenderFrameLive()) {
+    std::stringstream ss;
+    ss << "document.dispatchEvent(new CustomEvent('setInsetY', { detail: "
+       << height << "}));";
+    const base::string16 js_code = base::UTF8ToUTF16(ss.str());
+    if (height == 0) {
+      rfh->ExecuteJavaScript(js_code, base::NullCallback());
+    } else {
+      base::ThreadTaskRunnerHandle::Get()->PostDelayedTask(
+          FROM_HERE,
+          base::BindOnce(&content::RenderFrameHost::ExecuteJavaScript,
+                         base::Unretained(rfh), js_code,
+                         content::RenderFrameHost::JavaScriptResultCallback()),
+          base::TimeDelta::FromMilliseconds(kKeyboardAnimationTime));
+    }
+  }
+}
+#endif
+
 }  // namespace
 
 RootWindowController::RootWindowController(
@@ -112,9 +157,13 @@ RootWindowController::RootWindowController(
 
   // Ensure the window fills the display.
   host_->window()->SetLayoutManager(new FillLayout(host_->window()));
-
   host_->AddObserver(this);
   host_->Show();
+
+#if defined(OS_WEBOS)
+  window_bounds_ = bounds;
+  ComputeScaleFactor(window_bounds_.height());
+#endif
 }
 
 RootWindowController::~RootWindowController() {
@@ -174,6 +223,135 @@ void RootWindowController::OnHostCloseRequested(aura::WindowTreeHost* host) {
   // The ShellDesktopControllerAura will delete us.
   desktop_delegate_->CloseRootWindowController(this);
 }
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+void RootWindowController::OnWindowHostStateChanged(aura::WindowTreeHost* host,
+                                                    ui::WidgetState new_state) {
+  if (app_windows_.empty())
+    return;
+
+  if (new_state == ui::WidgetState::MINIMIZED ||
+      new_state == ui::WidgetState::MAXIMIZED ||
+      new_state == ui::WidgetState::FULLSCREEN) {
+    for (AppWindow* app_window : app_windows_) {
+      content::WebContents* web_contents = app_window->web_contents();
+      if (web_contents == nullptr)
+        continue;
+      content::BrowserContext* browser_context =
+          web_contents->GetBrowserContext();
+      if (browser_context == nullptr ||
+          browser_context->GetGuestManager() == nullptr)
+        continue;
+      browser_context->GetGuestManager()->ForEachGuest(
+          web_contents,
+          base::Bind(
+              [](ui::WidgetState new_state,
+                 content::WebContents* guest_contents) {
+                WebViewGuest* guest_view =
+                    guest_view::GuestViewBase::FromWebContents(guest_contents)
+                        ->As<WebViewGuest>();
+                // Suspend or resume only for non-suspended WebViewGuest
+                // Embeder will take care of suspended WebViewGuest
+                if (guest_view != nullptr && !guest_view->IsSuspended()) {
+#if defined(USE_NEVA_MEDIA)
+                  if (new_state == ui::WidgetState::MINIMIZED)
+                    content::MediaStateManager::GetInstance()->SuspendAllMedia(
+                        guest_contents);
+                  else if (new_state == ui::WidgetState::MAXIMIZED ||
+                           new_state == ui::WidgetState::FULLSCREEN) {
+                    content::MediaStateManager::GetInstance()->ResumeAllMedia(
+                        guest_contents);
+                  }
+#endif  // USE_NEVA_MEDIA
+                  content::RenderProcessHost* host =
+                      guest_view->web_contents()->GetMainFrame()->GetProcess();
+                  if (host) {
+                    if (new_state == ui::WidgetState::MINIMIZED)
+                      host->GetRendererInterface()->ProcessSuspend();
+                    else if (new_state == ui::WidgetState::MAXIMIZED ||
+                             new_state == ui::WidgetState::FULLSCREEN)
+                      host->GetRendererInterface()->ProcessResume();
+                  }
+                }
+                return false;
+              },
+              new_state));
+    }
+  }
+}
+///@}
+
+#if defined(OS_WEBOS)
+void RootWindowController::ComputeScaleFactor(int window_height) {
+  scale_factor_ = 1.f;
+  const int display_height =
+      display::Screen::GetScreen()->GetPrimaryDisplay().bounds().height();
+  if (window_height != display_height)
+    scale_factor_ = static_cast<float>(display_height) / window_height;
+}
+
+bool RootWindowController::IsTextInputOverlapped(aura::WindowTreeHost* host) {
+  vkb_overlap_y_value_ = 0;
+
+  if (!host)
+    return false;
+
+  ui::InputMethod* ime = host->GetInputMethod();
+  if (!ime || !ime->GetTextInputClient())
+    return false;
+
+  gfx::Rect caret_bounds = ime->GetTextInputClient()->GetCaretBounds();
+
+  for (AppWindow* app_window : app_windows_) {
+    content::WebContents* web_contents = app_window->web_contents();
+    if (!web_contents)
+      continue;
+
+    const int caret_bottom_y_pos =
+        caret_bounds.y() + caret_bounds.height() -
+        web_contents->GetContentNativeView()->bounds().y();
+    const int caret_bottom_y_pos_with_margin =
+        caret_bottom_y_pos + kKeyboardHeightMargin;
+    const int vkb_top_y_pos = window_bounds_.height() - input_panel_height();
+
+    vkb_overlap_y_value_ =
+        std::max(0, caret_bottom_y_pos_with_margin - vkb_top_y_pos);
+    return (vkb_overlap_y_value_ > 0);
+  }
+  return false;
+}
+
+void RootWindowController::SetInsetY(int height) {
+  if (height == last_inset_height_)
+    return;
+  for (AppWindow* app_window : app_windows_) {
+    DispatchSetInsetY(height, app_window->web_contents());
+  }
+  last_inset_height_ = height;
+}
+
+void RootWindowController::OnInputPanelVisibilityChanged(
+    aura::WindowTreeHost* host,
+    bool visibility) {
+  input_panel_visible_ = visibility;
+}
+
+void RootWindowController::OnInputPanelRectChanged(aura::WindowTreeHost* host,
+                                                   int32_t x,
+                                                   int32_t y,
+                                                   uint32_t width,
+                                                   uint32_t height) {
+  input_panel_bounds_.SetRect(x, y, width, height);
+  if (input_panel_bounds_.height() && input_panel_visible_) {
+    if (IsTextInputOverlapped(host)) {
+      SetInsetY(vkb_overlap_y_value_);
+    }
+  } else {
+    SetInsetY(0);
+  }
+}
+#endif
 
 void RootWindowController::OnAppWindowRemoved(AppWindow* window) {
   if (app_windows_.empty())

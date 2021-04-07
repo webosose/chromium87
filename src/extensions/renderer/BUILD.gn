@@ -4,6 +4,7 @@
 
 import("//build/config/features.gni")
 import("//extensions/buildflags/buildflags.gni")
+import("//neva/neva.gni")
 
 assert(enable_extensions)
 

@@ -33,6 +33,17 @@ bool OverlayStackOrderCompare(
 
 }  // namespace
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#include "ui/ozone/platform/wayland/host/extended_input_wrapper.h"
+#include "ui/ozone/platform/wayland/host/input_panel.h"
+#include "ui/ozone/platform/wayland/host/input_panel_manager.h"
+#include "ui/ozone/platform/wayland/host/surface_group_compositor_wrapper.h"
+#include "ui/ozone/platform/wayland/host/surface_group_wrapper.h"
+#include "ui/ozone/platform/wayland/host/wayland_extension.h"
+#include "ui/ozone/platform/wayland/host/wayland_input_method_context.h"
+///@}
+
 namespace ui {
 
 WaylandWindow::WaylandWindow(PlatformWindowDelegate* delegate,
@@ -309,6 +320,198 @@ void WaylandWindow::HandleSurfaceConfigure(int32_t widht,
 void WaylandWindow::HandlePopupConfigure(const gfx::Rect& bounds_dip) {
   NOTREACHED() << "Only shell popups must receive HandlePopupConfigure calls.";
 }
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+WaylandInputMethodContext* WaylandWindow::GetInputMethodContext() {
+  return static_cast<WaylandInputMethodContext*>(
+      delegate_->GetInputMethodContext());
+}
+
+void WaylandWindow::HandleStateChanged(PlatformWindowState state) {}
+
+void WaylandWindow::HandleActivationChanged(bool is_activated) {}
+
+void WaylandWindow::HandleCursorVisibilityChanged(bool is_visible) {
+  delegate_->OnCursorVisibilityChanged(is_visible);
+}
+
+void WaylandWindow::HandleExposed() {
+  delegate_->OnWindowExposed();
+}
+
+void WaylandWindow::HandleStateAboutToChange(PlatformWindowState state) {
+  delegate_->OnWindowStateAboutToChange(state);
+}
+
+void WaylandWindow::CreateGroup(const ui::WindowGroupConfiguration& config) {
+  if (connection_->extension()) {
+    SurfaceGroupCompositorWrapper* surface_group_compositor =
+        connection_->extension()->GetSurfaceGroupCompositor();
+
+    if (surface_group_compositor)
+      surface_group_ =
+          surface_group_compositor->CreateSurfaceGroup(this, config.name);
+  }
+
+  if (surface_group_) {
+    surface_group_->AllowAnonymousLayers(config.is_anonymous);
+    for (auto& layer : config.layers)
+      surface_group_->CreateLayer(layer.name, layer.z_order);
+    connection_->ScheduleFlush();
+  }
+}
+
+void WaylandWindow::AttachToGroup(const std::string& group_name,
+                                  const std::string& layer_name) {
+  if (connection_->extension()) {
+    SurfaceGroupCompositorWrapper* surface_group_compositor =
+        connection_->extension()->GetSurfaceGroupCompositor();
+
+    if (surface_group_compositor)
+      surface_group_ = surface_group_compositor->GetSurfaceGroup(group_name);
+  }
+
+  if (surface_group_) {
+    surface_group_->AttachToLayer(this, layer_name);
+    connection_->ScheduleFlush();
+  }
+}
+
+void WaylandWindow::FocusGroupOwner() {
+  if (surface_group_) {
+    surface_group_->FocusOwner();
+    connection_->ScheduleFlush();
+  }
+}
+
+void WaylandWindow::FocusGroupLayer() {
+  if (surface_group_) {
+    surface_group_->FocusLayer();
+    connection_->ScheduleFlush();
+  }
+}
+
+void WaylandWindow::DetachGroup() {
+  if (surface_group_) {
+    surface_group_->Detach(this);
+    connection_->ScheduleFlush();
+  }
+}
+
+void WaylandWindow::ShowInputPanel() {
+  if (connection_->extension()) {
+    InputPanelManager* input_panel_manager =
+        connection_->extension()->GetInputPanelManager();
+
+    if (input_panel_manager) {
+      InputPanel* input_panel = input_panel_manager->GetInputPanel(this);
+
+      if (input_panel) {
+        input_panel->ShowInputPanel();
+        connection_->ScheduleFlush();
+      }
+    }
+  }
+}
+
+void WaylandWindow::HideInputPanel() {
+  if (connection_->extension()) {
+    InputPanelManager* input_panel_manager =
+        connection_->extension()->GetInputPanelManager();
+
+    if (input_panel_manager) {
+      InputPanel* input_panel = input_panel_manager->GetInputPanel(this);
+
+      if (input_panel) {
+        input_panel->HideInputPanel();
+        connection_->ScheduleFlush();
+      }
+    }
+  }
+}
+
+void WaylandWindow::SetInputContentType(TextInputType text_input_type,
+                                        int text_input_flags) {
+  if (connection_->extension()) {
+    InputPanelManager* input_panel_manager =
+        connection_->extension()->GetInputPanelManager();
+
+    if (input_panel_manager) {
+      InputPanel* input_panel = input_panel_manager->GetInputPanel(this);
+
+      if (input_panel) {
+        input_panel->SetInputContentType(text_input_type, text_input_flags);
+        connection_->ScheduleFlush();
+      }
+    }
+  }
+}
+
+void WaylandWindow::SetSurroundingText(const std::string& text,
+                                       std::size_t cursor_position,
+                                       std::size_t anchor_position) {
+  if (connection_->extension()) {
+    InputPanelManager* input_panel_manager =
+        connection_->extension()->GetInputPanelManager();
+
+    if (input_panel_manager) {
+      InputPanel* input_panel = input_panel_manager->GetInputPanel(this);
+
+      if (input_panel) {
+        input_panel->SetSurroundingText(text, cursor_position, anchor_position);
+        connection_->ScheduleFlush();
+      }
+    }
+  }
+}
+
+void WaylandWindow::XInputActivate(const std::string& type) {
+  if (connection_->extension()) {
+    ExtendedInputWrapper* extended_input =
+        connection_->extension()->GetExtendedInput();
+
+    if (extended_input) {
+      extended_input->Activate(type);
+      connection_->ScheduleFlush();
+    }
+  }
+}
+
+void WaylandWindow::XInputDeactivate() {
+  if (connection_->extension()) {
+    ExtendedInputWrapper* extended_input =
+        connection_->extension()->GetExtendedInput();
+
+    if (extended_input) {
+      extended_input->Deactivate();
+      connection_->ScheduleFlush();
+    }
+  }
+}
+
+void WaylandWindow::XInputInvokeAction(std::uint32_t keysym,
+                                       XInputKeySymbolType symbol_type,
+                                       XInputEventType event_type) {
+  if (connection_->extension()) {
+    ExtendedInputWrapper* extended_input =
+        connection_->extension()->GetExtendedInput();
+
+    if (extended_input) {
+      extended_input->InvokeAction(keysym, symbol_type, event_type);
+      connection_->ScheduleFlush();
+    }
+  }
+}
+
+void WaylandWindow::HandleKeyboardEnter() {
+  delegate_->OnKeyboardEnter();
+}
+
+void WaylandWindow::HandleKeyboardLeave() {
+  delegate_->OnKeyboardLeave();
+}
+///@}
 
 void WaylandWindow::OnCloseRequest() {
   delegate_->OnCloseRequest();

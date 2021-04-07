@@ -5,6 +5,7 @@
 import("//build/buildflag_header.gni")
 import("//build/config/dcheck_always_on.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
+import("//neva/neva.gni")
 import("//third_party/blink/public/public_features.gni")
 import("//third_party/blink/renderer/config.gni")
 import("//third_party/blink/renderer/core/core.gni")
@@ -408,6 +409,14 @@ source_set("blink_headers") {
     "web/web_window_features.h",
     "web/win/web_font_rendering.h",
   ]
+
+  if (use_neva_media) {
+    sources += [
+      "platform/neva/web_media_codec_capability.h",
+      "platform/neva/web_media_player.h",
+      "platform/neva/web_media_player_client.h",
+    ]
+  }
 
   if (is_debug || dcheck_always_on) {
     sources += [ "web/web_disallow_transition_scope.h" ]

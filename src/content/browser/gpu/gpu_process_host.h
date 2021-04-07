@@ -188,6 +188,10 @@ class GpuProcessHost : public BrowserChildProcessHostDelegate,
   void TerminateGpuProcess(const std::string& message) override;
 #endif
 
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  void SendGpuProcessMessage(IPC::Message* message) override;
+#endif  // defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
   bool LaunchGpuProcess();
 
   void SendOutstandingReplies();

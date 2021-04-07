@@ -1,0 +1,74 @@
+# Copyright (c) 2016 The Chromium Authors. All rights reserved.
+
+import("//neva/neva.gni")
+
+config("ozone_wayland_config") {
+  defines = [ "OZONE_WAYLAND_IMPLEMENTATION" ]
+
+  include_dirs = [ ".." ]
+}
+
+source_set("ozone_wayland") {
+
+  configs += [ ":ozone_wayland_config" ]
+
+  sources = [
+    "media/media_ozone_platform_wayland.cc",
+    "media/media_ozone_platform_wayland.h",
+    "platform/client_native_pixmap_factory_wayland.cc",
+    "platform/client_native_pixmap_factory_wayland.h",
+    "platform/desktop_platform_screen.h",
+    "platform/desktop_platform_screen_delegate.h",
+    "platform/ozone_export_wayland.h",
+    "platform/messages.h",
+    "platform/message_generator.h",
+    "platform/message_generator.cc",
+    "platform/ozone_gpu_platform_support_host.h",
+    "platform/ozone_gpu_platform_support_host.cc",
+    "platform/ozone_platform_wayland.cc",
+    "platform/ozone_platform_wayland.h",
+    "platform/ozone_wayland_window.cc",
+    "platform/ozone_wayland_window.h",
+    "platform/window_constants.h",
+    "platform/window_manager_wayland.cc",
+    "platform/window_manager_wayland.h",
+  ]
+
+  deps = [
+    "//skia",
+    "//base/third_party/dynamic_annotations",
+    "//ui/base",
+    "//ui/base/cursor",
+    "//ui/base/ime:ime",
+    "//ui/display:display",
+    "//ui/events/ozone:ozone",
+    "//ui/events/ozone/evdev:evdev",
+    "//ui/events/ozone/evdev:events_ozone_evdev_neva",
+    "//ui/events/ozone/layout:layout",
+    "//ui/gfx/ipc",
+    "//ui/ozone:ozone_base",
+    "//ui/ozone/common",
+    "wayland",
+  ]
+
+  if (use_neva_media) {
+    deps += [ "//ui/platform_window:mojom" ]
+    sources += [
+      "media/video_window_controller_impl.cc",
+      "media/video_window_controller_impl.h",
+      "media/video_window_provider.h",
+    ]
+    if (use_gav) {
+      assert(is_webos, "use_gav should be enabled under webos")
+      sources += [
+        "media/foreign_video_window_provider.cc",
+        "media/foreign_video_window_provider.h",
+      ]
+    } else {
+      sources += [
+        "media/pseudo_video_window_provider.cc",
+        "media/pseudo_video_window_provider.h",
+      ]
+    }
+  }
+}

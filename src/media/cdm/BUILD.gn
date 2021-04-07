@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 import("//media/media_options.gni")
+import("//neva/neva.gni")
+import("//third_party/widevine/cdm/widevine.gni")
 
 if (enable_library_cdms) {
   source_set("cdm_api") {
@@ -91,6 +93,13 @@ source_set("cdm") {
         "cdm_host_file.h",
         "cdm_host_files.cc",
         "cdm_host_files.h",
+      ]
+    }
+
+    if (use_neva_media) {
+      sources += [
+        "neva/webos/content_decryption_module_webos.cc",
+        "neva/webos/content_decryption_module_webos.h",
       ]
     }
   }

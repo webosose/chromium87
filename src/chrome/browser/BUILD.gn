@@ -26,6 +26,7 @@ import("//components/spellcheck/spellcheck_build_features.gni")
 import("//device/vr/buildflags/buildflags.gni")
 import("//extensions/buildflags/buildflags.gni")
 import("//net/features.gni")
+import("//neva/neva.gni")
 import("//pdf/features.gni")
 import("//ppapi/buildflags/buildflags.gni")
 import("//printing/buildflags/buildflags.gni")
@@ -6120,6 +6121,13 @@ static_library("browser") {
     sources += [
       "net/trial_comparison_cert_verifier_controller.cc",
       "net/trial_comparison_cert_verifier_controller.h",
+    ]
+  }
+
+  # Added for ozone-wayland port
+  if (use_ozone && ozone_platform_wayland_external) {
+    sources -= [
+      "fullscreen_ozone.cc",
     ]
   }
 

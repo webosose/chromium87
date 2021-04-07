@@ -155,6 +155,12 @@ void WebRuntimeFeatures::EnableCacheInlineScriptCode(bool enable) {
   RuntimeEnabledFeatures::SetCacheInlineScriptCodeEnabled(enable);
 }
 
+#if defined(USE_FILESCHEME_CODECACHE)
+void WebRuntimeFeatures::EnableLocalResourceCodeCache(bool enable) {
+  RuntimeEnabledFeatures::SetLocalResourceCodeCacheEnabled(enable);
+}
+#endif
+
 void WebRuntimeFeatures::EnableCookieDeprecationMessages(bool enable) {
   RuntimeEnabledFeatures::SetCookieDeprecationMessagesEnabled(enable);
 }

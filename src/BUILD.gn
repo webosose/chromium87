@@ -31,6 +31,7 @@ import("//ui/base/ui_features.gni")
 import("//ui/gl/features.gni")
 import("//v8/gni/snapshot_toolchain.gni")
 import("//v8/gni/v8.gni")
+import("//neva/neva.gni")
 
 if (is_android) {
   import("//build/config/android/config.gni")
@@ -758,6 +759,25 @@ group("gn_all") {
     }
     if ((is_linux || is_chromeos) && current_toolchain == host_toolchain) {
       deps += [ "//v8:v8_shell" ]
+    }
+
+    if (use_neva_appruntime) {
+      deps += [
+        "//neva/wam_demo",
+        "//neva/neva_unittests",
+      ]
+      if (is_webos) {
+        deps += [
+          "//webos:weboswebruntime",
+          "//webos/install",
+        ]
+        if (current_cpu == "arm") {
+          deps -= [ "//third_party/libjpeg_turbo:simd" ]
+          deps += [
+            "//third_party/libjpeg_turbo:simd(//build/toolchain/linux:clang_webos_arm)",
+          ]
+        }
+      }
     }
   }
 

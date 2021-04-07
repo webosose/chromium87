@@ -39,6 +39,10 @@
 #include "base/base_paths_fuchsia.h"
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "content/shell/common/shell_neva_switches.h"
+#endif
+
 namespace content {
 
 ShellBrowserContext::ShellResourceContext::ShellResourceContext() {}
@@ -111,6 +115,22 @@ void ShellBrowserContext::InitWhileIOAllowed() {
                                  base::nix::kXdgConfigHomeEnvVar,
                                  base::nix::kDotConfigDir));
   path_ = config_dir.Append("content_shell");
+#if defined(USE_NEVA_APPRUNTIME)
+  // Overwrite path value
+  if (cmd_line->HasSwitch(switches::kUserDataDir)) {
+    base::FilePath new_path =
+        cmd_line->GetSwitchValuePath(switches::kUserDataDir);
+    if (!new_path.empty()) {
+      path_ = new_path;
+      LOG(INFO) << "kUserDataDir is set.";
+    } else {
+      LOG(INFO) << "kUserDataDir is empty.";
+    }
+  } else {
+    LOG(INFO) << "kUserDataDir isn't set.";
+  }
+  LOG(INFO) << "Will use path_=" << path_.value();
+#endif
 #elif defined(OS_MAC)
   CHECK(base::PathService::Get(base::DIR_APP_DATA, &path_));
   path_ = path_.Append("Chromium Content Shell");

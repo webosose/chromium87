@@ -71,6 +71,10 @@ class GpuChildThread : public ChildThreadImpl,
   bool Send(IPC::Message* msg) override;
   void BindServiceInterface(mojo::GenericPendingReceiver receiver) override;
 
+#if defined(USE_OZONE) && defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  bool OnControlMessageReceived(const IPC::Message& msg) override;
+#endif
+
   // IPC::Listener implementation via ChildThreadImpl:
   void OnAssociatedInterfaceRequest(
       const std::string& name,

@@ -32,7 +32,13 @@ extern const char kSetExtensionThrottleTestParams[];
 extern const char kShowComponentExtensionOptions[];
 extern const char kTraceAppSource[];
 extern const char kEnableCrxHashCheck[];
-
+///@name USE_NEVA_APPRUNTIME
+///@{
+extern const char kProcessPerGuestWebView[];
+///@}
+#if defined(OS_WEBOS)
+extern const char kWebOSAppId[];
+#endif
 }  // namespace switches
 
 }  // namespace extensions

@@ -25,6 +25,10 @@
 #include "ui/ozone/public/ozone_platform.h"
 #endif
 
+#if defined(OS_WEBOS)
+#include "ui/aura/window_tree_host.h"
+#endif
+
 #if defined(USE_X11)
 #include "ui/gfx/switches.h"
 #endif
@@ -113,6 +117,13 @@ Env* Env::GetInstance() {
 bool Env::HasInstance() {
   return !!g_primary_instance;
 }
+
+#if defined(OS_WEBOS)
+// static
+Window* Env::GetRootWindow() {
+  return GetInstance()->RootWindow();
+}
+#endif
 
 void Env::AddObserver(EnvObserver* observer) {
   observers_.AddObserver(observer);
@@ -244,6 +255,10 @@ void Env::NotifyWindowInitialized(Window* window) {
 }
 
 void Env::NotifyHostInitialized(WindowTreeHost* host) {
+#if defined(OS_WEBOS)
+  if (host)
+    root_window_ = host->window();
+#endif
   for (EnvObserver& observer : observers_)
     observer.OnHostInitialized(host);
 }

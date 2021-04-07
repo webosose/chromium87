@@ -231,6 +231,16 @@ class WebLocalFrame : public WebFrame {
 
   virtual void SendPings(const WebURL& destination_url) = 0;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual void ResetStateToMarkNextPaintForContainer() {}
+#endif
+
+#if defined(USE_NEVA_MEDIA)
+  // Supress media play under this frame
+  virtual void SetSuppressMediaPlay(bool suppress) = 0;
+  virtual bool IsSuppressedMediaPlay() const = 0;
+#endif
+
   // Navigation ----------------------------------------------------------
 
   // Start reloading the current document.

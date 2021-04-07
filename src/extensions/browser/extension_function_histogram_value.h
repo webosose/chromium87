@@ -1574,6 +1574,11 @@ enum HistogramValue {
   FILEMANAGERPRIVATE_SINGLEPARTITIONFORMAT = 1511,
   TABS_REMOVECSS = 1512,
   IDENTITY_CLEARALLCACHEDAUTHTOKENS = 1513,
+  ///@name USE_NEVA_APPRUNTIME
+  ///@{
+  WEBVIEWINTERNAL_RESUME = 1514,
+  WEBVIEWINTERNAL_SUSPEND = 1515,
+  ///@}
   // Last entry: Add new entries above, then run:
   // python tools/metrics/histograms/update_extension_histograms.py
   ENUM_BOUNDARY

@@ -560,6 +560,13 @@ class BLINK_PLATFORM_EXPORT Platform {
 
   virtual bool RTCSmoothnessAlgorithmEnabled() { return true; }
 
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+  virtual void AddSourceToAudioCapturerSourceManager(
+      media::AudioCapturerSource* source) {}
+  virtual void RemoveSourceFromAudioCapturerSourceManager(
+      media::AudioCapturerSource* source) {}
+#endif
+
   // WebRTC ----------------------------------------------------------
 
   virtual base::Optional<double> GetWebRtcMaxCaptureFrameRate() {

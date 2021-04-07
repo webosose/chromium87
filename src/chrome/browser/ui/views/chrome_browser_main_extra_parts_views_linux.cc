@@ -10,6 +10,17 @@
 #include "ui/display/screen.h"
 #include "ui/views/linux_ui/linux_ui.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+#include "ozone/ui/webui/ozone_webui.h"
+#endif  // defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+
+#if defined(USE_OZONE)
+#include "ui/ozone/public/ozone_platform.h"
+#endif  // defined(USE_OZONE)
+///@}
+
 #if BUILDFLAG(USE_GTK)
 #include "ui/gtk/gtk_ui.h"
 #include "ui/gtk/gtk_ui_delegate.h"
@@ -29,6 +40,14 @@
 
 namespace {
 
+#if defined(USE_OZONE)
+void InitializeUI(views::LinuxUI** linux_ui) {
+#if defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+  *linux_ui = BuildWebUI();
+#endif  // defined(OZONE_PLATFORM_WAYLAND_EXTERNAL)
+}
+#endif  // defined(USE_OZONE)
+
 views::LinuxUI* BuildLinuxUI() {
   views::LinuxUI* linux_ui = nullptr;
   // GtkUi is the only LinuxUI implementation for now.
@@ -36,6 +55,13 @@ views::LinuxUI* BuildLinuxUI() {
   if (ui::GtkUiDelegate::instance())
     linux_ui = BuildGtkUi(ui::GtkUiDelegate::instance());
 #endif
+///@name USE_NEVA_APPRUNTIME
+///@{
+#if defined(USE_OZONE)
+  if (ui::OzonePlatform::IsWaylandExternal())
+    InitializeUI(&linux_ui);
+#endif  // defined(USE_OZONE)
+///@}
   return linux_ui;
 }
 

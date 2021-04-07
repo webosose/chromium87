@@ -115,10 +115,22 @@ class MEDIA_EXPORT CdmContext {
   virtual FuchsiaCdmContext* GetFuchsiaCdmContext();
 #endif
 
+#if defined(USE_NEVA_MEDIA)
+  std::string get_key_system() { return key_system_; }
+
+  void set_key_system(const std::string& key_system) {
+    key_system_ = key_system;
+  }
+#endif
+
  protected:
   CdmContext();
 
  private:
+#if defined(USE_NEVA_MEDIA)
+  std::string key_system_;
+#endif
+
   DISALLOW_COPY_AND_ASSIGN(CdmContext);
 };
 

@@ -202,6 +202,10 @@ class WebWidget {
   // Set state that the widget is in the process of handling input events.
   virtual void SetHandlingInputEvent(bool handling) = 0;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  virtual bool HasImeEventGuard() const { return false; }
+#endif
+
   using HandledEventCallback = base::OnceCallback<void(
       mojom::InputEventResultState ack_state,
       const ui::LatencyInfo& latency_info,

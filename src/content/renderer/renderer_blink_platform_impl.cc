@@ -674,6 +674,24 @@ bool RendererBlinkPlatformImpl::AllowsLoopbackInPeerConnection() {
       switches::kAllowLoopbackInPeerConnection);
 }
 
+#if defined(USE_NEVA_SUSPEND_MEDIA_CAPTURE)
+void RendererBlinkPlatformImpl::AddSourceToAudioCapturerSourceManager(
+    media::AudioCapturerSource* source) {
+  RenderThreadImpl* render_thread = RenderThreadImpl::current();
+  if (!render_thread)
+    return;
+  render_thread->audio_capturer_source_manager()->AddSource(source);
+}
+
+void RendererBlinkPlatformImpl::RemoveSourceFromAudioCapturerSourceManager(
+    media::AudioCapturerSource* source) {
+  RenderThreadImpl* render_thread = RenderThreadImpl::current();
+  if (!render_thread)
+    return;
+  render_thread->audio_capturer_source_manager()->RemoveSource(source);
+}
+#endif
+
 blink::WebVideoCaptureImplManager*
 RendererBlinkPlatformImpl::GetVideoCaptureImplManager() {
   RenderThreadImpl* thread = RenderThreadImpl::current();

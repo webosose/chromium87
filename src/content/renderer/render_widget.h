@@ -218,6 +218,9 @@ class CONTENT_EXPORT RenderWidget
   void CloseWidgetSoon() override;
   void ClosePopupWidgetSoon() override;
   void Show(blink::WebNavigationPolicy) override;
+#if defined(USE_NEVA_APPRUNTIME)
+  void SetVisible(bool is_shown) override;
+#endif
   void SetWindowRect(const gfx::Rect&) override;
   bool RequestPointerLock(blink::WebLocalFrame* requester_frame,
                           blink::WebWidgetClient::PointerLockCallback callback,
@@ -256,6 +259,7 @@ class CONTENT_EXPORT RenderWidget
   void UpdateTextInputState();
 
   cc::LayerTreeHost* layer_tree_host() { return layer_tree_host_; }
+
   void SetHandlingInputEvent(bool handling_input_event);
 
   // Checks if the selection bounds have been changed. If they are changed,

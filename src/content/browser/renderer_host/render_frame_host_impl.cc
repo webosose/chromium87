@@ -259,6 +259,10 @@
 #include "content/browser/serial/serial_service.h"
 #endif
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "content/public/browser/web_contents.h"
+#endif
+
 #if defined(OS_MAC)
 #include "content/browser/renderer_host/popup_menu_helper_mac.h"
 #endif
@@ -1639,7 +1643,9 @@ void RenderFrameHostImpl::ExecuteJavaScriptMethod(
 void RenderFrameHostImpl::ExecuteJavaScript(const base::string16& javascript,
                                             JavaScriptResultCallback callback) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
+#if !defined(USE_NEVA_APPRUNTIME)
   CHECK(CanExecuteJavaScript());
+#endif
 
   const bool wants_result = !callback.is_null();
   GetNavigationControl()->JavaScriptExecuteRequest(javascript, wants_result,
@@ -4811,6 +4817,42 @@ void RenderFrameHostImpl::SetKeepAliveTimeoutForTesting(
     keep_alive_handle_factory_->SetTimeout(keep_alive_timeout_);
 }
 
+#if defined(USE_NEVA_MEDIA)
+mojom::FrameMediaController* RenderFrameHostImpl::GetFrameMediaController() {
+  if (!frame_media_controller_)
+    GetRemoteAssociatedInterfaces()->GetInterface(&frame_media_controller_);
+  return frame_media_controller_.get();
+}
+
+void RenderFrameHostImpl::PermitMediaActivation(int player_id) {
+  if (GetFrameMediaController())
+    GetFrameMediaController()->PermitMediaActivation(player_id);
+}
+
+void RenderFrameHostImpl::SetSuppressed(bool is_suppressed) {
+  if (GetFrameMediaController())
+    GetFrameMediaController()->SetSuppressed(is_suppressed);
+}
+
+void RenderFrameHostImpl::SuspendMedia(int player_id) {
+  if (GetFrameMediaController())
+    GetFrameMediaController()->SuspendMedia(player_id);
+}
+
+gfx::AcceleratedWidget RenderFrameHostImpl::GetAcceleratedWidget() {
+  RenderWidgetHostViewBase* view = static_cast<RenderWidgetHostViewBase*>(
+      frame_tree_node_->IsMainFrame()
+          ? render_view_host_->GetWidget()->GetView()
+          : frame_tree_node_->frame_tree()
+                ->GetMainFrame()
+                ->render_view_host_->GetWidget()
+                ->GetView());
+  if (view)
+    return view->GetAcceleratedWidget();
+  return gfx::kNullAcceleratedWidget;
+}
+#endif
+
 void RenderFrameHostImpl::ShowCreatedWindow(int pending_widget_routing_id,
                                             WindowOpenDisposition disposition,
                                             const gfx::Rect& initial_rect,
@@ -5536,6 +5578,17 @@ CanCommitStatus RenderFrameHostImpl::CanCommitOriginAndUrl(
     return CanCommitStatus::CAN_COMMIT_ORIGIN_AND_URL;
   }
 
+#if defined(USE_NEVA_APPRUNTIME)
+  if (origin.scheme() == url::kFileScheme) {
+    if (delegate_->GetAsWebContents()) {
+      blink::mojom::RendererPreferences* renderer_prefs =
+          delegate_->GetAsWebContents()->GetMutableRendererPrefs();
+      if (!renderer_prefs->file_security_origin.empty())
+        return CanCommitStatus::CAN_COMMIT_ORIGIN_AND_URL;
+    }
+  }
+#endif
+
   // Renderer-debug URLs can never be committed.
   if (IsRendererDebugURL(url)) {
     LogCanCommitOriginAndUrlFailureReason("is_renderer_debug_url");
@@ -6073,6 +6126,12 @@ void RenderFrameHostImpl::CommitNavigation(
   // WebBundleURLLoaderFactory held by the handle.
   if (!is_same_document)
     web_bundle_handle_ = std::move(web_bundle_handle);
+
+#if defined(USE_NEVA_APPRUNTIME)
+  auto* web_contents = delegate_->GetAsWebContents();
+  if (web_contents->GetDelegate()->GetAllowLocalResourceLoad())
+    commit_params->can_load_local_resources = true;
+#endif
 
   UpdatePermissionsForNavigation(*common_params, *commit_params);
 
@@ -6613,6 +6672,16 @@ void RenderFrameHostImpl::SetUpMojoIfNeeded() {
                 blink::mojom::LocalFrameHost::Name_));
       },
       base::Unretained(this)));
+
+#if defined(USE_NEVA_MEDIA)
+  associated_registry_->AddInterface(base::BindRepeating(
+      [](RenderFrameHostImpl* impl,
+         mojo::PendingAssociatedReceiver<
+             content::mojom::FrameVideoWindowFactory> receiver) {
+        impl->frame_video_window_factory_receiver_.Bind(std::move(receiver));
+      },
+      base::Unretained(this)));
+#endif  // defined(USE_NEVA_MEDIA)
 
   if (frame_tree_node_->IsMainFrame()) {
     associated_registry_->AddInterface(base::BindRepeating(

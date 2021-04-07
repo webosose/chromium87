@@ -721,6 +721,26 @@
         ]
       },
       {
+        "name": "resume",
+        "type": "function",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "instanceId"
+          }
+        ]
+      },
+      {
+        "name": "suspend",
+        "type": "function",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "instanceId"
+          }
+        ]
+      },
+      {
         "name": "stop",
         "type": "function",
         "parameters": [
