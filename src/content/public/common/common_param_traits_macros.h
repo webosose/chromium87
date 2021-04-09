@@ -161,6 +161,7 @@ IPC_STRUCT_TRAITS_BEGIN(blink::mojom::RendererPreferences)
   ///@name USE_NEVA_APPRUNTIME
   ///@{
   IPC_STRUCT_TRAITS_MEMBER(application_id)
+  IPC_STRUCT_TRAITS_MEMBER(display_id)
   IPC_STRUCT_TRAITS_MEMBER(media_codec_capability)
   IPC_STRUCT_TRAITS_MEMBER(media_preferences)
   IPC_STRUCT_TRAITS_MEMBER(board_type)

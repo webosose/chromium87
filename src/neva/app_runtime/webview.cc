@@ -434,16 +434,30 @@ void WebView::SetShouldSuppressDialogs(bool suppress) {
 void WebView::SetAppId(const std::string& app_id) {
   blink::mojom::RendererPreferences* renderer_prefs =
       web_contents_->GetMutableRendererPrefs();
-  if (!renderer_prefs->application_id.compare(app_id))
-    return;
-
-  renderer_prefs->application_id = app_id;
 
   // TODO(melnikov): It should be set by sepparate interface from WAM
 #if defined(USE_NEVA_EXTENSIONS)
   renderer_prefs->is_enact_browser =
       base::EqualsCaseInsensitiveASCII(app_id, "com.webos.app.enactbrowser");
+  if (!renderer_prefs->application_id.compare(application_id))
+    return;
+  renderer_prefs->application_id = app_id;
 #else
+  // app_id = application name + display affinity
+  // umediaserver needs application name for acg and display affinity
+  // for video to play on multiple diplays
+  // Newly introduced local storage manager uses application_id,
+  // so we need to provide the name without display affinity.
+  // [FIXME] Make clear to use unique key like instance id for OSE
+  // to get application name, display affinity
+  int pos = app_id.size() - 1;
+  std::string application_id = app_id.substr(0, pos);
+  std::string display_id = app_id.substr(pos, app_id.size());
+  if (!renderer_prefs->application_id.compare(application_id) &&
+      !renderer_prefs->display_id.compare(display_id))
+    return;
+  renderer_prefs->application_id = application_id;
+  renderer_prefs->display_id = display_id;
   renderer_prefs->is_enact_browser = false;
 #endif
 

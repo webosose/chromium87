@@ -160,6 +160,9 @@ struct RendererPreferences {
   // Web application id
   string application_id;
 
+  // Display affinity
+  string display_id;
+
   // Media Codec Capability
   string media_codec_capability;
 

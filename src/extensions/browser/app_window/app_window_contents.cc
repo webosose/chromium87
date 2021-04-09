@@ -43,6 +43,7 @@ void AppWindowContentsImpl::Initialize(content::BrowserContext* context,
 #if defined(OS_WEBOS)
   web_contents_->GetMutableRendererPrefs()->application_id =
       host_->GetApplicationId();
+  web_contents_->GetMutableRendererPrefs()->display_id = host_->GetDisplayId();
   web_contents_->GetMutableRendererPrefs()->media_codec_capability =
       host_->GetMediaCodecCapability();
 #endif
