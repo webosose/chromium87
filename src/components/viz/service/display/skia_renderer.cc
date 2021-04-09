@@ -1202,7 +1202,21 @@ SkiaRenderer::DrawQuadParams SkiaRenderer::CalculateDrawQuadParams(
     }
   }
 
+#if defined(USE_NEVA_PUNCH_HOLE)
+  // NEVA_PUNCH_HOLE makes punch hole
+  // opacity 1.f case
+  //  - Need to force to use SkBlendMode:kSrc with given color of
+  //  SK_ColorTRANSPARENT
+  // opacity < 1.f case
+  //  - Need to pass thru adjusting since it is already set to use
+  //    SkBlendMode:kDstOut with solid color and opacity < 1.f
+  if (quad->force_draw_transparent_color) {
+    if (params.opacity == 1.f)
+      params.blend_mode = SkBlendMode::kSrc;
+  } else if (!quad->ShouldDrawWithBlending()) {
+#else
   if (!quad->ShouldDrawWithBlending()) {
+#endif
     // The quad layer is src-over with 1.0 opacity and its needs_blending flag
     // has been set to false. However, even if the layer's opacity is 1.0, the
     // contents may not be (e.g. png or a color with alpha).

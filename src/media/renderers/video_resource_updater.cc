@@ -563,11 +563,6 @@ void VideoResourceUpdater::AppendQuads(viz::CompositorRenderPass* render_pass,
 
   switch (frame_resource_type_) {
     case VideoFrameResourceType::VIDEO_HOLE: {
-#if defined(NEVA_VIDEO_HOLE) && defined(USE_NEVA_MEDIA)
-      // We need to change |are_contents_opaque| flag for making transparent
-      // video hole, when we use SkiaRenderer.
-      shared_quad_state->are_contents_opaque = false;
-#endif
       auto* video_hole_quad =
           render_pass->CreateAndAppendDrawQuad<viz::VideoHoleDrawQuad>();
       video_hole_quad->SetNew(shared_quad_state, quad_rect, visible_quad_rect,

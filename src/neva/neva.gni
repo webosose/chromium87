@@ -87,6 +87,9 @@ declare_args() {
 }
 
 declare_args() {
+  # neva_media also needs a part of punch-hole implementation
+  use_neva_punch_hole = use_neva_media
+  
   # Suspend capturing audio/video when tab or app is suspended
   use_neva_suspend_media_capture = is_webos
 

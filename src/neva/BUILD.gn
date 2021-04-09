@@ -81,6 +81,10 @@ config("config") {
     }
   }
 
+  if (use_neva_punch_hole) {
+    defines += [ "USE_NEVA_PUNCH_HOLE=1" ]
+  }
+
   if (enable_webm_audio_codecs) {
     defines += [ "ENABLE_WEBM_AUDIO_CODECS=1" ]
   }
