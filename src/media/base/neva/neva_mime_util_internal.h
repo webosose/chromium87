@@ -35,6 +35,9 @@ class MEDIA_EXPORT NevaMimeUtil : public MimeUtil {
   void RemoveUnsupportedMediaFormats();
   void RemoveSupportedCodecFromContainer(const std::string& mime_type,
                                          const Codec& codec);
+  // Removes |mime_type| from |media_format_map_| if not supported by the
+  // platform.
+  void RemoveContainer(const std::string& mime_type);
 };
 
 }  // namespace internal

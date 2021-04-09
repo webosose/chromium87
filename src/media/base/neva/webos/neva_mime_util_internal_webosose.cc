@@ -1,4 +1,4 @@
-// Copyright 2018 LG Electronics, Inc.
+// Copyright (c) 2018 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 #include "media/base/neva/neva_mime_util_internal.h"
 
-#include "media/neva/media_preferences.h"
-
 namespace media {
 namespace internal {
 
@@ -25,36 +23,26 @@ void NevaMimeUtil::AddSupportedMediaFormats() {
   CodecSet webos_codecs;
   webos_codecs.insert(VALID_CODEC);
 
-  // extended support type on tv platform
-  AddContainerWithCodecs("audio/x-mpeg", webos_codecs);
-  AddContainerWithCodecs("video/x-ms-wmv", webos_codecs);
-  AddContainerWithCodecs("video/x-ms-asf", webos_codecs);
-  AddContainerWithCodecs("video/x-m2ts", webos_codecs);
-  AddContainerWithCodecs("video/m2ts", webos_codecs);
-  // MPEG-2 TS.
-  AddContainerWithCodecs("video/mp2t", webos_codecs);
-  // hls
   AddContainerWithCodecs("application/vnd.apple.mpegurl", webos_codecs);
-  AddContainerWithCodecs("application/vnd.apple.mpegurl.audio", webos_codecs);
   AddContainerWithCodecs("application/mpegurl", webos_codecs);
   AddContainerWithCodecs("application/x-mpegurl", webos_codecs);
   AddContainerWithCodecs("audio/mpegurl", webos_codecs);
   AddContainerWithCodecs("audio/x-mpegurl", webos_codecs);
-  // mpeg-dash
-  AddContainerWithCodecs("application/dash+xml", webos_codecs);
-  // msiis
-  AddContainerWithCodecs("application/vnd.ms-sstr+xml", webos_codecs);
-#if defined(USE_GST_MEDIA)
+
+  // webOS specific media types
   AddContainerWithCodecs("service/webos-camera", webos_codecs);
-#endif
+  AddContainerWithCodecs("service/webos-photo-camera", webos_codecs);
 }
 
 void NevaMimeUtil::RemoveUnsupportedMediaFormats() {
-  if (!media::MediaPreferences::Get()->IsAV1CodecEnabled()) {
-    RemoveSupportedCodecFromContainer("video/webm", AV1);
-    RemoveSupportedCodecFromContainer("video/mp4", AV1);
-  }
+  RemoveContainer("audio/webm");
+  RemoveContainer("video/webm");
+  RemoveContainer("video/ogg");
+#if BUILDFLAG(USE_PROPRIETARY_CODECS)
+  RemoveContainer("audio/aac");
+  RemoveContainer("audio/x-m4a");
+#endif  // BUILDFLAG(USE_PROPRIETARY_CODECS)
 }
 
-}  // namespace internal
-}  // namespace media
+} // namespace internal
+} // namespace media

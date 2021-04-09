@@ -28,7 +28,7 @@ neva = {
   ]
 
   if (is_webos) {
-    sources += [ "$_dir/webos/neva_mime_util_internal_webos.cc" ]
+    sources += [ "$_dir/webos/neva_mime_util_internal_webosose.cc" ]
   } else {
     sources += [ "$_dir/neva_mime_util_internal_stub.cc" ]
   }

@@ -46,5 +46,9 @@ void NevaMimeUtil::RemoveSupportedCodecFromContainer(
   it_media_format_map->second.erase(codec);
 }
 
+void NevaMimeUtil::RemoveContainer(const std::string& mime_type) {
+  media_format_map_.erase(base::ToLowerASCII(mime_type));
+}
+
 }  // namespace internal
 }  // namespace media
