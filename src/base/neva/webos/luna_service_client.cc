@@ -24,11 +24,12 @@
 
 namespace base {
 
-// Order must be same with URIType.
-static const char* const luna_service_uris[] = {
-    "luna://com.webos.audio",                     // AUDIO
-    "luna://com.webos.settingsservice",        // SETTING
-};
+namespace {
+
+const char kURIAudio[] = "luna://com.webos.audio";
+const char kURISetting[] = "luna://com.webos.settingsservice";
+
+}  // namespace
 
 // static
 std::string LunaServiceClient::GetServiceURI(URIType type,
@@ -36,7 +37,19 @@ std::string LunaServiceClient::GetServiceURI(URIType type,
   if (type < 0 || type > URIType::URITypeMax)
     return std::string();
 
-  std::string uri = luna_service_uris[type];
+  static std::map<URIType, std::string> kURIMap = {
+      {URIType::AUDIO, kURIAudio},
+      {URIType::SETTING, kURISetting}};
+
+  auto luna_service_uri = [&kURIMap, &type]() {
+    std::map<URIType, std::string>::iterator it;
+    it = kURIMap.find(type);
+    if (it != kURIMap.end())
+      return it->second;
+    return std::string();
+  };
+
+  std::string uri = luna_service_uri();
   uri.append("/");
   uri.append(action);
   return uri;
