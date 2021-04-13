@@ -204,6 +204,11 @@ void ShellDesktopControllerAura::AddAppWindow(AppWindow* app_window,
         root_window_controllers_[display.id()]->host();
     window_tree_host->SetWindowProperty(kAppId, app_id);
     window_tree_host->SetWindowProperty(kWebOSAccessPolicyKeysBack, "true");
+
+    const char kDisplayAffinity[] = "displayAffinity";
+    std::string display_id = app_window->GetDisplayId();
+    if (!display_id.empty())
+      window_tree_host->SetWindowProperty(kDisplayAffinity, display_id);
   }
 #endif
 #if defined(USE_NEVA_APPRUNTIME)

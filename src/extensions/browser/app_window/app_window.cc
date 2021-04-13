@@ -270,6 +270,12 @@ void AppWindow::Init(const GURL& url,
     SetApplicationId(app_id);
   }
 
+  if (command_line->HasSwitch(switches::kWebOSDisplayId)) {
+    std::string display_id =
+        command_line->GetSwitchValueASCII(switches::kWebOSDisplayId);
+    SetDisplayId(display_id);
+  }
+
   base::FilePath path;
   base::PathService::Get(base::FILE_MEDIA_CODEC_CAPABILITIES, &path);
   ReadMediaCapabilityFromPath(path);

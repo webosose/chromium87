@@ -388,6 +388,10 @@ class AppWindow : public content::WebContentsDelegate,
   }
   std::string GetApplicationId() const { return application_id_; }
 
+  // used by neva project
+  std::string GetDisplayId() const { return display_id_; }
+  void SetDisplayId(const std::string& id) { display_id_ = id; }
+
   std::string GetMediaCodecCapability() const {
     return media_codec_capability_;
   }
@@ -614,6 +618,9 @@ class AppWindow : public content::WebContentsDelegate,
 #if defined(OS_WEBOS)
   // Application Id that is sent to backend
   std::string application_id_;
+
+  // display affinity sent to backend
+  std::string display_id_;
 
   // Platform media codec capability sent to backend.
   std::string media_codec_capability_;
