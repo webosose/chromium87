@@ -41,6 +41,7 @@ WaylandWindow::WaylandWindow(unsigned handle)
       window_(NULL),
       type_(None),
       handle_(handle),
+      display_id_("default_display"),
 #if defined(OS_WEBOS)
       surface_group_(0),
       is_surface_group_client_(false),
@@ -51,11 +52,12 @@ WaylandWindow::WaylandWindow(unsigned handle)
 WaylandWindow::~WaylandWindow() {
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
   if (seat) {
-    if (seat->GetFocusWindowHandle() == handle_)
-      seat->SetFocusWindowHandle(0);
+    seat->ResetEnteredWindowHandle(handle_);
 
-    if (seat->GetGrabWindowHandle() == handle_)
-      seat->SetGrabWindowHandle(0, 0);
+    if (seat->GetActiveInputWindow(display_id_) == handle_)
+      seat->SetActiveInputWindow(display_id_, 0);
+
+    seat->ResetGrabWindow(handle_);
   }
 
 #if defined(OS_WEBOS)
@@ -134,13 +136,17 @@ void WaylandWindow::Minimize() {
 
 void WaylandWindow::Show() {
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
-  seat->SetFocusWindowHandle(handle_);
+  if (seat) {
+    seat->SetActiveInputWindow(display_id_, handle_);
+  }
 }
 
 void WaylandWindow::Hide() {
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
-  if (seat && seat->GetFocusWindowHandle() == handle_)
-    seat->SetFocusWindowHandle(0);
+  if (seat) {
+    if (seat->GetActiveInputWindow(display_id_) == handle_)
+      seat->SetActiveInputWindow(display_id_, 0);
+  }
 }
 
 void WaylandWindow::Restore() {
@@ -192,6 +198,10 @@ void WaylandWindow::SetKeyMask(ui::KeyMask key_mask, bool set) {
 
 void WaylandWindow::SetWindowProperty(const std::string& name,
                                       const std::string& value) {
+  // FIXME : We should have separated API for set display ID.
+  if (name == "displayAffinity")
+    display_id_ = value;
+
   if (!shell_surface_) {
     LOG(ERROR) << "Shell type not set. Setting it to TopLevel";
     SetShellAttributes(TOPLEVEL);

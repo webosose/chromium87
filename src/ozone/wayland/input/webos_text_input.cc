@@ -18,7 +18,6 @@
 
 #include <curses.h>
 #include <linux/input.h>
-#include "wayland-text-client-protocol.h"
 
 #include <string>
 
@@ -98,149 +97,198 @@ const struct text_model_listener text_model_listener_ = {
 
 static uint32_t serial = 0;
 
-WaylandTextInput::WaylandTextInput(WaylandSeat* seat)
-    : input_panel_rect_(0, 0, 0, 0),
-      activated_(false),
-      state_(InputPanelUnknownState),
-      input_content_type_(ui::INPUT_CONTENT_TYPE_NONE),
-      text_input_flags_(0),
-      active_window_(NULL),
-      last_active_window_(NULL),
-      seat_(seat) {}
+WaylandTextInput::WaylandTextInput(WaylandSeat* seat) : seat_(seat) {}
 
 WaylandTextInput::~WaylandTextInput() {
-  DeactivateTextModel();
-}
-
-void WaylandTextInput::ResetIme() {
-  if (!text_model_) {
-    CreateTextModel();
-  } else {
-    text_model_reset(text_model_, serial);
+  for (auto& input_panel_item : input_panel_map_) {
+    DeactivateInputPanel(input_panel_item.first);
   }
 }
 
-void WaylandTextInput::ActivateTextModel(WaylandWindow* active_window) {
-  if (text_model_ && active_window && !activated_) {
-    VLOG(1) << __func__ << " handle=" << active_window->Handle();
-    text_model_activate(text_model_, serial, seat_->GetWLSeat(),
-                        active_window->ShellSurface()->GetWLSurface());
+void WaylandTextInput::ResetIme(unsigned handle) {
+  WaylandWindow* active_window = FindActiveWindow(handle);
+  if (active_window) {
+    std::string display_id = active_window->GetDisplayId();
+    WaylandTextInput::InputPanel* panel = FindInputPanel(display_id);
+
+    if (panel && panel->model) {
+      text_model_reset(panel->model, serial);
+    } else {
+      panel = new InputPanel(CreateTextModel());
+      input_panel_map_[display_id].reset(panel);
+    }
   }
 }
 
-void WaylandTextInput::DeactivateTextModel() {
-  if (text_model_ && activated_) {
-    SetHiddenState();
-    text_model_reset(text_model_, serial);
-    VLOG(1) << __func__;
-    text_model_deactivate(text_model_, seat_->GetWLSeat());
-    text_model_destroy(text_model_);
-    text_model_ = nullptr;
-    activated_ = false;
-    state_ = InputPanelUnknownState;
+void WaylandTextInput::DeactivateInputPanel(const std::string& display_id) {
+  WaylandTextInput::InputPanel* input_panel = FindInputPanel(display_id);
+  if (input_panel && input_panel->model && input_panel->activated) {
+    SetHiddenState(display_id);
+    text_model_reset(input_panel->model, serial);
+    text_model_deactivate(input_panel->model, seat_->GetWLSeat());
+    text_model_destroy(input_panel->model);
+    input_panel->model = nullptr;
+    input_panel->activated = false;
   }
 }
 
-void WaylandTextInput::CreateTextModel() {
-  DCHECK(!text_model_);
+text_model* WaylandTextInput::CreateTextModel() {
+  text_model* model = nullptr;
   text_model_factory* factory =
       WaylandDisplay::GetInstance()->GetTextModelFactory();
   if (factory) {
-    text_model_ = text_model_factory_create_text_model(factory);
-    if (text_model_)
-      text_model_add_listener(text_model_, &text_model_listener_, this);
+    model = text_model_factory_create_text_model(factory);
+    if (model)
+      text_model_add_listener(model, &text_model_listener_, this);
   }
+  return model;
+}
+
+WaylandWindow* WaylandTextInput::FindActiveWindow(unsigned handle) {
+  for (auto& active_window_item : active_window_map_) {
+    if (active_window_item.second &&
+        active_window_item.second->Handle() == handle) {
+      return active_window_item.second;
+    }
+  }
+  return nullptr;
+}
+
+WaylandTextInput::InputPanel* WaylandTextInput::FindInputPanel(
+    const std::string& display_id) {
+  if (input_panel_map_.find(display_id) != input_panel_map_.end()) {
+    return input_panel_map_[display_id].get();
+  }
+  return nullptr;
+}
+
+std::string WaylandTextInput::FindDisplay(text_model* model) {
+  for (auto& input_panel_item : input_panel_map_) {
+    if (input_panel_item.second && input_panel_item.second->model == model) {
+      return input_panel_item.first;
+    }
+  }
+  return std::string();
 }
 
 void WaylandTextInput::ShowInputPanel(wl_seat* input_seat, unsigned handle) {
-  if (!text_model_)
-    CreateTextModel();
-
-  if (!text_model_)
-    return;
-
-  WaylandWindow* active_window{nullptr};
-  if (active_window_ && active_window_->Handle() == handle)
-    active_window = active_window_;
-  else if (last_active_window_ && last_active_window_->Handle() == handle)
-    active_window = last_active_window_;
+  WaylandWindow* active_window = FindActiveWindow(handle);
 
   if (active_window) {
-    if (activated_) {
-      if (state_ != InputPanelShown)
-        text_model_show_input_panel(text_model_);
-    } else {
-      ActivateTextModel(active_window);
+    std::string display_id = active_window->GetDisplayId();
+    WaylandTextInput::InputPanel* panel = FindInputPanel(display_id);
 
+    if (!panel || !panel->model) {
+      panel = new InputPanel(CreateTextModel());
+      input_panel_map_[display_id].reset(panel);
+    }
+
+    if (panel && panel->model) {
+      if (panel->activated) {
+        if (panel->state != InputPanelShown)
+          text_model_show_input_panel(panel->model);
+      } else
+        text_model_activate(panel->model, serial, seat_->GetWLSeat(),
+                            active_window->ShellSurface()->GetWLSurface());
       text_model_set_content_type(
-          text_model_,
-          ContentHintFromInputContentType(input_content_type_,
-                                          text_input_flags_),
-          ContentPurposeFromInputContentType(input_content_type_));
+          panel->model,
+          ContentHintFromInputContentType(panel->input_content_type,
+                                          panel->text_input_flags),
+          ContentPurposeFromInputContentType(panel->input_content_type));
     }
   }
 }
 
 void WaylandTextInput::HideInputPanel(wl_seat* input_seat,
+                                      const std::string& display_id,
                                       ui::ImeHiddenType hidden_type) {
-  if (!text_model_)
+  WaylandTextInput::InputPanel* panel = FindInputPanel(display_id);
+
+  if (!panel || !panel->model)
     return;
 
   if (hidden_type == ui::ImeHiddenType::kDeactivate) {
-    DeactivateTextModel();
+    DeactivateInputPanel(display_id);
   } else {
-    SetHiddenState();
-    text_model_hide_input_panel(text_model_);
+    SetHiddenState(display_id);
+    text_model_hide_input_panel(panel->model);
   }
 }
 
-void WaylandTextInput::SetActiveWindow(WaylandWindow* window) {
-  active_window_ = window;
-  if (active_window_)
-    last_active_window_ = active_window_;
+void WaylandTextInput::SetActiveWindow(const std::string& display_id,
+                                       WaylandWindow* window) {
+  active_window_map_[display_id] = window;
 }
 
-void WaylandTextInput::SetHiddenState() {
-  input_panel_rect_.SetRect(0, 0, 0, 0);
-  if (last_active_window_) {
+WaylandWindow* WaylandTextInput::GetActiveWindow(
+    const std::string& display_id) const {
+  if (active_window_map_.find(display_id) != active_window_map_.end()) {
+    return active_window_map_.at(display_id);
+  }
+  return nullptr;
+}
+
+void WaylandTextInput::SetHiddenState(const std::string& display_id) {
+  WaylandTextInput::InputPanel* panel = FindInputPanel(display_id);
+  if (panel)
+    panel->input_panel_rect.SetRect(0, 0, 0, 0);
+  WaylandWindow* active_window = GetActiveWindow(display_id);
+  if (active_window) {
     WaylandDisplay::GetInstance()->InputPanelRectChanged(
-        last_active_window_->Handle(), 0, 0, 0, 0);
+        active_window->Handle(), 0, 0, 0, 0);
     WaylandDisplay::GetInstance()->InputPanelStateChanged(
-        last_active_window_->Handle(),
-        webos::InputPanelState::INPUT_PANEL_HIDDEN);
+        active_window->Handle(), webos::InputPanelState::INPUT_PANEL_HIDDEN);
   }
 }
 
 void WaylandTextInput::SetInputContentType(ui::InputContentType content_type,
                                            int text_input_flags,
                                            unsigned handle) {
-  if (active_window_ && active_window_->Handle() == handle) {
-    input_content_type_ = content_type;
-    text_input_flags_ = text_input_flags;
-    if (text_model_ && activated_) {
-      text_model_set_content_type(
-          text_model_,
-          ContentHintFromInputContentType(input_content_type_,
-                                          text_input_flags_),
-          ContentPurposeFromInputContentType(input_content_type_));
+  WaylandWindow* active_window = FindActiveWindow(handle);
+  if (active_window) {
+    std::string display_id = active_window->GetDisplayId();
+    WaylandTextInput::InputPanel* panel = FindInputPanel(display_id);
+
+    if (panel) {
+      panel->input_content_type = content_type;
+      panel->text_input_flags = text_input_flags;
+      if (panel->model)
+        text_model_set_content_type(
+            panel->model,
+            ContentHintFromInputContentType(panel->input_content_type,
+                                            panel->text_input_flags),
+            ContentPurposeFromInputContentType(panel->input_content_type));
     }
   }
 }
 
-void WaylandTextInput::SetSurroundingText(const std::string& text,
+void WaylandTextInput::SetSurroundingText(unsigned handle,
+                                          const std::string& text,
                                           size_t cursor_position,
                                           size_t anchor_position) {
-  if (text_model_)
-    text_model_set_surrounding_text(text_model_, text.c_str(), cursor_position,
-                                    anchor_position);
+  WaylandWindow* active_window = FindActiveWindow(handle);
+
+  if (active_window) {
+    std::string display_id = active_window->GetDisplayId();
+    WaylandTextInput::InputPanel* panel = FindInputPanel(display_id);
+    if (panel && panel->model)
+      text_model_set_surrounding_text(panel->model, text.c_str(),
+                                      cursor_position, anchor_position);
+  }
 }
 
-void WaylandTextInput::OnWindowAboutToDestroy(unsigned windowhandle) {
-  if (active_window_ && active_window_->Handle() == windowhandle)
-    active_window_ = NULL;
+WaylandTextInput::InputPanel::InputPanel() = default;
 
-  if (last_active_window_ && last_active_window_->Handle() == windowhandle)
-    last_active_window_ = NULL;
+WaylandTextInput::InputPanel::InputPanel(text_model* t_model)
+    : model(t_model) {}
+
+WaylandTextInput::InputPanel::~InputPanel() = default;
+
+void WaylandTextInput::OnWindowAboutToDestroy(unsigned windowhandle) {
+  WaylandWindow* active_window = FindActiveWindow(windowhandle);
+
+  if (active_window)
+    active_window_map_[active_window->GetDisplayId()] = nullptr;
 }
 
 void WaylandTextInput::OnCommitString(void* data,
@@ -249,8 +297,12 @@ void WaylandTextInput::OnCommitString(void* data,
                                       const char* text) {
   WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
-  if (instance->last_active_window_)
-    dispatcher->Commit(instance->last_active_window_->Handle(), std::string(text));
+  std::string display = instance->FindDisplay(text_input);
+  if (!display.empty()) {
+    WaylandWindow* active_window = instance->GetActiveWindow(display);
+    if (active_window)
+      dispatcher->Commit(active_window->Handle(), std::string(text));
+  }
 }
 
 void WaylandTextInput::OnPreeditString(void* data,
@@ -260,9 +312,13 @@ void WaylandTextInput::OnPreeditString(void* data,
                                        const char* commit) {
   WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
-  if (instance->last_active_window_)
-    dispatcher->PreeditChanged(instance->last_active_window_->Handle(),
-        std::string(text), std::string(commit));
+  std::string display = instance->FindDisplay(text_input);
+  if (!display.empty()) {
+    WaylandWindow* active_window = instance->GetActiveWindow(display);
+    if (active_window)
+      dispatcher->PreeditChanged(active_window->Handle(), std::string(text),
+                                 std::string(commit));
+  }
 }
 
 void WaylandTextInput::OnDeleteSurroundingText(void* data,
@@ -272,8 +328,12 @@ void WaylandTextInput::OnDeleteSurroundingText(void* data,
                                                uint32_t length) {
   WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
-  if (instance->last_active_window_)
-    dispatcher->DeleteRange(instance->last_active_window_->Handle(), index, length);
+  std::string display = instance->FindDisplay(text_input);
+  if (!display.empty()) {
+    WaylandWindow* active_window = instance->GetActiveWindow(display);
+    if (active_window)
+      dispatcher->DeleteRange(active_window->Handle(), index, length);
+  }
 }
 
 void WaylandTextInput::OnCursorPosition(void* data,
@@ -310,8 +370,10 @@ void WaylandTextInput::OnKeysym(void* data,
     return;
 
   // Copied from WaylandKeyboard::OnKeyNotify().
+
   ui::EventType type = ui::ET_KEY_PRESSED;
   WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
+
   dispatcher->SetSerial(serial);
   if (state == WL_KEYBOARD_KEY_STATE_RELEASED)
     type = ui::ET_KEY_RELEASED;
@@ -325,39 +387,76 @@ void WaylandTextInput::OnKeysym(void* data,
     flag = (IMEModifierFlags)(flag >> 1);
   }
 
-  WaylandTextInput* wl_text_input = static_cast<WaylandTextInput*>(data);
   dispatcher->KeyNotify(type, key_code, device_id);
 
-  bool hide_ime = false;
-  if (key_code == KEY_PREVIOUS || key_code == KEY_UP || key_code == KEY_DOWN)
-    if (wl_text_input->state_ == InputPanelHidden)
-      hide_ime = true;
+  WaylandTextInput* wl_text_input = static_cast<WaylandTextInput*>(data);
+  std::string display = wl_text_input->FindDisplay(text_input);
 
-  if (state == WL_KEYBOARD_KEY_STATE_RELEASED &&
-      (key_code == KEY_ENTER || key_code == KEY_KPENTER) &&
-      (wl_text_input->input_content_type_ !=
-       ui::InputContentType::INPUT_CONTENT_TYPE_TEXT_AREA) &&
-      (wl_text_input->state_ == InputPanelShown))
-    hide_ime = true;
+  if (!display.empty()) {
+    WaylandTextInput::InputPanel* panel =
+        wl_text_input->FindInputPanel(display);
 
-  if (key_code == KEY_TAB)
-    hide_ime = true;
+    if (panel) {
+      bool hide_ime = false;
 
-  if (hide_ime)
-    dispatcher->PrimarySeat()->HideInputPanel(ui::ImeHiddenType::kHide);
+      if (key_code == KEY_PREVIOUS || key_code == KEY_UP ||
+          key_code == KEY_DOWN)
+        if (panel->state == InputPanelHidden)
+          hide_ime = true;
+
+      if (state == WL_KEYBOARD_KEY_STATE_RELEASED &&
+          (key_code == KEY_ENTER || key_code == KEY_KPENTER) &&
+          (panel->input_content_type !=
+           ui::InputContentType::INPUT_CONTENT_TYPE_TEXT_AREA) &&
+          (panel->state == InputPanelShown))
+        hide_ime = true;
+
+      if (key_code == KEY_TAB)
+        hide_ime = true;
+
+      if (hide_ime) {
+        dispatcher->PrimarySeat()->HideInputPanel(ui::ImeHiddenType::kHide,
+                                                  display);
+      }
+    }
+  }
 }
 
 void WaylandTextInput::OnEnter(void* data,
                                struct text_model* text_input,
                                struct wl_surface* surface) {
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
-  instance->activated_ = true;
+  WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
+  std::string display = instance->FindDisplay(text_input);
+
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(text_input));
+
+  if (!display.empty()) {
+    WaylandTextInput::InputPanel* panel = instance->FindInputPanel(display);
+    if (panel)
+      panel->activated = true;
+  }
+
+  WaylandWindow* window =
+      static_cast<WaylandWindow*>(wl_surface_get_user_data(surface));
+  if (window)
+    dispatcher->InputPanelEnter(device_id, window->Handle());
 }
 
 void WaylandTextInput::OnLeave(void* data,
                                struct text_model* text_input) {
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
-  instance->DeactivateTextModel();
+  WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
+  std::string display = instance->FindDisplay(text_input);
+
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(text_input));
+
+  if (!display.empty())
+    instance->DeactivateInputPanel(display);
+
+  dispatcher->InputPanelLeave(device_id);
 }
 
 void WaylandTextInput::OnInputPanelState(void* data,
@@ -365,20 +464,30 @@ void WaylandTextInput::OnInputPanelState(void* data,
                                          uint32_t state) {
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
   WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
-  instance->state_ = static_cast<InputPanelState>(state);
 
-  switch (state) {
-    case InputPanelShown:
-      if (instance->last_active_window_)
-        dispatcher->InputPanelStateChanged(
-            instance->last_active_window_->Handle(),
-            webos::InputPanelState::INPUT_PANEL_SHOWN);
-      break;
-    case InputPanelHidden:
-      instance->SetHiddenState();
-      break;
-    default:
-      break;
+  std::string display = instance->FindDisplay(text_input);
+
+  if (!display.empty()) {
+    WaylandTextInput::InputPanel* panel = instance->FindInputPanel(display);
+
+    if (panel)
+      panel->state = static_cast<InputPanelState>(state);
+
+    switch (state) {
+      case InputPanelShown: {
+        WaylandWindow* active_window = instance->GetActiveWindow(display);
+        if (active_window)
+          dispatcher->InputPanelStateChanged(
+              active_window->Handle(),
+              webos::InputPanelState::INPUT_PANEL_SHOWN);
+        break;
+      }
+      case InputPanelHidden:
+        instance->SetHiddenState(display);
+        break;
+      default:
+        break;
+    }
   }
 }
 
@@ -390,13 +499,21 @@ void WaylandTextInput::OnTextModelInputPanelRect(void* data,
                                                  uint32_t height) {
   WaylandTextInput* instance = static_cast<WaylandTextInput*>(data);
   WaylandDisplay* dispatcher = WaylandDisplay::GetInstance();
+  std::string display = instance->FindDisplay(text_model);
+  if (!display.empty()) {
+    WaylandTextInput::InputPanel* panel = instance->FindInputPanel(display);
 
-  gfx::Rect oldRect(instance->input_panel_rect_);
-  instance->input_panel_rect_.SetRect(x, y, width, height);
+    if (panel) {
+      gfx::Rect oldRect(panel->input_panel_rect);
+      panel->input_panel_rect.SetRect(x, y, width, height);
 
-  if (instance->last_active_window_ && instance->input_panel_rect_ != oldRect)
-    dispatcher->InputPanelRectChanged(instance->last_active_window_->Handle(),
-                                      x, y, width, height);
+      WaylandWindow* active_window = instance->GetActiveWindow(display);
+
+      if (active_window && panel->input_panel_rect != oldRect)
+        dispatcher->InputPanelRectChanged(active_window->Handle(), x, y, width,
+                                          height);
+    }
+  }
 }
 
 }  // namespace ozonewayland

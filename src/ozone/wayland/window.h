@@ -100,6 +100,7 @@ class WaylandWindow {
   void AddRegion(int left, int top, int right, int bottom);
   void SubRegion(int left, int top, int right, int bottom);
   gfx::Rect GetBounds() const { return allocation_; }
+  std::string GetDisplayId() const { return display_id_; }
 
  private:
   WaylandShellSurface* shell_surface_;
@@ -107,6 +108,7 @@ class WaylandWindow {
 
   ShellType type_;
   unsigned handle_;
+  std::string display_id_;
 #if defined(OS_WEBOS)
   WebOSSurfaceGroup* surface_group_;
   bool is_surface_group_client_;

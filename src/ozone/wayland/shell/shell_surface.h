@@ -63,7 +63,7 @@ class WaylandShellSurface {
   virtual void SetWindowProperty(const std::string& name, const std::string& value);
 
   // static functions.
-  static void PopupDone();
+  static void PopupDone(void* data);
   static void WindowResized(void *data, unsigned width, unsigned height);
   static void WindowActivated(void *data);
   static void WindowDeActivated(void *data);

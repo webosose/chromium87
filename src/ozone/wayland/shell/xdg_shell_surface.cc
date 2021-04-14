@@ -188,7 +188,7 @@ void XDGShellSurface::HandleDelete(void* data,
 
 void XDGShellSurface::HandlePopupPopupDone(void* data,
                                            struct xdg_popup* xdg_popup) {
-  WaylandShellSurface::PopupDone();
+  WaylandShellSurface::PopupDone(data);
 }
 
 }  // namespace ozonewayland

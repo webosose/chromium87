@@ -43,8 +43,8 @@ void InputMethodContextManager::RemoveContext(InputMethodContextImplWayland* con
   contexts_list_.remove(context);
 }
 
-void InputMethodContextManager::ImeReset() {
-  sender_->Send(new WaylandDisplay_ImeReset());
+void InputMethodContextManager::ImeReset(unsigned handle) {
+  sender_->Send(new WaylandDisplay_ImeReset(handle));
 }
 
 void InputMethodContextManager::OnGpuProcessLaunched(

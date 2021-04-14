@@ -146,16 +146,16 @@ void OzoneWaylandWindow::InitPlatformWindow(
     case neva::PlatformWindowType::kPopup:
     case neva::PlatformWindowType::kMenu: {
       parent_ = parent_window;
-      if (!parent_ && window_manager_->GetActiveWindow())
-        parent_ = window_manager_->GetActiveWindow()->GetHandle();
+      if (!parent_ && window_manager_->GetActiveWindow(display_id_))
+        parent_ = window_manager_->GetActiveWindow(display_id_)->GetHandle();
       type_ = ui::WidgetType::POPUP;
       ValidateBounds();
       break;
     }
     case neva::PlatformWindowType::kTooltip: {
       parent_ = parent_window;
-      if (!parent_ && window_manager_->GetActiveWindow())
-        parent_ = window_manager_->GetActiveWindow()->GetHandle();
+      if (!parent_ && window_manager_->GetActiveWindow(display_id_))
+        parent_ = window_manager_->GetActiveWindow(display_id_)->GetHandle();
       type_ = ui::WidgetType::TOOLTIP;
       bounds_.set_origin(gfx::Point(0, 0));
       break;
@@ -377,8 +377,11 @@ void OzoneWaylandWindow::ConfineCursorToBounds(const gfx::Rect& bounds) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // WindowTreeHostDelegateWayland, ui::PlatformEventDispatcher implementation:
-bool OzoneWaylandWindow::CanDispatchEvent(
-    const ui::PlatformEvent& ne) {
+bool OzoneWaylandWindow::CanDispatchEvent(const ui::PlatformEvent& ne) {
+  unsigned device_event_grabber =
+      window_manager_->DeviceEventGrabber(ne->source_device_id());
+  if (device_event_grabber != 0)
+    return device_event_grabber == handle_;
   return window_manager_->event_grabber() == gfx::AcceleratedWidget(handle_);
 }
 
@@ -511,6 +514,10 @@ void OzoneWaylandWindow::SizeConstraintsChanged() {
 
 void OzoneWaylandWindow::SetWindowProperty(const std::string& name,
                                            const std::string& value) {
+  // FIXME : We should have separated API for set display ID.
+  if (name == "displayAffinity")
+    display_id_ = value;
+
   sender_->Send(new WaylandDisplay_SetWindowProperty(handle_, name, value));
 }
 
@@ -569,7 +576,7 @@ void OzoneWaylandWindow::ShowInputPanel() {
 }
 
 void OzoneWaylandWindow::HideInputPanel(ImeHiddenType hidden_type) {
-  sender_->Send(new WaylandDisplay_HideInputPanel(hidden_type));
+  sender_->Send(new WaylandDisplay_HideInputPanel(hidden_type, handle_));
 }
 
 void OzoneWaylandWindow::SetInputContentType(ui::TextInputType text_input_type,
@@ -581,8 +588,8 @@ void OzoneWaylandWindow::SetInputContentType(ui::TextInputType text_input_type,
 void OzoneWaylandWindow::SetSurroundingText(const std::string& text,
                                             size_t cursor_position,
                                             size_t anchor_position) {
-  sender_->Send(new WaylandDisplay_SetSurroundingText(text, cursor_position,
-                                                      anchor_position));
+  sender_->Send(new WaylandDisplay_SetSurroundingText(
+      handle_, text, cursor_position, anchor_position));
 }
 
 void OzoneWaylandWindow::SetResizeEnabled(bool enabled) {

@@ -42,7 +42,6 @@ namespace ui {
 
 WindowManagerWayland::WindowManagerWayland(OzoneGpuPlatformSupportHost* proxy)
     : open_windows_(NULL),
-      active_window_(NULL),
       proxy_(proxy),
       keyboard_(KeyboardEvdevNeva::Create(&modifiers_,
                 KeyboardLayoutEngineManager::GetKeyboardLayoutEngine(),
@@ -71,8 +70,8 @@ void WindowManagerWayland::OnRootWindowCreated(
 void WindowManagerWayland::OnRootWindowClosed(
     OzoneWaylandWindow* window) {
   open_windows().remove(window);
-  if (active_window_ == window) {
-    active_window_ = NULL;
+  if (window && GetActiveWindow(window->GetDisplayId()) == window) {
+    active_window_map_[window->GetDisplayId()] = nullptr;
     if (!open_windows().empty())
       OnActivationChanged(open_windows().front()->GetHandle(), true);
   }
@@ -95,8 +94,10 @@ void WindowManagerWayland::OnRootWindowClosed(
 }
 
 void WindowManagerWayland::Restore(OzoneWaylandWindow* window) {
-  active_window_ = window;
-  event_grabber_  = window->GetHandle();
+  if (window) {
+    active_window_map_[window->GetDisplayId()] = window;
+    event_grabber_ = window->GetHandle();
+  }
 }
 
 void WindowManagerWayland::OnPlatformScreenCreated(
@@ -117,6 +118,13 @@ bool WindowManagerWayland::HasWindowsOpen() const {
   return open_windows_ ? !open_windows_->empty() : false;
 }
 
+OzoneWaylandWindow* WindowManagerWayland::GetActiveWindow(
+    const std::string& display_id) const {
+  if (active_window_map_.find(display_id) != active_window_map_.end())
+    return active_window_map_.at(display_id);
+  return nullptr;
+}
+
 void WindowManagerWayland::GrabEvents(gfx::AcceleratedWidget widget) {
   if (current_capture_ == widget)
     return;
@@ -134,8 +142,15 @@ void WindowManagerWayland::UngrabEvents(gfx::AcceleratedWidget widget) {
   if (current_capture_ != widget)
     return;
 
-  current_capture_ = gfx::kNullAcceleratedWidget;
-  event_grabber_ = active_window_ ? active_window_->GetHandle() : 0;
+  if (current_capture_) {
+    OzoneWaylandWindow* window = GetWindow(current_capture_);
+    if (window) {
+      OzoneWaylandWindow* active_window =
+          GetActiveWindow(window->GetDisplayId());
+      current_capture_ = gfx::kNullAcceleratedWidget;
+      event_grabber_ = active_window ? active_window->GetHandle() : 0;
+    }
+  }
 }
 
 OzoneWaylandWindow*
@@ -163,27 +178,27 @@ void WindowManagerWayland::OnActivationChanged(unsigned windowhandle,
     return;
   }
 
+  OzoneWaylandWindow* active_window = GetActiveWindow(window->GetDisplayId());
+
   if (active) {
-    if (active_window_ && active_window_ == window)
-        return;
-
-    if (current_capture_) {
-      event_grabber_ = windowhandle;
-      return;
-    }
-
-    if (active_window_)
-      active_window_->GetDelegate()->OnActivationChanged(false);
-
     event_grabber_ = windowhandle;
-    active_window_ = window;
-    active_window_->GetDelegate()->OnActivationChanged(active);
-  } else if (active_window_ == window) {
-      active_window_->GetDelegate()->OnActivationChanged(active);
-      if (event_grabber_ == gfx::AcceleratedWidget(active_window_->GetHandle()))
-         event_grabber_ = gfx::kNullAcceleratedWidget;
+    if (current_capture_)
+      return;
 
-      active_window_ = NULL;
+    if (active_window && active_window == window)
+      return;
+
+    if (active_window)
+      active_window->GetDelegate()->OnActivationChanged(false);
+
+    active_window_map_[window->GetDisplayId()] = window;
+    window->GetDelegate()->OnActivationChanged(active);
+  } else if (active_window == window) {
+    active_window->GetDelegate()->OnActivationChanged(active);
+    if (event_grabber_ == gfx::AcceleratedWidget(active_window->GetHandle()))
+      event_grabber_ = gfx::kNullAcceleratedWidget;
+
+    active_window_map_[window->GetDisplayId()] = nullptr;
   }
 }
 
@@ -287,6 +302,8 @@ void WindowManagerWayland::OnMessageReceived(const IPC::Message& message) {
   IPC_MESSAGE_HANDLER(WaylandInput_AxisNotify, AxisNotify)
   IPC_MESSAGE_HANDLER(WaylandInput_PointerEnter, PointerEnter)
   IPC_MESSAGE_HANDLER(WaylandInput_PointerLeave, PointerLeave)
+  IPC_MESSAGE_HANDLER(WaylandInput_InputPanelEnter, InputPanelEnter)
+  IPC_MESSAGE_HANDLER(WaylandInput_InputPanelLeave, InputPanelLeave)
   IPC_MESSAGE_HANDLER(WaylandInput_KeyboardEnter, KeyboardEnter)
   IPC_MESSAGE_HANDLER(WaylandInput_KeyboardLeave, KeyboardLeave)
   IPC_MESSAGE_HANDLER(WaylandInput_KeyNotify, KeyNotify)
@@ -350,22 +367,37 @@ void WindowManagerWayland::AxisNotify(float x,
           weak_ptr_factory_.GetWeakPtr(), x, y, xoffset, yoffset));
 }
 
-void WindowManagerWayland::PointerEnter(unsigned handle,
+void WindowManagerWayland::PointerEnter(uint32_t device_id,
+                                        unsigned handle,
                                         float x,
                                         float y) {
   base::ThreadTaskRunnerHandle::Get()->PostTask(
       FROM_HERE,
       base::Bind(&WindowManagerWayland::NotifyPointerEnter,
-          weak_ptr_factory_.GetWeakPtr(), handle, x, y));
+                 weak_ptr_factory_.GetWeakPtr(), device_id, handle, x, y));
 }
 
-void WindowManagerWayland::PointerLeave(unsigned handle,
+void WindowManagerWayland::PointerLeave(uint32_t device_id,
+                                        unsigned handle,
                                         float x,
                                         float y) {
   base::ThreadTaskRunnerHandle::Get()->PostTask(
       FROM_HERE,
       base::Bind(&WindowManagerWayland::NotifyPointerLeave,
-          weak_ptr_factory_.GetWeakPtr(), handle, x, y));
+                 weak_ptr_factory_.GetWeakPtr(), device_id, handle, x, y));
+}
+
+void WindowManagerWayland::InputPanelEnter(uint32_t device_id,
+                                           unsigned handle) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyInputPanelEnter,
+                            weak_ptr_factory_.GetWeakPtr(), device_id, handle));
+}
+
+void WindowManagerWayland::InputPanelLeave(uint32_t device_id) {
+  base::ThreadTaskRunnerHandle::Get()->PostTask(
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyInputPanelLeave,
+                            weak_ptr_factory_.GetWeakPtr(), device_id));
 }
 
 void WindowManagerWayland::KeyNotify(EventType type,
@@ -607,36 +639,46 @@ void WindowManagerWayland::NotifyAxis(float x,
   DispatchEvent(&wheelev);
 }
 
-void WindowManagerWayland::NotifyPointerEnter(unsigned handle,
-                                                 float x,
-                                                 float y) {
+void WindowManagerWayland::NotifyPointerEnter(uint32_t device_id,
+                                              unsigned handle,
+                                              float x,
+                                              float y) {
   OnWindowEnter(handle);
 
   gfx::Point position(x, y);
-  MouseEvent mouseev(ET_MOUSE_ENTERED,
-                         position,
-                         position,
-                         EventTimeForNow(),
-                         0,
-                         0);
+  MouseEvent mouseev(ET_MOUSE_ENTERED, position, position, EventTimeForNow(), 0,
+                     0);
 
   DispatchEvent(&mouseev);
 }
 
-void WindowManagerWayland::NotifyPointerLeave(unsigned handle,
+void WindowManagerWayland::NotifyPointerLeave(uint32_t device_id,
+                                              unsigned handle,
                                               float x,
                                               float y) {
   OnWindowLeave(handle);
-
+#if !defined(OS_WEBOS)
+  // LSM sends a pointer leave event to a window
+  // if we touch on another window of the second display.
+  // The first window after that can be unfocused.
+  // We can't right handle pointer leave event
+  // on the first window on client side.
+  // Disable dispatching ET_MOUSE_EXITED event.
   gfx::Point position(x, y);
-  MouseEvent mouseev(ET_MOUSE_EXITED,
-                         position,
-                         position,
-                         EventTimeForNow(),
-                         0,
-                         0);
+  MouseEvent mouseev(ET_MOUSE_EXITED, position, position, EventTimeForNow(), 0,
+                     0);
 
   DispatchEvent(&mouseev);
+#endif
+}
+
+void WindowManagerWayland::NotifyInputPanelEnter(uint32_t device_id,
+                                                 unsigned handle) {
+  GrabDeviceEvents(device_id, handle);
+}
+
+void WindowManagerWayland::NotifyInputPanelLeave(uint32_t device_id) {
+  UnGrabDeviceEvents(device_id);
 }
 
 void WindowManagerWayland::NotifyTouchEvent(EventType type,
@@ -957,6 +999,29 @@ void WindowManagerWayland::NotifyNativeWindowStateAboutToChange(unsigned handle,
   }
   VLOG(1) << __PRETTY_FUNCTION__;
   window->GetDelegate()->OnWindowHostStateAboutToChange(state);
+}
+
+void WindowManagerWayland::GrabDeviceEvents(uint32_t device_id,
+                                            unsigned widget) {
+  OzoneWaylandWindow* window = GetWindow(widget);
+  if (window) {
+    OzoneWaylandWindow* active_window = GetActiveWindow(window->GetDisplayId());
+    if (active_window && widget == active_window->GetHandle())
+      device_event_grabber_map_[device_id] = widget;
+  }
+}
+
+void WindowManagerWayland::UnGrabDeviceEvents(uint32_t device_id) {
+  if (device_event_grabber_map_.find(device_id) !=
+      device_event_grabber_map_.end())
+    device_event_grabber_map_[device_id] = 0;
+}
+
+unsigned WindowManagerWayland::DeviceEventGrabber(uint32_t device_id) const {
+  if (device_event_grabber_map_.find(device_id) !=
+      device_event_grabber_map_.end())
+    return device_event_grabber_map_.at(device_id);
+  return 0;
 }
 
 }  // namespace ui

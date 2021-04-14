@@ -97,8 +97,11 @@ void WaylandKeyboard::OnKeyboardEnter(void* data,
 
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
 
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(input_keyboard));
+
   if (!surface) {
-    seat->SetFocusWindowHandle(0);
+    seat->SetEnteredWindowHandle(device_id, 0);
     return;
   }
 
@@ -108,9 +111,13 @@ void WaylandKeyboard::OnKeyboardEnter(void* data,
   WaylandKeyboard* device = static_cast<WaylandKeyboard*>(data);
   WaylandWindow* window =
     static_cast<WaylandWindow*>(wl_surface_get_user_data(surface));
-  seat->SetFocusWindowHandle(window->Handle());
-  VLOG(1) << __func__ << " handle=" << (window ? window->Handle() : -1);
-  WaylandDisplay::GetInstance()->KeyboardEnter(window->Handle());
+
+  if (window) {
+    seat->SetEnteredWindowHandle(device_id, window->Handle());
+    VLOG(1) << __func__ << " handle=" << (window ? window->Handle() : -1);
+    seat->SetActiveInputWindow(window->GetDisplayId(), window->Handle());
+    WaylandDisplay::GetInstance()->KeyboardEnter(window->Handle());
+  }
 }
 
 void WaylandKeyboard::OnKeyboardLeave(void* data,
@@ -119,6 +126,9 @@ void WaylandKeyboard::OnKeyboardLeave(void* data,
                                       wl_surface* surface) {
   WaylandDisplay::GetInstance()->SetSerial(serial);
 
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(input_keyboard));
+
   if (!surface || !data)
     return;
 
@@ -126,9 +136,12 @@ void WaylandKeyboard::OnKeyboardLeave(void* data,
   WaylandKeyboard* device = static_cast<WaylandKeyboard*>(data);
   WaylandWindow* window =
     static_cast<WaylandWindow*>(wl_surface_get_user_data(surface));
-  VLOG(1) << __func__ << " handle=" << (window ? window->Handle() : -1);
-  WaylandDisplay::GetInstance()->KeyboardLeave(window->Handle());
-  seat->SetFocusWindowHandle(0);
+
+  if (window) {
+    VLOG(1) << __func__ << " handle=" << (window ? window->Handle() : -1);
+    WaylandDisplay::GetInstance()->KeyboardLeave(window->Handle());
+    seat->SetEnteredWindowHandle(device_id, 0);
+  }
 }
 
 void WaylandKeyboard::OnKeyModifiers(void *data,

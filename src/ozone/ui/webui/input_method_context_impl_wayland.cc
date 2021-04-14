@@ -43,7 +43,7 @@ bool InputMethodContextImplWayland::DispatchKeyEvent(
 }
 
 void InputMethodContextImplWayland::Reset() {
-  input_method_context_manager_->ImeReset();
+  input_method_context_manager_->ImeReset(handle_);
 }
 
 void InputMethodContextImplWayland::Focus() {

@@ -103,15 +103,23 @@ IPC_MESSAGE_CONTROL4(WaylandInput_AxisNotify,  // NOLINT(readability/fn_size)
                      int /*x_offset*/,
                      int /*y_offset*/)
 
-IPC_MESSAGE_CONTROL3(WaylandInput_PointerEnter,  // NOLINT(readability/fn_size)
+IPC_MESSAGE_CONTROL4(WaylandInput_PointerEnter,  // NOLINT(readability/fn_size)
+                     uint32_t /*device_id*/,
                      unsigned /*handle*/,
                      float /*x*/,
                      float /*y*/)
 
-IPC_MESSAGE_CONTROL3(WaylandInput_PointerLeave,  // NOLINT(readability/fn_size)
+IPC_MESSAGE_CONTROL4(WaylandInput_PointerLeave,  // NOLINT(readability/fn_size)
+                     uint32_t /*device_id*/,
                      unsigned /*handle*/,
                      float /*x*/,
                      float /*y*/)
+
+IPC_MESSAGE_CONTROL2(WaylandInput_InputPanelEnter,
+                     uint32_t /*device_id*/,
+                     unsigned /*handle*/)
+
+IPC_MESSAGE_CONTROL1(WaylandInput_InputPanelLeave, uint32_t /*device_id*/)
 
 IPC_MESSAGE_CONTROL5(WaylandOutput_ScreenChanged,  // NOLINT(readability/fn_size)
                      std::string, /*display_id*/
@@ -290,13 +298,17 @@ IPC_MESSAGE_CONTROL2(WaylandDisplay_CursorSet,  // NOLINT(readability/fn_size)
 IPC_MESSAGE_CONTROL1(WaylandDisplay_MoveCursor,  // NOLINT(readability/fn_size)
                      gfx::Point)
 
-IPC_MESSAGE_CONTROL0(WaylandDisplay_ImeReset)  // NOLINT(readability/fn_size)
+IPC_MESSAGE_CONTROL1(WaylandDisplay_ImeReset,  // NOLINT(readability/fn_size)
+                     unsigned /* window handle */)
 
 IPC_MESSAGE_CONTROL1(WaylandDisplay_ShowInputPanel,  // NOLINT(readability/fn_size)
                      unsigned /* window handle */)
 
-IPC_MESSAGE_CONTROL1(WaylandDisplay_HideInputPanel,  // NOLINT(readability/fn_size)
-                     ui::ImeHiddenType /* hidden_type */)
+IPC_MESSAGE_CONTROL2(
+    WaylandDisplay_HideInputPanel,  // NOLINT(readability/fn_size)
+    ui::ImeHiddenType /* hidden_type */,
+    unsigned /* window handle */
+)
 
 IPC_MESSAGE_CONTROL3(WaylandDisplay_SetInputContentType,  // NOLINT(readability/fn_size)
                      ui::InputContentType /* text_input_type */,
@@ -328,7 +340,8 @@ IPC_MESSAGE_CONTROL2(
     unsigned /*handle*/,
     gfx::LocationHint /*value*/)
 
-IPC_MESSAGE_CONTROL3(WaylandDisplay_SetSurroundingText,
+IPC_MESSAGE_CONTROL4(WaylandDisplay_SetSurroundingText,
+                     unsigned /*handle*/,
                      std::string /*text*/,
                      unsigned /*cursor_position*/,
                      unsigned /*anchor_position*/)

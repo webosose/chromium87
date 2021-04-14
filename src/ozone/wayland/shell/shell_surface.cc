@@ -19,6 +19,7 @@
 
 #include "ozone/wayland/display.h"
 #include "ozone/wayland/seat.h"
+#include "ozone/wayland/window.h"
 
 namespace ozonewayland {
 
@@ -50,14 +51,14 @@ void WaylandShellSurface::SetWindowProperty(const std::string& name,
                    << "\" property to \"" << value << "\"";
 }
 
-void WaylandShellSurface::PopupDone() {
+void WaylandShellSurface::PopupDone(void* data) {
+  WaylandWindow* window = static_cast<WaylandWindow*>(data);
   WaylandDisplay* display = WaylandDisplay::GetInstance();
-  WaylandSeat* seat = display->PrimarySeat();
 
-  if (!seat->GetGrabWindowHandle())
+  if (!window)
     return;
-  display->CloseWidget(seat->GetGrabWindowHandle());
-  seat->SetGrabWindowHandle(0, 0);
+
+  display->CloseWidget(window->Handle());
 }
 
 void WaylandShellSurface::WindowResized(void* data,

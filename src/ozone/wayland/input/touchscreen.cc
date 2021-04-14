@@ -62,19 +62,26 @@ void WaylandTouchscreen::OnTouchDown(void *data,
   WaylandDisplay::GetInstance()->SetSerial(serial);
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
 
-  // Need this code when the user clicks on a text input box directly
-  if (!seat->GetPointer()) {
-    if (!surface) {
-      seat->SetFocusWindowHandle(0);
-      return;
-    }
-    WaylandWindow* window =
-         static_cast<WaylandWindow*>(wl_surface_get_user_data(surface));
-    seat->SetFocusWindowHandle(window->Handle());
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(wl_touch));
+
+  if (!surface) {
+    seat->SetEnteredWindowHandle(device_id, 0);
+    return;
   }
 
-  if (seat->GetFocusWindowHandle() && seat->GetGrabButton() == 0)
-    seat->SetGrabWindowHandle(seat->GetFocusWindowHandle(), id);
+  WaylandWindow* window =
+      static_cast<WaylandWindow*>(wl_surface_get_user_data(surface));
+
+  if (window) {
+    seat->SetEnteredWindowHandle(device_id, window->Handle());
+    seat->SetActiveInputWindow(window->GetDisplayId(), window->Handle());
+  }
+
+  if (seat->GetEnteredWindowHandle(device_id) &&
+      seat->GetGrabButton(device_id) == 0)
+    seat->SetGrabWindow(
+        device_id, GrabWindowInfo(seat->GetEnteredWindowHandle(device_id), id));
 
   float sx = wl_fixed_to_double(x);
   float sy = wl_fixed_to_double(y);
@@ -93,13 +100,16 @@ void WaylandTouchscreen::OnTouchUp(void* data,
   WaylandTouchscreen* device = static_cast<WaylandTouchscreen*>(data);
   WaylandDisplay::GetInstance()->SetSerial(serial);
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(wl_touch));
 
   WaylandDisplay::GetInstance()->TouchNotify(
       ui::ET_TOUCH_RELEASED, device->pointer_position_.x(),
       device->pointer_position_.y(), id, time);
 
-  if (int32_t(seat->GetGrabWindowHandle() && seat->GetGrabButton()) == id)
-    seat->SetGrabWindowHandle(0, 0);
+  if (int32_t(seat->GetGrabWindowHandle(device_id) &&
+              seat->GetGrabButton(device_id)) == id)
+    seat->SetGrabWindow(device_id, GrabWindowInfo(0, 0));
 }
 
 void WaylandTouchscreen::OnTouchMotion(void *data,
@@ -110,13 +120,17 @@ void WaylandTouchscreen::OnTouchMotion(void *data,
                                       wl_fixed_t y) {
   WaylandTouchscreen* device = static_cast<WaylandTouchscreen*>(data);
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(wl_touch));
+
   float sx = wl_fixed_to_double(x);
   float sy = wl_fixed_to_double(y);
 
   device->pointer_position_.SetPoint(sx, sy);
 
-  if (seat->GetGrabWindowHandle() &&
-    seat->GetGrabWindowHandle() != seat->GetFocusWindowHandle()) {
+  if (seat->GetGrabWindowHandle(device_id) &&
+      seat->GetGrabWindowHandle(device_id) !=
+          seat->GetEnteredWindowHandle(device_id)) {
     return;
   }
 
@@ -134,12 +148,16 @@ void WaylandTouchscreen::OnTouchCancel(void *data,
   WaylandTouchscreen* device = static_cast<WaylandTouchscreen*>(data);
   WaylandSeat* seat = WaylandDisplay::GetInstance()->PrimarySeat();
 
+  const uint32_t device_id =
+      wl_proxy_get_id(reinterpret_cast<wl_proxy*>(wl_touch));
+
   WaylandDisplay::GetInstance()->TouchNotify(
       ui::ET_TOUCH_CANCELLED, device->pointer_position_.x(),
-      device->pointer_position_.y(), seat->GetGrabButton(), 0);
+      device->pointer_position_.y(), seat->GetGrabButton(device_id), 0);
 
-  if (seat->GetGrabWindowHandle() && seat->GetGrabButton() != 0)
-    seat->SetGrabWindowHandle(0, 0);
+  if (seat->GetGrabWindowHandle(device_id) &&
+      seat->GetGrabButton(device_id) != 0)
+    seat->SetGrabWindow(device_id, GrabWindowInfo(0, 0));
 }
 
 }  // namespace ozonewayland

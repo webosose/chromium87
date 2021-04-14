@@ -45,7 +45,8 @@ WaylandTextInput::~WaylandTextInput() {
     wl_text_input_destroy(text_input_);
 }
 
-void WaylandTextInput::SetActiveWindow(WaylandWindow* window) {
+void WaylandTextInput::SetActiveWindow(const std::string& display_id,
+                                       WaylandWindow* window) {
   active_window_ = window;
   if (active_window_)
     last_active_window_ = active_window_;
@@ -204,7 +205,9 @@ void WaylandTextInput::ShowInputPanel(wl_seat* input_seat, unsigned handle) {
   }
 }
 
-void WaylandTextInput::HideInputPanel(wl_seat* input_seat) {
+void WaylandTextInput::HideInputPanel(wl_seat* input_seat,
+                                      const std::string& display_id,
+                                      ui::ImeHiddenType) {
   if (text_input_)
     wl_text_input_deactivate(text_input_, input_seat);
 }

@@ -614,8 +614,8 @@ void WaylandDisplay::MoveCursor(const gfx::Point& location) {
   primary_seat_->MoveCursor(location);
 }
 
-void WaylandDisplay::ResetIme() {
-  primary_seat_->ResetIme();
+void WaylandDisplay::ResetIme(unsigned handle) {
+  primary_seat_->ResetIme(handle);
 }
 
 void WaylandDisplay::ImeCaretBoundsChanged(gfx::Rect rect) {
@@ -626,8 +626,12 @@ void WaylandDisplay::ShowInputPanel(unsigned handle) {
   primary_seat_->ShowInputPanel(handle);
 }
 
-void WaylandDisplay::HideInputPanel(ui::ImeHiddenType hidden_type) {
-  primary_seat_->HideInputPanel(hidden_type);
+void WaylandDisplay::HideInputPanel(ui::ImeHiddenType hidden_type,
+                                    unsigned handle) {
+  WaylandWindow* widget = GetWidget(handle);
+  if (widget) {
+    primary_seat_->HideInputPanel(hidden_type, widget->GetDisplayId());
+  }
 }
 
 void WaylandDisplay::SetInputContentType(ui::InputContentType content_type,
@@ -880,10 +884,12 @@ void WaylandDisplay::SetKeyMask(unsigned handle,
   widget->SetKeyMask(key_mask, set);
 }
 
-void WaylandDisplay::SetSurroundingText(const std::string& text,
+void WaylandDisplay::SetSurroundingText(unsigned handle,
+                                        const std::string& text,
                                         size_t cursor_position,
                                         size_t anchor_position) {
-  primary_seat_->SetSurroundingText(text, cursor_position, anchor_position);
+  primary_seat_->SetSurroundingText(handle, text, cursor_position,
+                                    anchor_position);
   FlushDisplay();
 }
 
@@ -1248,12 +1254,26 @@ void WaylandDisplay::AxisNotify(float x,
   Dispatch(new WaylandInput_AxisNotify(x, y, xoffset, yoffset));
 }
 
-void WaylandDisplay::PointerEnter(unsigned handle, float x, float y) {
-  Dispatch(new WaylandInput_PointerEnter(handle, x, y));
+void WaylandDisplay::PointerEnter(uint32_t device_id,
+                                  unsigned handle,
+                                  float x,
+                                  float y) {
+  Dispatch(new WaylandInput_PointerEnter(device_id, handle, x, y));
 }
 
-void WaylandDisplay::PointerLeave(unsigned handle, float x, float y) {
-  Dispatch(new WaylandInput_PointerLeave(handle, x, y));
+void WaylandDisplay::PointerLeave(uint32_t device_id,
+                                  unsigned handle,
+                                  float x,
+                                  float y) {
+  Dispatch(new WaylandInput_PointerLeave(device_id, handle, x, y));
+}
+
+void WaylandDisplay::InputPanelEnter(uint32_t device_id, unsigned handle) {
+  Dispatch(new WaylandInput_InputPanelEnter(device_id, handle));
+}
+
+void WaylandDisplay::InputPanelLeave(uint32_t device_id) {
+  Dispatch(new WaylandInput_InputPanelLeave(device_id));
 }
 
 void WaylandDisplay::KeyNotify(ui::EventType type,

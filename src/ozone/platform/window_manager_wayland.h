@@ -73,7 +73,7 @@ class WindowManagerWayland
   OzoneWaylandWindow* GetWindow(unsigned handle);
   bool HasWindowsOpen() const;
 
-  OzoneWaylandWindow* GetActiveWindow() const { return active_window_; }
+  OzoneWaylandWindow* GetActiveWindow(const std::string& display_id) const;
 
   // Tries to set a given widget as the recipient for events. It will
   // fail if there is already another widget as recipient.
@@ -84,6 +84,8 @@ class WindowManagerWayland
 
   // Gets the current widget recipient of mouse events.
   gfx::AcceleratedWidget event_grabber() const { return event_grabber_; }
+
+  unsigned DeviceEventGrabber(uint32_t device_id) const;
 
  private:
   ui::DeviceHotplugEventObserver* GetHotplugEventObserver();
@@ -123,8 +125,10 @@ class WindowManagerWayland
                   float y,
                   int xoffset,
                   int yoffset);
-  void PointerEnter(unsigned handle, float x, float y);
-  void PointerLeave(unsigned handle, float x, float y);
+  void PointerEnter(uint32_t device_id, unsigned handle, float x, float y);
+  void PointerLeave(uint32_t device_id, unsigned handle, float x, float y);
+  void InputPanelEnter(uint32_t device_id, unsigned handle);
+  void InputPanelLeave(uint32_t device_id);
   void KeyNotify(EventType type, unsigned code, int device_id);
   void VirtualKeyNotify(EventType type,
                         uint32_t key,
@@ -185,12 +189,16 @@ class WindowManagerWayland
                   float y,
                   int xoffset,
                   int yoffset);
-  void NotifyPointerEnter(unsigned handle,
+  void NotifyPointerEnter(uint32_t device_id,
+                          unsigned handle,
                           float x,
                           float y);
-  void NotifyPointerLeave(unsigned handle,
+  void NotifyPointerLeave(uint32_t device_id,
+                          unsigned handle,
                           float x,
                           float y);
+  void NotifyInputPanelEnter(uint32_t device_id, unsigned handle);
+  void NotifyInputPanelLeave(uint32_t device_id);
   void NotifyTouchEvent(EventType type,
                         float x,
                         float y,
@@ -248,10 +256,14 @@ class WindowManagerWayland
   void NotifyCursorVisibilityChanged(bool visible);
   ///@}
 
+  void GrabDeviceEvents(uint32_t device_id, unsigned widget);
+  void UnGrabDeviceEvents(uint32_t device_id);
+
   // List of all open aura::Window.
   std::list<OzoneWaylandWindow*>* open_windows_;
   gfx::AcceleratedWidget event_grabber_ = gfx::kNullAcceleratedWidget;
-  OzoneWaylandWindow* active_window_;
+  std::map<uint32_t, unsigned> device_event_grabber_map_;
+  std::map<std::string, OzoneWaylandWindow*> active_window_map_;
   gfx::AcceleratedWidget current_capture_ = gfx::kNullAcceleratedWidget;
   OzoneGpuPlatformSupportHost* proxy_;
   // Modifier key state (shift, ctrl, etc).

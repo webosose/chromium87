@@ -124,7 +124,7 @@ void WLShellSurface::HandleConfigure(void* data,
 
 void WLShellSurface::HandlePopupDone(void* data,
                                      struct wl_shell_surface* surface) {
-  WaylandShellSurface::PopupDone();
+  WaylandShellSurface::PopupDone(data);
 }
 
 void WLShellSurface::HandlePing(void* data,

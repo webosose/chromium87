@@ -36,7 +36,8 @@ class InputMethodContextManager : public GpuPlatformSupportHost {
   void AddContext(InputMethodContextImplWayland* context);
   void RemoveContext(InputMethodContextImplWayland* context);
 
-  void ImeReset();
+  void ImeReset(unsigned handle);
+
  private:
   // GpuPlatformSupportHost
   void OnGpuProcessLaunched(

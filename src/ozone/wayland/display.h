@@ -200,8 +200,10 @@ class WaylandDisplay : public ui::SurfaceFactoryOzone,
                     float x,
                     float y);
   void AxisNotify(float x, float y, int xoffset, int yoffset);
-  void PointerEnter(unsigned handle, float x, float y);
-  void PointerLeave(unsigned handle, float x, float y);
+  void PointerEnter(uint32_t device_id, unsigned handle, float x, float y);
+  void PointerLeave(uint32_t device_id, unsigned handle, float x, float y);
+  void InputPanelEnter(uint32_t device_id, unsigned handle);
+  void InputPanelLeave(uint32_t device_id);
   void KeyNotify(ui::EventType type, unsigned code, int device_id);
   void VirtualKeyNotify(ui::EventType type, uint32_t key, int device_id);
   void TouchNotify(ui::EventType type,
@@ -311,10 +313,10 @@ class WaylandDisplay : public ui::SurfaceFactoryOzone,
   void SetCursorBitmap(const std::vector<SkBitmap>& bitmaps,
                        const gfx::Point& location);
   void MoveCursor(const gfx::Point& location);
-  void ResetIme();
+  void ResetIme(unsigned handle);
   void ImeCaretBoundsChanged(gfx::Rect rect);
   void ShowInputPanel(unsigned handle);
-  void HideInputPanel(ui::ImeHiddenType);
+  void HideInputPanel(ui::ImeHiddenType, unsigned handle);
   void SetInputContentType(ui::InputContentType content_type,
                            int text_input_flags,
                            unsigned handle);
@@ -369,7 +371,8 @@ class WaylandDisplay : public ui::SurfaceFactoryOzone,
   void SetInputRegion(unsigned handle, const std::vector<gfx::Rect>& region);
   void SetGroupKeyMask(unsigned handle, ui::KeyMask key_mask);
   void SetKeyMask(unsigned handle, ui::KeyMask key_mask, bool set);
-  void SetSurroundingText(const std::string& text,
+  void SetSurroundingText(unsigned handle,
+                          const std::string& text,
                           size_t cursor_position,
                           size_t anchor_position);
   void XInputActivate(const std::string& type);

@@ -24,6 +24,7 @@
 #include "ozone/wayland/input/keyboard.h"
 #include "ozone/wayland/input/pointer.h"
 #include "ozone/wayland/input/touchscreen.h"
+#include "ozone/wayland/window.h"
 
 #if defined(OS_WEBOS)
 #include "ozone/wayland/input/webos_text_input.h"
@@ -43,12 +44,8 @@ const char kTouchscreenSuffix[] = "_touch";
 
 namespace ozonewayland {
 
-WaylandSeat::WaylandSeat(WaylandDisplay* display,
-                         uint32_t id)
-    : focused_window_handle_(0),
-      grab_window_handle_(0),
-      grab_button_(0),
-      seat_(NULL),
+WaylandSeat::WaylandSeat(WaylandDisplay* display, uint32_t id)
+    : seat_(NULL),
 #if defined(USE_DATA_DEVICE_MANAGER)
       data_device_(NULL),
 #endif
@@ -128,6 +125,18 @@ void WaylandSeat::OnSeatCapabilities(void *data, wl_seat *seat, uint32_t caps) {
     device->input_touch_ = NULL;
   }
 }
+void WaylandSeat::SetEnteredWindowHandle(uint32_t device_id,
+                                         unsigned windowhandle) {
+  entered_window_handle_map_[device_id] = windowhandle;
+}
+
+unsigned WaylandSeat::GetEnteredWindowHandle(uint32_t device_id) const {
+  if (entered_window_handle_map_.find(device_id) !=
+      entered_window_handle_map_.end()) {
+    return entered_window_handle_map_.at(device_id);
+  }
+  return 0;
+}
 
 void WaylandSeat::OnName(void* data, wl_seat* seat, const char* name) {
   WaylandSeat* device = static_cast<WaylandSeat*>(data);
@@ -158,17 +167,60 @@ void WaylandSeat::OnName(void* data, wl_seat* seat, const char* name) {
   }
 }
 
-void WaylandSeat::SetFocusWindowHandle(unsigned windowhandle) {
-  focused_window_handle_ = windowhandle;
-  WaylandWindow* window = NULL;
-  if (windowhandle)
+void WaylandSeat::SetActiveInputWindow(const std::string& display_id,
+                                       unsigned windowhandle) {
+  WaylandWindow* window = nullptr;
+  if (windowhandle) {
     window = WaylandDisplay::GetInstance()->GetWindow(windowhandle);
-  text_input_->SetActiveWindow(window);
+    if (!window)
+      return;
+  }
+  text_input_->SetActiveWindow(display_id, window);
 }
 
-void WaylandSeat::SetGrabWindowHandle(unsigned windowhandle, uint32_t button) {
-  grab_window_handle_ = windowhandle;
-  grab_button_ = button;
+unsigned WaylandSeat::GetActiveInputWindow(
+    const std::string& display_id) const {
+  WaylandWindow* window = text_input_->GetActiveWindow(display_id);
+  if (window)
+    return window->Handle();
+  else
+    return 0;
+}
+
+void WaylandSeat::ResetEnteredWindowHandle(unsigned window_handle) {
+  for (auto& entered_window_handle_item : entered_window_handle_map_) {
+    if (entered_window_handle_item.second == window_handle) {
+      entered_window_handle_item.second = 0;
+    }
+  }
+}
+
+void WaylandSeat::SetGrabWindow(uint32_t device_id,
+                                const GrabWindowInfo& grab_window) {
+  grab_window_map_[device_id] = grab_window;
+}
+
+unsigned WaylandSeat::GetGrabWindowHandle(uint32_t device_id) const {
+  if (grab_window_map_.find(device_id) != grab_window_map_.end()) {
+    return grab_window_map_.at(device_id).grab_window_handle;
+  }
+  return 0;
+}
+
+uint32_t WaylandSeat::GetGrabButton(uint32_t device_id) const {
+  if (grab_window_map_.find(device_id) != grab_window_map_.end()) {
+    return grab_window_map_.at(device_id).grab_button;
+  }
+  return 0;
+}
+
+void WaylandSeat::ResetGrabWindow(unsigned window_handle) {
+  for (auto& grab_window_item : grab_window_map_) {
+    if (grab_window_item.second.grab_window_handle == window_handle) {
+      grab_window_item.second.grab_window_handle = 0;
+      grab_window_item.second.grab_button = 0;
+    }
+  }
 }
 
 void WaylandSeat::SetCursorBitmap(const std::vector<SkBitmap>& bitmaps,
@@ -191,8 +243,12 @@ void WaylandSeat::MoveCursor(const gfx::Point& location) {
       location, WaylandDisplay::GetInstance()->GetSerial());
 }
 
-void WaylandSeat::ResetIme() {
+void WaylandSeat::ResetIme(unsigned handle) {
+#if defined(OS_WEBOS)
+  text_input_->ResetIme(handle);
+#else
   text_input_->ResetIme();
+#endif
 }
 
 void WaylandSeat::ImeCaretBoundsChanged(gfx::Rect rect) {
@@ -203,8 +259,9 @@ void WaylandSeat::ShowInputPanel(unsigned handle) {
   text_input_->ShowInputPanel(seat_, handle);
 }
 
-void WaylandSeat::HideInputPanel(ui::ImeHiddenType hidden_type) {
-  text_input_->HideInputPanel(seat_, hidden_type);
+void WaylandSeat::HideInputPanel(ui::ImeHiddenType hidden_type,
+                                 const std::string& display_id) {
+  text_input_->HideInputPanel(seat_, display_id, hidden_type);
 }
 
 void WaylandSeat::SetInputContentType(ui::InputContentType content_type,
@@ -215,10 +272,14 @@ void WaylandSeat::SetInputContentType(ui::InputContentType content_type,
 #endif
 }
 
-void WaylandSeat::SetSurroundingText(const std::string& text,
+void WaylandSeat::SetSurroundingText(unsigned handle,
+                                     const std::string& text,
                                      size_t cursor_position,
                                      size_t anchor_position) {
-  text_input_->SetSurroundingText(text, cursor_position, anchor_position);
+#if defined(OS_WEBOS)
+  text_input_->SetSurroundingText(handle, text, cursor_position,
+                                  anchor_position);
+#endif
 }
 
 }  // namespace ozonewayland
