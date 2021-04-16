@@ -646,8 +646,7 @@ void WindowManagerWayland::NotifyTouchEvent(EventType type,
                                             uint32_t time_stamp) {
   gfx::PointF location(x, y);
   TouchEvent event(
-      type, location, location,
-      base::TimeTicks() + base::TimeDelta::FromMilliseconds(time_stamp),
+      type, location, location, EventTimeForNow(),
       PointerDetails(
           EventPointerType::kTouch,
           static_cast<int>(touch_slot_generator_.GetGeneratedID(touch_id))));
