@@ -378,6 +378,11 @@ void OzoneWaylandWindow::ConfineCursorToBounds(const gfx::Rect& bounds) {
 ////////////////////////////////////////////////////////////////////////////////
 // WindowTreeHostDelegateWayland, ui::PlatformEventDispatcher implementation:
 bool OzoneWaylandWindow::CanDispatchEvent(const ui::PlatformEvent& ne) {
+  if (ne->IsTouchEvent()) {
+    unsigned touch_button_grabber =
+        window_manager_->TouchButtonGrabber(ne->source_device_id());
+    return touch_button_grabber == handle_;
+  }
   unsigned device_event_grabber =
       window_manager_->DeviceEventGrabber(ne->source_device_id());
   if (device_event_grabber != 0)

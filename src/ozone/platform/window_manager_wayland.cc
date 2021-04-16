@@ -422,15 +422,14 @@ void WindowManagerWayland::OnVirtualKeyNotify(EventType type,
                          EventTimeForNow(), device_id, ui::EF_NONE);
 }
 
-void WindowManagerWayland::TouchNotify(EventType type,
-                                       float x,
-                                       float y,
-                                       int32_t touch_id,
-                                       uint32_t time_stamp) {
+void WindowManagerWayland::TouchNotify(uint32_t device_id,
+                                       unsigned handle,
+                                       ui::EventType type,
+                                       const ui::TouchEventInfo& event_info) {
   base::ThreadTaskRunnerHandle::Get()->PostTask(
-      FROM_HERE,
-      base::Bind(&WindowManagerWayland::NotifyTouchEvent,
-          weak_ptr_factory_.GetWeakPtr(), type, x, y, touch_id, time_stamp));
+      FROM_HERE, base::Bind(&WindowManagerWayland::NotifyTouchEvent,
+                            weak_ptr_factory_.GetWeakPtr(), device_id, handle,
+                            type, event_info));
 }
 
 void WindowManagerWayland::CloseWidget(unsigned handle) {
@@ -681,18 +680,31 @@ void WindowManagerWayland::NotifyInputPanelLeave(uint32_t device_id) {
   UnGrabDeviceEvents(device_id);
 }
 
-void WindowManagerWayland::NotifyTouchEvent(EventType type,
-                                            float x,
-                                            float y,
-                                            int32_t touch_id,
-                                            uint32_t time_stamp) {
-  gfx::PointF location(x, y);
-  TouchEvent event(
-      type, location, location, EventTimeForNow(),
-      PointerDetails(
-          EventPointerType::kTouch,
-          static_cast<int>(touch_slot_generator_.GetGeneratedID(touch_id))));
-  DispatchEvent(&event);
+void WindowManagerWayland::NotifyTouchEvent(
+    uint32_t device_id,
+    unsigned handle,
+    ui::EventType type,
+    const ui::TouchEventInfo& event_info) {
+  gfx::PointF position(event_info.x_, event_info.y_);
+  base::TimeTicks timestamp = EventTimeForNow();
+  uint32_t touch_slot =
+      touch_slot_generator_.GetGeneratedID(event_info.touch_id_);
+
+  if (type == ET_TOUCH_PRESSED)
+    GrabTouchButton(device_id, handle);
+
+  TouchEvent touchev(
+      type, position, position, timestamp,
+      ui::PointerDetails(ui::EventPointerType::kTouch, touch_slot));
+  touchev.set_source_device_id(device_id);
+
+  DispatchEvent(&touchev);
+
+  if (type == ET_TOUCH_RELEASED || type == ET_TOUCH_CANCELLED) {
+    if (type == ET_TOUCH_CANCELLED)
+      UnGrabTouchButton(device_id);
+    touch_slot_generator_.ReleaseNumber(event_info.touch_id_);
+  }
 }
 
 void WindowManagerWayland::NotifyScreenChanged(const std::string& display_id,
@@ -1021,6 +1033,30 @@ unsigned WindowManagerWayland::DeviceEventGrabber(uint32_t device_id) const {
   if (device_event_grabber_map_.find(device_id) !=
       device_event_grabber_map_.end())
     return device_event_grabber_map_.at(device_id);
+  return 0;
+}
+
+void WindowManagerWayland::GrabTouchButton(uint32_t touch_button_id,
+                                           unsigned widget) {
+  OzoneWaylandWindow* window = GetWindow(widget);
+  if (window) {
+    OzoneWaylandWindow* active_window = GetActiveWindow(window->GetDisplayId());
+    if (active_window && widget == active_window->GetHandle())
+      touch_button_grabber_map_[touch_button_id] = widget;
+  }
+}
+
+void WindowManagerWayland::UnGrabTouchButton(uint32_t touch_button_id) {
+  if (device_event_grabber_map_.find(touch_button_id) !=
+      device_event_grabber_map_.end())
+    device_event_grabber_map_.erase(touch_button_id);
+}
+
+unsigned WindowManagerWayland::TouchButtonGrabber(
+    uint32_t touch_button_id) const {
+  if (touch_button_grabber_map_.find(touch_button_id) !=
+      touch_button_grabber_map_.end())
+    return touch_button_grabber_map_.at(touch_button_id);
   return 0;
 }
 
