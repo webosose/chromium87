@@ -41,8 +41,18 @@ namespace webos {
 
 LanguageListener::LanguageListener(content::WebContents* web_contents)
     : content::WebContentsObserver(web_contents), weak_factory_(this) {
+  base::CommandLine* cmd = base::CommandLine::ForCurrentProcess();
+  if (!cmd->HasSwitch(extensions::switches::kWebOSAppId)) {
+    LOG(ERROR) << __func__ << "(): no webOS-application identifier specified";
+    return;
+  }
   pal::luna::Client::Params params;
   params.bus = pal::luna::Bus::Private;
+  params.appid = cmd->GetSwitchValueASCII(extensions::switches::kWebOSAppId);
+  params.name = cmd->HasSwitch(extensions::switches::kWebOSLunaServiceName)
+                    ? cmd->GetSwitchValueASCII(
+                          extensions::switches::kWebOSLunaServiceName)
+                    : pal::luna::GetServiceNameWithPID(params.appid.c_str());
   luna_client_ = pal::luna::GetSharedClient(params);
 
   if (luna_client_ && luna_client_->IsInitialized()) {

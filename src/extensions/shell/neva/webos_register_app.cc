@@ -46,14 +46,18 @@ RegisterApp::RegisterApp(content::WebContents* web_contents)
 
   pal::luna::Client::Params params;
   params.bus = pal::luna::Bus::Private;
-  params.name = cmd->GetSwitchValueASCII(extensions::switches::kWebOSAppId);
+  params.name =
+      cmd->HasSwitch(extensions::switches::kWebOSLunaServiceName)
+          ? cmd->GetSwitchValueASCII(
+                extensions::switches::kWebOSLunaServiceName)
+          : cmd->GetSwitchValueASCII(extensions::switches::kWebOSAppId);
   luna_client_ = pal::luna::GetSharedClient(params);
 
   if (luna_client_ && luna_client_->IsInitialized()) {
     luna_client_->SubscribeFromApp(
         std::string(kRegisterAppMethod),
         std::string(kRegisterAppRequest),
-        params.name,
+        cmd->GetSwitchValueASCII(extensions::switches::kWebOSAppId),
         base::BindRepeating(&RegisterApp::OnResponse,
                             weak_factory_.GetWeakPtr()));
   }

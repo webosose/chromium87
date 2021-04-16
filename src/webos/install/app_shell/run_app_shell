@@ -97,6 +97,12 @@ CHROME_COMPOSITING_FLAGS=" \
   --enable-accelerated-compositing\
   --enable-smooth-scrolling\
 "
+
+CHROME_LS2_NAME_FLAG=""
+if test -n ${LS2_NAME}; then
+  CHROME_LS2_NAME_FLAG="--webos-luna-service-name=${LS2_NAME}"
+fi
+
 CHROME_FLAGS=" \
   --allow-scripts-to-close-windows\
   --always-authorize-plugins\
@@ -123,6 +129,7 @@ CHROME_FLAGS=" \
   --start-maximized\
   --user-data-dir=${CHROME_CACHE}\
   --webos-appid=${BROWSER_APP_ID}\
+  ${CHROME_LS2_NAME_FLAG}\
   --load-apps=${APP_FOLDER_PATH}\
   --v8-snapshot-blob-path=${APP_FOLDER_PATH}/snapshot_blob.bin\
 "
