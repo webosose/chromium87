@@ -24,10 +24,13 @@
 #include <vector>
 
 #include "base/macros.h"
-#include "ozone/platform/input_content_type.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "ui/base/ime/neva/input_method_common.h"
 #include "ui/gfx/geometry/rect.h"
+
+namespace ui {
+struct TextInputInfo;
+}
 
 namespace ozonewayland {
 
@@ -78,9 +81,8 @@ class WaylandSeat {
   void ImeCaretBoundsChanged(gfx::Rect rect);
   void ShowInputPanel(unsigned handle);
   void HideInputPanel(unsigned handle, ui::ImeHiddenType);
-  void SetInputContentType(ui::InputContentType content_type,
-                           int text_input_flags,
-                           unsigned handle);
+  void SetTextInputInfo(const ui::TextInputInfo& text_input_info,
+                        unsigned handle);
   void SetSurroundingText(unsigned handle,
                           const std::string& text,
                           size_t cursor_position,

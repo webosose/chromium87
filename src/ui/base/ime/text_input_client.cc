@@ -20,6 +20,10 @@ bool TextInputClient::SystemKeyboardDisabled() const {
 gfx::Rect TextInputClient::GetTextInputBounds() const {
   return gfx::Rect();
 }
+
+int TextInputClient::GetTextInputMaxLength() const {
+  return -1;
+}
 ///@}
 
 }  // namespace ui

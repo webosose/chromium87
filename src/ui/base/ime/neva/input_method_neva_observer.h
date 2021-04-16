@@ -26,6 +26,8 @@
 
 namespace ui {
 
+struct TextInputInfo;
+
 class COMPONENT_EXPORT(UI_BASE_IME) InputMethodNevaObserver
     : public InputMethodObserver {
  public:
@@ -42,8 +44,8 @@ class COMPONENT_EXPORT(UI_BASE_IME) InputMethodNevaObserver
 
   virtual void OnShowIme() = 0;
   virtual void OnHideIme(ImeHiddenType) = 0;
-  virtual void OnTextInputTypeChanged(ui::TextInputType text_input_type,
-                                      int text_input_flags) = 0;
+  virtual void OnTextInputInfoChanged(
+      const ui::TextInputInfo& text_input_info) = 0;
   virtual void SetSurroundingText(const std::string& text,
                                   size_t cursor_position,
                                   size_t anchor_position) = 0;

@@ -29,6 +29,7 @@
 #include "ozone/wayland/seat.h"
 #include "ozone/wayland/shell/shell_surface.h"
 #include "ozone/wayland/window.h"
+#include "ui/base/ime/neva/input_method_common.h"
 #include "ui/base/ime/text_input_flags.h"
 #include "ui/events/keycodes/keyboard_code_conversion.h"
 #include "ui/events/keycodes/xkb_keysym.h"
@@ -40,7 +41,7 @@ uint32_t ContentHintFromInputContentType(ui::InputContentType content_type,
                                          int input_flags) {
   uint32_t wl_hint = (TEXT_MODEL_CONTENT_HINT_AUTO_COMPLETION |
                       TEXT_MODEL_CONTENT_HINT_AUTO_CAPITALIZATION);
-  if (content_type == ui::INPUT_CONTENT_TYPE_PASSWORD)
+  if (content_type == ui::InputContentType::kPassword)
     wl_hint |= TEXT_MODEL_CONTENT_HINT_PASSWORD;
 
   // hint from flags
@@ -58,22 +59,22 @@ uint32_t ContentHintFromInputContentType(ui::InputContentType content_type,
 
 uint32_t ContentPurposeFromInputContentType(ui::InputContentType content_type) {
   switch (content_type) {
-    case ui::INPUT_CONTENT_TYPE_PASSWORD:
+    case ui::InputContentType::kPassword:
       return TEXT_MODEL_CONTENT_PURPOSE_PASSWORD;
-    case ui::INPUT_CONTENT_TYPE_EMAIL:
+    case ui::InputContentType::kEmail:
       return TEXT_MODEL_CONTENT_PURPOSE_EMAIL;
-    case ui::INPUT_CONTENT_TYPE_NUMBER:
+    case ui::InputContentType::kNumber:
       return TEXT_MODEL_CONTENT_PURPOSE_NUMBER;
-    case ui::INPUT_CONTENT_TYPE_TELEPHONE:
+    case ui::InputContentType::kTelephone:
       return TEXT_MODEL_CONTENT_PURPOSE_PHONE;
-    case ui::INPUT_CONTENT_TYPE_URL:
+    case ui::InputContentType::kUrl:
       return TEXT_MODEL_CONTENT_PURPOSE_URL;
-    case ui::INPUT_CONTENT_TYPE_DATE:
+    case ui::InputContentType::kDate:
       return TEXT_MODEL_CONTENT_PURPOSE_DATE;
-    case ui::INPUT_CONTENT_TYPE_DATE_TIME:
-    case ui::INPUT_CONTENT_TYPE_DATE_TIME_LOCAL:
+    case ui::InputContentType::kDateTime:
+    case ui::InputContentType::kDateTimeLocal:
       return TEXT_MODEL_CONTENT_PURPOSE_DATETIME;
-    case ui::INPUT_CONTENT_TYPE_TIME:
+    case ui::InputContentType::kTime:
       return TEXT_MODEL_CONTENT_PURPOSE_TIME;
     default:
       return TEXT_MODEL_CONTENT_PURPOSE_NORMAL;
@@ -155,20 +156,27 @@ void WaylandTextInput::HideInputPanel(wl_seat* input_seat,
   panel->SetHiddenState();
 }
 
-void WaylandTextInput::SetInputContentType(ui::InputContentType content_type,
-                                           int text_input_flags,
-                                           unsigned handle) {
+void WaylandTextInput::SetTextInputInfo(
+    const ui::TextInputInfo& text_input_info,
+    unsigned handle) {
   WaylandTextInput::InputPanel* panel = GetInputPanel(handle);
 
   if (panel) {
-    panel->input_content_type = content_type;
-    panel->text_input_flags = text_input_flags;
-    if (panel->model)
+    panel->input_content_type = text_input_info.type;
+    panel->text_input_flags = text_input_info.flags;
+    panel->max_text_length = text_input_info.max_length;
+    if (panel->model) {
+      // Set content type
       text_model_set_content_type(
           panel->model,
           ContentHintFromInputContentType(panel->input_content_type,
                                           panel->text_input_flags),
           ContentPurposeFromInputContentType(panel->input_content_type));
+
+      // Set maximum text length (if it was previously set only)
+      if (panel->max_text_length >= 0)
+        text_model_set_max_text_length(panel->model, panel->max_text_length);
+    }
   }
 }
 
@@ -360,8 +368,7 @@ void WaylandTextInput::OnKeysym(void* data,
 
   if (state == WL_KEYBOARD_KEY_STATE_RELEASED &&
       (key_code == KEY_ENTER || key_code == KEY_KPENTER) &&
-      (panel->input_content_type !=
-       ui::InputContentType::INPUT_CONTENT_TYPE_TEXT_AREA) &&
+      (panel->input_content_type != ui::InputContentType::kTextArea) &&
       (panel->state == InputPanelShown))
     hide_ime = true;
 

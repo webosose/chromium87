@@ -19,6 +19,7 @@
 #include "ui/base/ime/neva/input_method_neva_observer.h"
 
 #include "base/strings/utf_string_conversions.h"
+#include "ui/base/ime/neva/input_method_common.h"
 #include "ui/base/ime/text_input_client.h"
 
 namespace ui {
@@ -104,13 +105,19 @@ void InputMethodNevaObserver::SetImeEnabled(bool enable) {
   is_enabled_ = enable;
 }
 
-void InputMethodNevaObserver::OnTextInputStateChanged(const TextInputClient* client) {
+void InputMethodNevaObserver::OnTextInputStateChanged(
+    const TextInputClient* client) {
   if (!is_enabled_)
     return;
 
   if (client) {
     if (client->GetTextInputType() != TEXT_INPUT_TYPE_NONE) {
-      OnTextInputTypeChanged(client->GetTextInputType(), client->GetTextInputFlags());
+      TextInputInfo input_info;
+      input_info.type =
+          GetInputContentTypeFromTextInputType(client->GetTextInputType());
+      input_info.flags = client->GetTextInputFlags();
+      input_info.max_length = client->GetTextInputMaxLength();
+      OnTextInputInfoChanged(input_info);
       if (!client->SystemKeyboardDisabled())
         OnShowIme();
     } else {

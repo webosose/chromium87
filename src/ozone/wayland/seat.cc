@@ -256,11 +256,10 @@ void WaylandSeat::HideInputPanel(unsigned handle,
   text_input_->HideInputPanel(seat_, handle, hidden_type);
 }
 
-void WaylandSeat::SetInputContentType(ui::InputContentType content_type,
-                                      int text_input_flags,
-                                      unsigned handle) {
+void WaylandSeat::SetTextInputInfo(const ui::TextInputInfo& text_input_info,
+                                   unsigned handle) {
 #if defined(OS_WEBOS)
-  text_input_->SetInputContentType(content_type, text_input_flags, handle);
+  text_input_->SetTextInputInfo(text_input_info, handle);
 #endif
 }
 

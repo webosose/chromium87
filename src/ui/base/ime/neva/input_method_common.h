@@ -1,4 +1,4 @@
-// Copyright (c) 2019 LG Electronics, Inc.
+// Copyright 2019 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,37 @@
 #ifndef UI_BASE_IME_NEVA_INPUT_METHOD_COMMON_H_
 #define UI_BASE_IME_NEVA_INPUT_METHOD_COMMON_H_
 
+#include "base/component_export.h"
+#include "ui/base/ime/neva/input_content_type.h"
+#include "ui/base/ime/text_input_type.h"
+
 namespace ui {
 
-enum class ImeHiddenType {
+enum class COMPONENT_EXPORT(UI_BASE_IME) ImeHiddenType {
   // Only hide ime without deactivating
   kHide,
   // Deactivate ime
   kDeactivate
 };
+
+// The text input information for handling IME on the UI side.
+struct COMPONENT_EXPORT(UI_BASE_IME) TextInputInfo {
+  TextInputInfo() = default;
+  ~TextInputInfo() = default;
+
+  // Type of the input field.
+  InputContentType type = InputContentType::kNone;
+
+  // The input field flags (autocorrect, autocomplete, etc.)
+  int flags = 0;
+
+  // Maximum text length for the input field.
+  int max_length = -1;
+};
+
+COMPONENT_EXPORT(UI_BASE_IME)
+InputContentType GetInputContentTypeFromTextInputType(
+    TextInputType text_input_type);
 
 }  // namespace ui
 

@@ -77,6 +77,11 @@ struct WebTextInputInfo {
 
   WebRect bounds;
 
+#if defined(USE_NEVA_APPRUNTIME)
+  // The maxLength attribute value of the currently focused input field.
+  int max_length = -1;
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
   WebTextInputInfo()
       : type(kWebTextInputTypeNone),
         flags(kWebTextInputFlagNone),

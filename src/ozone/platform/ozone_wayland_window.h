@@ -24,7 +24,6 @@
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
 #include "ozone/platform/channel_observer.h"
-#include "ozone/platform/input_content_type.h"
 #include "third_party/skia/include/core/SkRegion.h"
 #include "ui/events/platform/platform_event_dispatcher.h"
 #include "ui/gfx/geometry/rect.h"
@@ -115,7 +114,7 @@ class OzoneWaylandWindow : public PlatformWindow,
 
   void ShowInputPanel() override;
   void HideInputPanel(ImeHiddenType) override;
-  void SetInputContentType(ui::TextInputType text_input_type, int text_input_flags) override;
+  void SetTextInputInfo(const ui::TextInputInfo& text_input_info) override;
   void SetSurroundingText(const std::string& text,
                           size_t cursor_position,
                           size_t anchor_position) override;
@@ -154,8 +153,6 @@ class OzoneWaylandWindow : public PlatformWindow,
                                  int hotspot_y,
                                  bool allowed_cursor_overriding);
 
-  InputContentType InputContentTypeFromTextInputType(
-      TextInputType text_input_type);
   PlatformWindowDelegate* delegate_;   // Not owned.
   OzoneGpuPlatformSupportHost* sender_;  // Not owned.
   WindowManagerWayland* window_manager_;  // Not owned.

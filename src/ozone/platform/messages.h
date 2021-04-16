@@ -28,8 +28,8 @@
 #include "ipc/neva/redefined_param_traits_macros.h"
 #include "ipc/param_traits_macros.h"
 #include "ozone/platform/event_param_traits.h"
-#include "ozone/platform/input_content_type.h"
 #include "third_party/skia/include/core/SkBitmap.h"
+#include "ui/base/ime/neva/input_content_type.h"
 #include "ui/base/ime/neva/input_method_common.h"
 #include "ui/events/event_constants.h"
 #include "ui/events/types/event_type.h"
@@ -50,8 +50,7 @@ IPC_ENUM_TRAITS_MAX_VALUE(ui::EventFlags,
 IPC_ENUM_TRAITS_MAX_VALUE(ui::EventType,
                           ui::ET_LAST)
 IPC_ENUM_TRAITS_MAX_VALUE(ui::ImeHiddenType, ui::ImeHiddenType::kDeactivate)
-IPC_ENUM_TRAITS_MAX_VALUE(ui::InputContentType,
-                          ui::INPUT_CONTENT_TYPE_DATE_TIME_FIELD)
+IPC_ENUM_TRAITS_MAX_VALUE(ui::InputContentType, ui::InputContentType::kMax)
 IPC_ENUM_TRAITS_MAX_VALUE(ui::WidgetState,
                           ui::WidgetState::DESTROYED)
 IPC_ENUM_TRAITS_MAX_VALUE(ui::WidgetType,
@@ -61,6 +60,12 @@ IPC_ENUM_TRAITS_MAX_VALUE(ui::KeyMask,
 IPC_ENUM_TRAITS_MAX_VALUE(ui::XInputKeySymbolType, ui::XINPUT_NATIVE_KEY_SYMBOL)
 IPC_ENUM_TRAITS_MAX_VALUE(ui::XInputEventType, ui::XINPUT_RELEASE)
 IPC_ENUM_TRAITS_MAX_VALUE(gfx::LocationHint, gfx::LocationHint::kSouthEast)
+
+IPC_STRUCT_TRAITS_BEGIN(ui::TextInputInfo)
+  IPC_STRUCT_TRAITS_MEMBER(type)
+  IPC_STRUCT_TRAITS_MEMBER(flags)
+  IPC_STRUCT_TRAITS_MEMBER(max_length)
+IPC_STRUCT_TRAITS_END()
 
 //------------------------------------------------------------------------------
 // Browser Messages
@@ -310,9 +315,8 @@ IPC_MESSAGE_CONTROL2(
     unsigned /* window handle */
 )
 
-IPC_MESSAGE_CONTROL3(WaylandDisplay_SetInputContentType,  // NOLINT(readability/fn_size)
-                     ui::InputContentType /* text_input_type */,
-                     int                  /* text_input_flags */,
+IPC_MESSAGE_CONTROL2(WaylandDisplay_SetTextInputInfo,  // NOLINT(readability/fn_size)
+                     ui::TextInputInfo /* text_input_info */,
                      unsigned /* window handle */)
 
 IPC_MESSAGE_CONTROL1(WaylandDisplay_RequestDragData,  // NOLINT(readability/

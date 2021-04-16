@@ -584,10 +584,9 @@ void OzoneWaylandWindow::HideInputPanel(ImeHiddenType hidden_type) {
   sender_->Send(new WaylandDisplay_HideInputPanel(hidden_type, handle_));
 }
 
-void OzoneWaylandWindow::SetInputContentType(ui::TextInputType text_input_type,
-                                             int text_input_flags) {
-  sender_->Send(new WaylandDisplay_SetInputContentType(
-      InputContentTypeFromTextInputType(text_input_type), text_input_flags, handle_));
+void OzoneWaylandWindow::SetTextInputInfo(
+    const ui::TextInputInfo& text_input_info) {
+  sender_->Send(new WaylandDisplay_SetTextInputInfo(text_input_info, handle_));
 }
 
 void OzoneWaylandWindow::SetSurroundingText(const std::string& text,
@@ -599,48 +598,6 @@ void OzoneWaylandWindow::SetSurroundingText(const std::string& text,
 
 void OzoneWaylandWindow::SetResizeEnabled(bool enabled) {
   resize_enabled_ = enabled;
-}
-
-InputContentType OzoneWaylandWindow::InputContentTypeFromTextInputType(
-    TextInputType text_input_type) {
-  switch (text_input_type) {
-    case ui::TEXT_INPUT_TYPE_NONE:
-      return INPUT_CONTENT_TYPE_NONE;
-    case ui::TEXT_INPUT_TYPE_TEXT:
-      return INPUT_CONTENT_TYPE_TEXT;
-    case ui::TEXT_INPUT_TYPE_PASSWORD:
-      return INPUT_CONTENT_TYPE_PASSWORD;
-    case ui::TEXT_INPUT_TYPE_SEARCH:
-      return INPUT_CONTENT_TYPE_SEARCH;
-    case ui::TEXT_INPUT_TYPE_EMAIL:
-      return INPUT_CONTENT_TYPE_EMAIL;
-    case ui::TEXT_INPUT_TYPE_NUMBER:
-      return INPUT_CONTENT_TYPE_NUMBER;
-    case ui::TEXT_INPUT_TYPE_TELEPHONE:
-      return INPUT_CONTENT_TYPE_TELEPHONE;
-    case ui::TEXT_INPUT_TYPE_URL:
-      return INPUT_CONTENT_TYPE_URL;
-    case ui::TEXT_INPUT_TYPE_DATE:
-      return INPUT_CONTENT_TYPE_DATE;
-    case ui::TEXT_INPUT_TYPE_DATE_TIME:
-      return INPUT_CONTENT_TYPE_DATE_TIME;
-    case ui::TEXT_INPUT_TYPE_DATE_TIME_LOCAL:
-      return INPUT_CONTENT_TYPE_DATE_TIME_LOCAL;
-    case ui::TEXT_INPUT_TYPE_MONTH:
-      return INPUT_CONTENT_TYPE_MONTH;
-    case ui::TEXT_INPUT_TYPE_TIME:
-      return INPUT_CONTENT_TYPE_TIME;
-    case ui::TEXT_INPUT_TYPE_WEEK:
-      return INPUT_CONTENT_TYPE_WEEK;
-    case ui::TEXT_INPUT_TYPE_TEXT_AREA:
-      return INPUT_CONTENT_TYPE_TEXT_AREA;
-    case ui::TEXT_INPUT_TYPE_CONTENT_EDITABLE:
-      return INPUT_CONTENT_TYPE_CONTENT_EDITABLE;
-    case ui::TEXT_INPUT_TYPE_DATE_TIME_FIELD:
-      return INPUT_CONTENT_TYPE_DATE_TIME_FIELD;
-    default:
-      return INPUT_CONTENT_TYPE_TEXT;
-  }
 }
 
 void OzoneWaylandWindow::XInputActivate(const std::string& type) {

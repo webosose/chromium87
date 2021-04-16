@@ -631,10 +631,9 @@ void WaylandDisplay::HideInputPanel(ui::ImeHiddenType hidden_type,
   primary_seat_->HideInputPanel(handle, hidden_type);
 }
 
-void WaylandDisplay::SetInputContentType(ui::InputContentType content_type,
-                                         int text_input_flags,
-                                         unsigned handle) {
-  primary_seat_->SetInputContentType(content_type, text_input_flags, handle);
+void WaylandDisplay::SetTextInputInfo(const ui::TextInputInfo& text_input_info,
+                                      unsigned handle) {
+  primary_seat_->SetTextInputInfo(text_input_info, handle);
 }
 
 void WaylandDisplay::RequestDragData(const std::string& mime_type) {
@@ -1107,7 +1106,7 @@ bool WaylandDisplay::OnMessageReceived(const IPC::Message& message) {
   IPC_MESSAGE_HANDLER(WaylandDisplay_ImeReset, ResetIme)
   IPC_MESSAGE_HANDLER(WaylandDisplay_ShowInputPanel, ShowInputPanel)
   IPC_MESSAGE_HANDLER(WaylandDisplay_HideInputPanel, HideInputPanel)
-  IPC_MESSAGE_HANDLER(WaylandDisplay_SetInputContentType, SetInputContentType)
+  IPC_MESSAGE_HANDLER(WaylandDisplay_SetTextInputInfo, SetTextInputInfo)
   IPC_MESSAGE_HANDLER(WaylandDisplay_RequestDragData, RequestDragData)
   IPC_MESSAGE_HANDLER(WaylandDisplay_RequestSelectionData, RequestSelectionData)
   IPC_MESSAGE_HANDLER(WaylandDisplay_DragWillBeAccepted, DragWillBeAccepted)

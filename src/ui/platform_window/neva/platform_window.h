@@ -36,6 +36,7 @@ class SkPath;
 namespace ui {
 
 class PlatformWindow;
+struct TextInputInfo;
 
 namespace neva {
 
@@ -79,8 +80,7 @@ class PlatformWindow {
   virtual void SetLocationHint(gfx::LocationHint value) {}
   virtual void ShowInputPanel() {}
   virtual void HideInputPanel(ImeHiddenType) {}
-  virtual void SetInputContentType(ui::TextInputType text_input_type,
-                                   int text_input_flags) {}
+  virtual void SetTextInputInfo(const ui::TextInputInfo& text_input_info) {}
   virtual void SetSurroundingText(const std::string& text,
                                   size_t cursor_position,
                                   size_t anchor_position) {}

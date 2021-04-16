@@ -38,6 +38,9 @@ bool WebTextInputInfo::Equals(const WebTextInputInfo& other) const {
          selection_end == other.selection_end &&
          composition_start == other.composition_start &&
          composition_end == other.composition_end &&
+#if defined(USE_NEVA_APPRUNTIME)
+         max_length == other.max_length &&
+#endif  // defined(USE_NEVA_APPRUNTIME)
          input_mode == other.input_mode && action == other.action;
 }
 

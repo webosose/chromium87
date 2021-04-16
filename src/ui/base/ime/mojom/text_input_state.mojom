@@ -76,5 +76,11 @@ struct TextInputState {
 
   // Bounds for text input
   gfx.mojom.Rect bounds;
+
+///@name USE_NEVA_APPRUNTIME
+///@{
+  // Specifies the maximum text length for the currently focused input field.
+  int32 max_length;
+///@}
 };
 

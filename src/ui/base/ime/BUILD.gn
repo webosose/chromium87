@@ -77,6 +77,9 @@ component("ime") {
   #@name USE_NEVA_APPRUNTIME
   #@{
   sources += [
+    "neva/input_content_type.h",
+    "neva/input_method_common.cc",
+    "neva/input_method_common.h",
     "neva/input_method_neva_observer.cc",
     "neva/input_method_neva_observer.h",
   ]

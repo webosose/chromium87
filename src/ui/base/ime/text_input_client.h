@@ -114,6 +114,7 @@ class COMPONENT_EXPORT(UI_BASE_IME) TextInputClient {
 ///@{
   virtual gfx::Rect GetTextInputBounds() const;
   virtual bool SystemKeyboardDisabled() const;
+  virtual int GetTextInputMaxLength() const;
 ///@}
 
   // Returns the current text input flags, which is a bit map of

@@ -2597,6 +2597,12 @@ gfx::Size RenderWidgetHostViewAura::GetCompositorViewportPixelSize() {
   return gfx::ScaleToCeiledSize(GetRequestedRendererSize(),
                                 GetDeviceScaleFactor() * window_scale_ratio_);
 }
+
+int RenderWidgetHostViewAura::GetTextInputMaxLength() const {
+  if (text_input_manager_ && text_input_manager_->GetTextInputState())
+    return text_input_manager_->GetTextInputState()->max_length;
+  return -1;
+}
 #endif
 
 #if defined(USE_NEVA_MEDIA)

@@ -644,6 +644,9 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
     params->mode = new_mode;
     params->action = new_info.action;
     params->flags = new_info.flags;
+#if defined(USE_NEVA_APPRUNTIME)
+    params->max_length = new_info.max_length;
+#endif  // defined(USE_NEVA_APPRUNTIME)
     params->vk_policy = new_vk_policy;
     params->last_vk_visibility_request = last_vk_visibility_request;
     if (!new_info.ime_text_spans.empty()) {

@@ -31,6 +31,7 @@
 #include "ui/base/class_property.h"
 #include "ui/base/hit_test.h"
 #include "ui/base/ime/input_method.h"
+#include "ui/base/ime/neva/input_method_common.h"
 #include "ui/base/ui_base_neva_switches.h"
 #include "ui/events/platform/platform_event_source.h"
 #include "ui/gfx/geometry/insets.h"
@@ -1312,10 +1313,10 @@ void DesktopWindowTreeHostOzone::OnHideIme(ui::ImeHiddenType hidden_type) {
   platform_window_->HideInputPanel(hidden_type);
 }
 
-void DesktopWindowTreeHostOzone::OnTextInputTypeChanged(ui::TextInputType text_input_type,
-                                                        int text_input_flags) {
-  if (text_input_type != ui::TEXT_INPUT_TYPE_NONE)
-    platform_window_->SetInputContentType(text_input_type, text_input_flags);
+void DesktopWindowTreeHostOzone::OnTextInputInfoChanged(
+    const ui::TextInputInfo& text_input_info) {
+  if (text_input_info.type != ui::InputContentType::kNone)
+    platform_window_->SetTextInputInfo(text_input_info);
 }
 
 void DesktopWindowTreeHostOzone::SetSurroundingText(const std::string& text,
