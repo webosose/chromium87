@@ -18,6 +18,7 @@
 
 #include "base/command_line.h"
 #include "base/json/json_reader.h"
+#include "base/json/string_escape.h"
 #include "content/public/browser/web_contents.h"
 #include "extensions/common/switches.h"
 #include "ui/aura/window.h"
@@ -79,6 +80,25 @@ void RegisterApp::OnResponse(pal::luna::Client::ResponseStatus,
     aura::Window* top_window = contents->GetTopLevelNativeWindow();
     if (top_window && top_window->GetHost())
       top_window->GetHost()->ToggleFullscreen();
+
+    base::Value* params = root->FindDictKey("parameters");
+    if (params) {
+      const std::string* target = params->FindStringKey("target");
+      if (target) {
+        VLOG(1) << __func__ << ": target url = " << *target;
+
+        content::RenderFrameHost* r = contents->GetMainFrame();
+        std::string js_line =
+            R"JS(
+                var e_tab_open = new CustomEvent("webOSRelaunch", {detail: {url: ")JS" +
+            *target + R"JS("}});
+                document.dispatchEvent(e_tab_open);)JS";
+
+        if (r)
+          r->ExecuteJavaScript(base::UTF8ToUTF16(js_line),
+                               base::NullCallback());
+      }
+    }
   }
 }
 
