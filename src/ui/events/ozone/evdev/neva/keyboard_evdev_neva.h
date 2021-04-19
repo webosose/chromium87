@@ -25,20 +25,17 @@ namespace ui {
 
 class KeyboardEvdevNeva : public KeyboardEvdev {
  public:
-   KeyboardEvdevNeva(EventModifiers* modifiers,
-                     KeyboardLayoutEngine* keyboard_layout_engine,
-                     const EventDispatchCallback& callback)
-    : KeyboardEvdev(modifiers, keyboard_layout_engine, callback) {}
+  KeyboardEvdevNeva(EventModifiers* modifiers,
+                    KeyboardLayoutEngine* keyboard_layout_engine,
+                    const EventDispatchCallback& callback);
+  KeyboardEvdevNeva(const KeyboardEvdevNeva&) = delete;
+  KeyboardEvdevNeva& operator=(const KeyboardEvdevNeva&) = delete;
+  virtual ~KeyboardEvdevNeva() {}
 
-   virtual ~KeyboardEvdevNeva() {}
-
-   static std::unique_ptr<KeyboardEvdevNeva> Create(
-                     EventModifiers* modifiers,
-                     KeyboardLayoutEngine* keyboard_layout_engine,
-                     const EventDispatchCallback& callback);
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(KeyboardEvdevNeva);
+  static std::unique_ptr<KeyboardEvdevNeva> Create(
+      EventModifiers* modifiers,
+      KeyboardLayoutEngine* keyboard_layout_engine,
+      const EventDispatchCallback& callback);
 };
 
 }  // namespace ui
