@@ -106,6 +106,7 @@ fi
 CHROME_DISPLAY_FLAG=""
 if test -n ${DISPLAY_ID}; then
   CHROME_DISPLAY_FLAG="--webos-displayid=${DISPLAY_ID}"
+  CHROME_CACHE="${CHROME_CACHE}-${DISPLAY_ID}"
 fi
 
 CHROME_FLAGS=" \
