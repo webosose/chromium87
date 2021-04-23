@@ -45,7 +45,8 @@ const char kTouchscreenSuffix[] = "_touch";
 namespace ozonewayland {
 
 WaylandSeat::WaylandSeat(WaylandDisplay* display, uint32_t id)
-    : seat_(NULL),
+    : active_input_window_handle_(0),
+      seat_(NULL),
 #if defined(USE_DATA_DEVICE_MANAGER)
       data_device_(NULL),
 #endif
@@ -167,24 +168,15 @@ void WaylandSeat::OnName(void* data, wl_seat* seat, const char* name) {
   }
 }
 
-void WaylandSeat::SetActiveInputWindow(const std::string& display_id,
-                                       unsigned windowhandle) {
+void WaylandSeat::SetActiveInputWindow(unsigned windowhandle) {
+  active_input_window_handle_ = windowhandle;
   WaylandWindow* window = nullptr;
   if (windowhandle) {
     window = WaylandDisplay::GetInstance()->GetWindow(windowhandle);
     if (!window)
       return;
   }
-  text_input_->SetActiveWindow(display_id, window);
-}
-
-unsigned WaylandSeat::GetActiveInputWindow(
-    const std::string& display_id) const {
-  WaylandWindow* window = text_input_->GetActiveWindow(display_id);
-  if (window)
-    return window->Handle();
-  else
-    return 0;
+  text_input_->SetActiveWindow(window);
 }
 
 void WaylandSeat::ResetEnteredWindowHandle(unsigned window_handle) {
@@ -259,9 +251,9 @@ void WaylandSeat::ShowInputPanel(unsigned handle) {
   text_input_->ShowInputPanel(seat_, handle);
 }
 
-void WaylandSeat::HideInputPanel(ui::ImeHiddenType hidden_type,
-                                 const std::string& display_id) {
-  text_input_->HideInputPanel(seat_, display_id, hidden_type);
+void WaylandSeat::HideInputPanel(unsigned handle,
+                                 ui::ImeHiddenType hidden_type) {
+  text_input_->HideInputPanel(seat_, handle, hidden_type);
 }
 
 void WaylandSeat::SetInputContentType(ui::InputContentType content_type,

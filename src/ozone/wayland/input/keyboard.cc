@@ -115,7 +115,7 @@ void WaylandKeyboard::OnKeyboardEnter(void* data,
   if (window) {
     seat->SetEnteredWindowHandle(device_id, window->Handle());
     VLOG(1) << __func__ << " handle=" << (window ? window->Handle() : -1);
-    seat->SetActiveInputWindow(window->GetDisplayId(), window->Handle());
+    seat->SetActiveInputWindow(window->Handle());
     WaylandDisplay::GetInstance()->KeyboardEnter(window->Handle());
   }
 }

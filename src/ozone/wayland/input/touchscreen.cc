@@ -76,7 +76,7 @@ void WaylandTouchscreen::OnTouchDown(void *data,
 
   if (window) {
     seat->SetEnteredWindowHandle(device_id, window->Handle());
-    seat->SetActiveInputWindow(window->GetDisplayId(), window->Handle());
+    seat->SetActiveInputWindow(window->Handle());
   }
 
   if (seat->GetEnteredWindowHandle(device_id) &&

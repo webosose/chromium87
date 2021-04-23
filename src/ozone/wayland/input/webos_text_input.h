@@ -40,13 +40,11 @@ class WaylandTextInput {
   explicit WaylandTextInput(WaylandSeat* seat);
   ~WaylandTextInput();
 
+  void SetActiveWindow(WaylandWindow* window);
+
   void ResetIme(unsigned handle);
   void ShowInputPanel(wl_seat* input_seat, unsigned handle);
-  void HideInputPanel(wl_seat* input_seat,
-                      const std::string& display_id,
-                      ui::ImeHiddenType);
-  void SetActiveWindow(const std::string& display_id, WaylandWindow* window);
-  WaylandWindow* GetActiveWindow(const std::string& display_id) const;
+  void HideInputPanel(wl_seat* input_seat, unsigned handle, ui::ImeHiddenType);
   void SetInputContentType(ui::InputContentType content_type,
                            int text_input_flags,
                            unsigned handle);
@@ -132,10 +130,21 @@ class WaylandTextInput {
 
   struct InputPanel {
     InputPanel();
-    InputPanel(text_model* t_model);
+    InputPanel(text_model* t_model,
+               WaylandSeat* w_seat,
+               unsigned window_handle);
     ~InputPanel();
 
+    void SetHiddenState();
+
+    void Activate();
+    void Deactivate();
+    void Show();
+    void Hide();
+
     text_model* model = nullptr;
+    WaylandSeat* seat = nullptr;
+    unsigned associative_window_handle = 0;
     gfx::Rect input_panel_rect = gfx::Rect(0, 0, 0, 0);
     bool activated = false;
     InputPanelState state = InputPanelUnknownState;
@@ -154,16 +163,12 @@ class WaylandTextInput {
   using InputPanelPtr = std::unique_ptr<InputPanel, InputPanelDeleter>;
 
   text_model* CreateTextModel();
-  WaylandWindow* FindActiveWindow(unsigned handle);
-  InputPanel* FindInputPanel(const std::string& display_id);
-  std::string FindDisplay(text_model* model);
-  void DeactivateInputPanel(const std::string& display_id);
-  void SetHiddenState(const std::string& display_id);
+  InputPanel* CreateInputPanel(unsigned handle);
+  InputPanel* GetInputPanel(unsigned handle);
 
   friend struct base::DefaultSingletonTraits<WaylandTextInput>;
 
-  std::map<std::string, InputPanelPtr> input_panel_map_;
-  std::map<std::string, WaylandWindow*> active_window_map_;
+  std::map<unsigned, InputPanelPtr> input_panel_map_;
   WaylandSeat* seat_;
 
   DISALLOW_COPY_AND_ASSIGN(WaylandTextInput);

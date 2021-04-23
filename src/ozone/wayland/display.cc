@@ -628,10 +628,7 @@ void WaylandDisplay::ShowInputPanel(unsigned handle) {
 
 void WaylandDisplay::HideInputPanel(ui::ImeHiddenType hidden_type,
                                     unsigned handle) {
-  WaylandWindow* widget = GetWidget(handle);
-  if (widget) {
-    primary_seat_->HideInputPanel(hidden_type, widget->GetDisplayId());
-  }
+  primary_seat_->HideInputPanel(handle, hidden_type);
 }
 
 void WaylandDisplay::SetInputContentType(ui::InputContentType content_type,
