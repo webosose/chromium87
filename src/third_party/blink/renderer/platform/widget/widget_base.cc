@@ -646,6 +646,8 @@ void WidgetBase::UpdateTextInputStateInternal(bool show_virtual_keyboard,
     params->flags = new_info.flags;
 #if defined(USE_NEVA_APPRUNTIME)
     params->max_length = new_info.max_length;
+    params->input_panel_rectangle =
+        static_cast<gfx::Rect>(new_info.input_panel_rectangle);
 #endif  // defined(USE_NEVA_APPRUNTIME)
     params->vk_policy = new_vk_policy;
     params->last_vk_visibility_request = last_vk_visibility_request;

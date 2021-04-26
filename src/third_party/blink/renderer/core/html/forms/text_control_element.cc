@@ -737,6 +737,12 @@ void TextControlElement::setMinLength(int new_value,
   }
 }
 
+#if defined(USE_NEVA_APPRUNTIME)
+Vector<double> TextControlElement::getInputPanelCoords() const {
+  return input_panel_coords_;
+}
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
 void TextControlElement::RestoreCachedSelection() {
   if (SetSelectionRange(cached_selection_start_, cached_selection_end_,
                         cached_selection_direction_))
@@ -785,6 +791,11 @@ void TextControlElement::ParseAttribute(
       if (auto* frame = GetDocument().GetFrame())
         frame->GetSpellChecker().RemoveSpellingAndGrammarMarkers(*inner_editor);
     }
+#if defined(USE_NEVA_APPRUNTIME)
+  } else if (params.name == html_names::kInputpanelcoordsAttr) {
+    input_panel_coords_ =
+        ParseHTMLListOfFloatingPointNumbers(params.new_value.GetString());
+#endif  // defined(USE_NEVA_APPRUNTIME)
   } else {
     HTMLFormControlElementWithState::ParseAttribute(params);
   }

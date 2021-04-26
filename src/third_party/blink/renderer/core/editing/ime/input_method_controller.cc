@@ -63,6 +63,10 @@
 #include "third_party/blink/renderer/core/page/page.h"
 #include "third_party/blink/renderer/platform/geometry/double_rect.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include <cmath>
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
 namespace blink {
 
 namespace {
@@ -319,6 +323,36 @@ ImeTextSpan::Type ConvertSuggestionMarkerType(
 bool ShouldGetImeTextSpansAroundPosition(ImeTextSpan::Type type) {
   return type == ImeTextSpan::Type::kAutocorrect;
 }
+
+#if defined(USE_NEVA_APPRUNTIME)
+WebRect GetRectangleFromCoordinates(TextControlElement* element) {
+  WebRect empty_rectangle;
+  Vector<double> coords = element->getInputPanelCoords();
+
+  // strictly four coordinates only
+  if (coords.size() != 4)
+    return empty_rectangle;
+
+  double x0 = coords[0];
+  double y0 = coords[1];
+  double x1 = coords[2];
+  double y1 = coords[3];
+
+  // positive values only
+  if (std::signbit(x0) || std::signbit(y0) || std::signbit(x1) ||
+      std::signbit(y1))
+    return empty_rectangle;
+
+  // x1 > x0 and y1 > y0 only
+  if (x1 <= x0 || y1 <= y0)
+    return empty_rectangle;
+
+  return WebRect(static_cast<int>(std::lrint(x0)),
+                 static_cast<int>(std::lrint(y0)),
+                 static_cast<int>(std::lrint(x1 - x0)),
+                 static_cast<int>(std::lrint(y1 - y0)));
+}
+#endif  // defined(USE_NEVA_APPRUNTIME)
 
 }  // anonymous namespace
 
@@ -1526,6 +1560,7 @@ WebTextInputInfo InputMethodController::TextInputInfo() const {
   info.flags = TextInputFlags();
 #if defined(USE_NEVA_APPRUNTIME)
   info.max_length = TextInputMaxLength();
+  info.input_panel_rectangle = InputPanelRectangle();
 #endif  // defined(USE_NEVA_APPRUNTIME)
   if (info.type == kWebTextInputTypeNone)
     return info;
@@ -1656,6 +1691,34 @@ int InputMethodController::TextInputMaxLength() const {
       return textarea->maxLength();
   }
 
+  return result;
+}
+
+WebRect InputMethodController::InputPanelRectangle() const {
+  WebRect result;
+  Element* element = GetDocument().FocusedElement();
+  if (!element)
+    return result;
+
+  if (auto* input = DynamicTo<HTMLInputElement>(*element)) {
+    if (!input->IsDisabledOrReadOnly())
+      return GetRectangleFromCoordinates(input);
+  }
+
+  if (auto* textarea = DynamicTo<HTMLTextAreaElement>(*element)) {
+    if (!textarea->IsDisabledOrReadOnly())
+      return GetRectangleFromCoordinates(textarea);
+  }
+
+  // TODO(sergey.kipet@lge.com): to support input panel positioning for the
+  // date-time field input element the blink::DateTimeFieldElement type shall
+  // be also properly updated. Once the type is prepared the below code is to be
+  // included into the function as well:
+  //
+  //   if (auto* html_element = DynamicTo<HTMLElement>(element)) {
+  //     if (html_element->IsDateTimeFieldElement())
+  //       ...
+  //   }
   return result;
 }
 #endif  // defined(USE_NEVA_APPRUNTIME)

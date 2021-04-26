@@ -81,6 +81,10 @@ struct TextInputState {
 ///@{
   // Specifies the maximum text length for the currently focused input field.
   int32 max_length;
+
+  // Specifies the input panel (virtual keyboard) rectangle invoked for the
+  // currently focused input element.
+  gfx.mojom.Rect input_panel_rectangle;
 ///@}
 };
 

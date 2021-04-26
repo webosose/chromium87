@@ -165,8 +165,19 @@ void WaylandTextInput::SetTextInputInfo(
     panel->input_content_type = text_input_info.type;
     panel->text_input_flags = text_input_info.flags;
     panel->max_text_length = text_input_info.max_length;
+    panel->input_panel_rect = text_input_info.input_panel_rectangle;
+
     if (panel->model) {
-      // Set content type
+      // Set the input panel rectangle
+      if (panel->input_panel_rect.IsEmpty())
+        text_model_reset_input_panel_rect(panel->model);
+      else
+        text_model_set_input_panel_rect(
+            panel->model, panel->input_panel_rect.x(),
+            panel->input_panel_rect.y(), panel->input_panel_rect.width(),
+            panel->input_panel_rect.height());
+
+      // Set the content type
       text_model_set_content_type(
           panel->model,
           ContentHintFromInputContentType(panel->input_content_type,

@@ -21,6 +21,7 @@ bool ShouldUpdateTextInputState(const ui::mojom::TextInputState& old_state,
          old_state.flags != new_state.flags ||
 #if defined(USE_NEVA_APPRUNTIME)
          old_state.max_length != new_state.max_length ||
+         old_state.input_panel_rectangle != new_state.input_panel_rectangle ||
 #endif  // defined(USE_NEVA_APPRUNTIME)
          old_state.can_compose_inline != new_state.can_compose_inline;
 #elif defined(OS_MAC)

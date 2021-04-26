@@ -4,7 +4,10 @@
 
 #include "ui/base/ime/text_input_client.h"
 
+///@name USE_NEVA_APPRUNTIME
+///@{
 #include "ui/gfx/geometry/rect.h"
+///@}
 
 namespace ui {
 
@@ -23,6 +26,10 @@ gfx::Rect TextInputClient::GetTextInputBounds() const {
 
 int TextInputClient::GetTextInputMaxLength() const {
   return -1;
+}
+
+gfx::Rect TextInputClient::GetInputPanelRectangle() const {
+  return gfx::Rect();
 }
 ///@}
 

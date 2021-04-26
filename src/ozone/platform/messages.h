@@ -65,6 +65,7 @@ IPC_STRUCT_TRAITS_BEGIN(ui::TextInputInfo)
   IPC_STRUCT_TRAITS_MEMBER(type)
   IPC_STRUCT_TRAITS_MEMBER(flags)
   IPC_STRUCT_TRAITS_MEMBER(max_length)
+  IPC_STRUCT_TRAITS_MEMBER(input_panel_rectangle)
 IPC_STRUCT_TRAITS_END()
 
 //------------------------------------------------------------------------------
@@ -315,9 +316,10 @@ IPC_MESSAGE_CONTROL2(
     unsigned /* window handle */
 )
 
-IPC_MESSAGE_CONTROL2(WaylandDisplay_SetTextInputInfo,  // NOLINT(readability/fn_size)
-                     ui::TextInputInfo /* text_input_info */,
-                     unsigned /* window handle */)
+IPC_MESSAGE_CONTROL2(
+    WaylandDisplay_SetTextInputInfo,  // NOLINT(readability/fn_size)
+    ui::TextInputInfo /* text_input_info */,
+    unsigned /* window handle */)
 
 IPC_MESSAGE_CONTROL1(WaylandDisplay_RequestDragData,  // NOLINT(readability/
                      std::string /* mime_type */)     //        fn_size)

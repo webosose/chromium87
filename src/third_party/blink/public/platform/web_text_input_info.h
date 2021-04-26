@@ -36,6 +36,10 @@
 #include "ui/base/ime/mojom/virtual_keyboard_types.mojom-shared.h"
 #include "ui/base/ime/text_input_action.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/public/platform/web_rect.h"
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
 namespace blink {
 
 struct WebTextInputInfo {
@@ -80,6 +84,10 @@ struct WebTextInputInfo {
 #if defined(USE_NEVA_APPRUNTIME)
   // The maxLength attribute value of the currently focused input field.
   int max_length = -1;
+
+  // The input panel (virtual keyboard) rectangle for the currently
+  // focused input field.
+  WebRect input_panel_rectangle;
 #endif  // defined(USE_NEVA_APPRUNTIME)
 
   WebTextInputInfo()

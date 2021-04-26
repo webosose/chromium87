@@ -18,11 +18,34 @@
 
 #include "ui/base/ime/neva/input_method_neva_observer.h"
 
+#include "base/logging.h"
 #include "base/strings/utf_string_conversions.h"
 #include "ui/base/ime/neva/input_method_common.h"
 #include "ui/base/ime/text_input_client.h"
+#include "ui/display/display.h"
+#include "ui/display/screen.h"
 
 namespace ui {
+
+namespace {
+
+bool FitsScreenBounds(const gfx::Rect& rectangle) {
+  bool result = false;
+
+  if (rectangle.IsEmpty())
+    return result;
+
+  result = display::Screen::GetScreen()->GetPrimaryDisplay().bounds().Contains(
+      rectangle);
+
+  if (!result)
+    VLOG(1) << __func__
+            << "(): provided coordinates are out of the screen bounds";
+
+  return result;
+}
+
+}  // namespace
 
 InputMethodNevaObserver::InputMethodNevaObserver() {
 }
@@ -117,6 +140,9 @@ void InputMethodNevaObserver::OnTextInputStateChanged(
           GetInputContentTypeFromTextInputType(client->GetTextInputType());
       input_info.flags = client->GetTextInputFlags();
       input_info.max_length = client->GetTextInputMaxLength();
+      gfx::Rect rectangle = client->GetInputPanelRectangle();
+      if (FitsScreenBounds(rectangle))
+        input_info.input_panel_rectangle = rectangle;
       OnTextInputInfoChanged(input_info);
       if (!client->SystemKeyboardDisabled())
         OnShowIme();

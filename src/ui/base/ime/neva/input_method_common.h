@@ -20,6 +20,7 @@
 #include "base/component_export.h"
 #include "ui/base/ime/neva/input_content_type.h"
 #include "ui/base/ime/text_input_type.h"
+#include "ui/gfx/geometry/rect.h"
 
 namespace ui {
 
@@ -43,6 +44,10 @@ struct COMPONENT_EXPORT(UI_BASE_IME) TextInputInfo {
 
   // Maximum text length for the input field.
   int max_length = -1;
+
+  // Position on the screen and dimensions of the input panel (virtual keyboard)
+  // invoked for the input field.
+  gfx::Rect input_panel_rectangle;
 };
 
 COMPONENT_EXPORT(UI_BASE_IME)

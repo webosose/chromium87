@@ -110,6 +110,10 @@
     "incremental",
     "inert",
     "inputmode",
+///@name USE_NEVA_APPRUNTIME
+///@{
+    "inputpanelcoords",
+///@}
     "integrity",
     "is",
     "ismap",

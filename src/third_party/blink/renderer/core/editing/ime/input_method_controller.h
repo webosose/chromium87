@@ -41,6 +41,10 @@
 #include "third_party/blink/renderer/platform/heap/handle.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
+#if defined(USE_NEVA_APPRUNTIME)
+#include "third_party/blink/public/platform/web_rect.h"
+#endif  // defined(USE_NEVA_APPRUNTIME)
+
 namespace blink {
 
 class Editor;
@@ -204,6 +208,7 @@ class CORE_EXPORT InputMethodController final
   int TextInputFlags() const;
 #if defined(USE_NEVA_APPRUNTIME)
   int TextInputMaxLength() const;
+  WebRect InputPanelRectangle() const;
 #endif  // defined(USE_NEVA_APPRUNTIME)
   ui::TextInputAction InputActionOfFocusedElement() const;
   WebTextInputMode InputModeOfFocusedElement() const;

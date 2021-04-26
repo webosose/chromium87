@@ -2603,6 +2603,12 @@ int RenderWidgetHostViewAura::GetTextInputMaxLength() const {
     return text_input_manager_->GetTextInputState()->max_length;
   return -1;
 }
+
+gfx::Rect RenderWidgetHostViewAura::GetInputPanelRectangle() const {
+  if (text_input_manager_ && text_input_manager_->GetTextInputState())
+    return text_input_manager_->GetTextInputState()->input_panel_rectangle;
+  return gfx::Rect();
+}
 #endif
 
 #if defined(USE_NEVA_MEDIA)
