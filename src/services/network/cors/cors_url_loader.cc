@@ -310,7 +310,8 @@ void CorsURLLoader::OnReceiveRedirect(const net::RedirectInfo& redirect_info,
         GetHeaderString(*response_head,
                         header_names::kAccessControlAllowCredentials),
         request_.credentials_mode,
-        tainted_ ? url::Origin() : *request_.request_initiator);
+        tainted_ ? url::Origin() : *request_.request_initiator,
+        neva::CorsCorbException::ShouldAllowExceptionForProcess(process_id_));
     if (error_status) {
       HandleComplete(URLLoaderCompletionStatus(*error_status));
       return;

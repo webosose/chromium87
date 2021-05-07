@@ -60,6 +60,7 @@ void CorsCorbException::ApplyException(
   switch (error_status->cors_error) {
     case mojom::CorsError::kWildcardOriginNotAllowed:
     case mojom::CorsError::kMissingAllowOriginHeader:
+    case mojom::CorsError::kHeaderDisallowedByPreflightResponse:
       VLOG(1) << "Allow cors for CORS error=" << error_status->cors_error;
       error_status.reset();
       break;

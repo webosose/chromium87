@@ -302,6 +302,11 @@ class PreflightController::PreflightLoader final {
       DCHECK(!detected_error_status);
       detected_error_status =
           CheckPreflightResult(result.get(), original_request_);
+      if (detected_error_status &&
+          neva::CorsCorbException::ShouldAllowExceptionForProcess(
+              process_id_)) {
+            neva::CorsCorbException::ApplyException(detected_error_status);
+      }
     }
 
     if (!(original_request_.load_flags & net::LOAD_DISABLE_CACHE) &&
