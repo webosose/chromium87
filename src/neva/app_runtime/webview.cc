@@ -1088,7 +1088,7 @@ void WebView::DidStartNavigation(content::NavigationHandle* navigation_handle) {
 
 void WebView::DidFinishNavigation(
     content::NavigationHandle* navigation_handle) {
-  if (!navigation_handle)
+  if (!navigation_handle || !navigation_handle->HasCommitted())
     return;
 
   if (navigation_handle->GetNetErrorCode() != net::OK) {
