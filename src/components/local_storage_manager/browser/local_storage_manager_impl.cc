@@ -152,58 +152,18 @@ void LocalStorageManagerImpl::OnAccessOrigin(
                    StoreModificationOperation::kAddApplication));
   }
 
-  bool app_installed = it_app->second;
-
+  VLOG(1) << "OnAccessOrigin: checking main domain";
   AppLinkVerifyResult verify_result =
       VerifyOriginAppLink(origin_actual, app_id);
-  if (verify_result == AppLinkVerifyResult::kExist &&
-      data_delete_completions_.empty()) {
-    std::move(callback).Run();
-    return;
-  } else {
-    std::set<GURL> origins_to_delete;
-    std::set<GURL> origins_to_wait;
-    if (verify_result == AppLinkVerifyResult::kAddedNewOriginEntry) {
-      origins_to_delete.insert(origin_actual);
-    }
-    if (verify_result == AppLinkVerifyResult::kDeletionInProgress) {
-      origins_to_wait.insert(origin_actual);
-    }
+
+  if (verify_result != AppLinkVerifyResult::kExist) {
     VLOG(1) << "OnAccessOrigin: checking subdomains";
     std::set<GURL> sub_origins = GetSubOrigins(origin_actual);
     for (const auto& sub_origin : sub_origins) {
-      AppLinkVerifyResult verify_result_suborigin =
-          VerifyOriginAppLink(sub_origin, app_id);
-      if (verify_result_suborigin ==
-          AppLinkVerifyResult::kAddedNewOriginEntry) {
-        origins_to_delete.insert(sub_origin);
-      }
-      if (verify_result_suborigin == AppLinkVerifyResult::kDeletionInProgress) {
-        origins_to_wait.insert(sub_origin);
-      }
-    }
-    if (app_installed) {
-      for (auto& origin : origins_to_delete) {
-        bool delete_cookies = origin.SchemeIsHTTPOrHTTPS();
-        if (delete_cookies && origin.has_host()) {
-          delete_cookies = IsHTTPOrHTTPSOriginUniqueForHost(origin.host());
-        }
-        StartDeleteOriginData(origin, delete_cookies);
-      }
-      origins_to_wait.insert(std::begin(origins_to_delete),
-                             std::end(origins_to_delete));
-      data_delete_completions_.emplace_back(origins_to_wait,
-                                            std::move(callback));
-      return;
-    }
-    if (!origins_to_wait.empty()) {
-      VLOG(1) << "Deleting in progress, start waiting origin="
-              << *origins_to_wait.begin();
-      data_delete_completions_.emplace_back(origins_to_wait,
-                                            std::move(callback));
-      return;
+      VerifyOriginAppLink(sub_origin, app_id);
     }
   }
+  std::move(callback).Run();
 }
 
 std::set<GURL> LocalStorageManagerImpl::GetSubOrigins(const GURL& origin) {
