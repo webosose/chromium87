@@ -41,8 +41,7 @@
 namespace ui {
 
 WindowManagerWayland::WindowManagerWayland(OzoneGpuPlatformSupportHost* proxy)
-    : open_windows_(NULL),
-      proxy_(proxy),
+    : proxy_(proxy),
       keyboard_(KeyboardEvdevNeva::Create(&modifiers_,
                 KeyboardLayoutEngineManager::GetKeyboardLayoutEngine(),
                 base::Bind(&WindowManagerWayland::PostUiEvent,
@@ -64,16 +63,18 @@ WindowManagerWayland::GetHotplugEventObserver() {
 
 void WindowManagerWayland::OnRootWindowCreated(
     OzoneWaylandWindow* window) {
-  open_windows().push_back(window);
+  open_windows(window->GetDisplayId()).push_back(window);
 }
 
 void WindowManagerWayland::OnRootWindowClosed(
     OzoneWaylandWindow* window) {
-  open_windows().remove(window);
-  if (window && GetActiveWindow(window->GetDisplayId()) == window) {
-    active_window_map_[window->GetDisplayId()] = nullptr;
-    if (!open_windows().empty())
-      OnActivationChanged(open_windows().front()->GetHandle(), true);
+  const std::string& display_id = window->GetDisplayId();
+  std::list<OzoneWaylandWindow*>& windows = open_windows(display_id);
+  windows.remove(window);
+  if (window && GetActiveWindow(display_id) == window) {
+    active_window_map_[display_id] = nullptr;
+    if (!windows.empty())
+      OnActivationChanged(windows.front()->GetHandle(), true);
   }
 
   if (event_grabber_ == gfx::AcceleratedWidget(window->GetHandle()))
@@ -85,12 +86,21 @@ void WindowManagerWayland::OnRootWindowClosed(
     current_capture_ = gfx::kNullAcceleratedWidget;
   }
 
-  if (open_windows().empty()) {
-    delete open_windows_;
-    open_windows_ = NULL;
+  if (windows.empty()) {
+    clear_open_windows(display_id);
     return;
   }
 
+}
+
+void WindowManagerWayland::OnRootWindowDisplayChanged(
+    const std::string& prev_display_id,
+    const std::string& new_display_id,
+    OzoneWaylandWindow* window) {
+  // Remove the window from previous display window list
+  open_windows(prev_display_id).remove(window);
+  // Add the window to his new diplay window list
+  open_windows(new_display_id).push_back(window);
 }
 
 void WindowManagerWayland::Restore(OzoneWaylandWindow* window) {
@@ -115,7 +125,7 @@ void WindowManagerWayland::SetPlatformCursor(PlatformCursor cursor) {
 }
 
 bool WindowManagerWayland::HasWindowsOpen() const {
-  return open_windows_ ? !open_windows_->empty() : false;
+  return !open_windows_map_.empty();
 }
 
 OzoneWaylandWindow* WindowManagerWayland::GetActiveWindow(
@@ -155,17 +165,14 @@ void WindowManagerWayland::UngrabEvents(gfx::AcceleratedWidget widget) {
 
 OzoneWaylandWindow*
 WindowManagerWayland::GetWindow(unsigned handle) {
-  OzoneWaylandWindow* window = NULL;
-  const std::list<OzoneWaylandWindow*>& windows = open_windows();
-  std::list<OzoneWaylandWindow*>::const_iterator it;
-  for (it = windows.begin(); it != windows.end(); ++it) {
-    if ((*it)->GetHandle() == handle) {
-      window = *it;
-      break;
+  for (const auto& kv : open_windows_map_) {
+    for (auto* const window : *(kv.second)) {
+      if (window->GetHandle() == handle)
+        return window;
     }
   }
 
-  return window;
+  return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,11 +210,18 @@ void WindowManagerWayland::OnActivationChanged(unsigned windowhandle,
 }
 
 std::list<OzoneWaylandWindow*>&
-WindowManagerWayland::open_windows() {
-  if (!open_windows_)
-    open_windows_ = new std::list<OzoneWaylandWindow*>();
+WindowManagerWayland::open_windows(const std::string& display_id) {
+  if (open_windows_map_.find(display_id) == open_windows_map_.end())
+    open_windows_map_[display_id] = new std::list<OzoneWaylandWindow*>();
 
-  return *open_windows_;
+  return *open_windows_map_[display_id];
+}
+
+void WindowManagerWayland::clear_open_windows(const std::string& display_id) {
+  if (open_windows_map_.find(display_id) != open_windows_map_.end()) {
+    delete open_windows_map_[display_id];
+    open_windows_map_.erase(display_id);
+  }
 }
 
 void WindowManagerWayland::OnWindowFocused(unsigned handle) {
@@ -888,19 +902,20 @@ void WindowManagerWayland::CursorVisibilityChanged(bool visible) {
 void WindowManagerWayland::NotifyInputPanelVisibilityChanged(
     unsigned windowhandle,
     bool visibility) {
-  if (!visibility) {
-    for (auto* const window : open_windows()) {
-      if (window->GetHandle() != windowhandle)
-        window->GetDelegate()->OnInputPanelVisibilityChanged(visibility);
-    }
-  }
-
   OzoneWaylandWindow* window = GetWindow(windowhandle);
   if (!window) {
     LOG(ERROR) << "Received invalid window handle " << windowhandle
                << " from GPU process";
     return;
   }
+
+  if (!visibility) {
+    for (auto* const open_window : open_windows(window->GetDisplayId())) {
+      if (open_window->GetHandle() != windowhandle)
+        open_window->GetDelegate()->OnInputPanelVisibilityChanged(visibility);
+    }
+  }
+
   window->GetDelegate()->OnInputPanelVisibilityChanged(visibility);
 }
 
@@ -909,16 +924,15 @@ void WindowManagerWayland::NotifyInputPanelRectChanged(unsigned windowhandle,
                                                        int32_t y,
                                                        uint32_t width,
                                                        uint32_t height) {
-  for (auto* const window : open_windows()) {
-    window->GetDelegate()->OnInputPanelRectChanged(x, y, width, height);
-  }
-
   OzoneWaylandWindow* window = GetWindow(windowhandle);
   if (!window) {
     LOG(ERROR) << "Received invalid window handle " << windowhandle
                << " from GPU process";
     return;
   }
+
+  for (auto* const window : open_windows(window->GetDisplayId()))
+    window->GetDelegate()->OnInputPanelRectChanged(x, y, width, height);
 }
 
 void WindowManagerWayland::NativeWindowStateChanged(unsigned handle,
@@ -983,9 +997,10 @@ void WindowManagerWayland::NotifyKeyboardLeave(unsigned windowhandle) {
 
 void WindowManagerWayland::NotifyCursorVisibilityChanged(bool visible) {
   // Notify all open windows with cursor visibility state change
-  const std::list<OzoneWaylandWindow*>& windows = open_windows();
-  for (const OzoneWaylandWindow* window: windows) {
-    window->GetDelegate()->OnCursorVisibilityChanged(visible);
+  for (const auto& kv : open_windows_map_) {
+    for (const OzoneWaylandWindow* window : *(kv.second)) {
+      window->GetDelegate()->OnCursorVisibilityChanged(visible);
+    }
   }
 }
 
