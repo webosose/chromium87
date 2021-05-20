@@ -100,8 +100,17 @@ media_platform_api_webos = {
   _dir = get_path_info("../webos", "abspath")
   sources = [ "$_dir/media_preferences_webos.cc" ]
 
-  sources += [
-    "$_dir/media_platform_api_webos_stub.cc",
-    "$_dir/media_platform_api_webos_stub.h",
-  ]
+  if (use_gst_media) {
+    configs += [ "//media/neva/webos:media_base_gst_config" ]
+    deps += [ "//base/neva/webos" ]
+    sources += [
+      "$_dir/media_platform_api_webos_gmp.cc",
+      "$_dir/media_platform_api_webos_gmp.h",
+    ]
+  } else {
+    sources += [
+      "$_dir/media_platform_api_webos_stub.cc",
+      "$_dir/media_platform_api_webos_stub.h",
+    ]
+  }
 }
