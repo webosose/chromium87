@@ -52,6 +52,8 @@ declare_args() {
 
   use_gav = false
 
+  use_gst_media = false
+
   # Use memory trace feature
   use_memory_trace = false
 
