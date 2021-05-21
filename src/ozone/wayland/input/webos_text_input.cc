@@ -252,7 +252,7 @@ void WaylandTextInput::InputPanel::Activate() {
 }
 
 void WaylandTextInput::InputPanel::Deactivate() {
-  if (model && activated) {
+  if (model && seat) {
     text_model_reset(model, serial);
     text_model_deactivate(model, seat->GetWLSeat());
     text_model_destroy(model);
