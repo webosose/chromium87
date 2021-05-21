@@ -74,6 +74,7 @@ UMediaClientImpl::UMediaClientImpl(
     const std::string& app_id)
     : event_listener_(std::move(event_listener)),
       main_task_runner_(main_task_runner),
+      luna_service_client_(app_id),
       app_id_(app_id),
       system_media_manager_(
           SystemMediaManager::Create(AsWeakPtr(), main_task_runner)) {
@@ -98,7 +99,6 @@ UMediaClientImpl::~UMediaClientImpl() {
         SystemMediaManager::PlayState::kUnloaded);
     UnloadInternal();
   }
-  uMediaServer::uMediaClient::waitForStop();
 }
 
 void UMediaClientImpl::Load(bool video,
@@ -241,6 +241,9 @@ void UMediaClientImpl::Suspend(SuspendReason reason) {
   FUNC_LOG(1) << " - MediaId: " << MediaId();
 
   is_suspended_ = true;
+#if defined(USE_GST_MEDIA)
+  force_unload = true;
+#endif
 
   if (force_unload) {
     released_media_resource_ = true;
@@ -302,6 +305,10 @@ void UMediaClientImpl::SetPreload(Preload preload) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   FUNC_LOG(1) << " app_id_=" << app_id_
               << " preload=" << WebOSMediaClientPreloadToString(preload);
+#if defined(USE_GST_MEDIA)
+  // g-media-pipeline doesn't support preload
+  preload = WebOSMediaClient::Preload::kPreloadNone;
+#endif
 
   if (use_pipeline_preload_ && !(is_loading() || is_loaded()) &&
       preload_ == WebOSMediaClient::Preload::kPreloadMetaData &&
@@ -421,6 +428,10 @@ bool UMediaClientImpl::IsSupportedPreload() {
 bool UMediaClientImpl::CheckUseMediaPlayerManager(
     const std::string& mediaOption) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
+#if defined(USE_GST_MEDIA)
+  return false;
+#endif  // USE_GST_MEDIA
+
   Json::Reader reader;
   Json::Value media_option;
   bool res = true;
@@ -1186,6 +1197,11 @@ media::PipelineStatus UMediaClientImpl::CheckErrorCode(int64_t errorCode) {
     if (errorCode == SMP_RM_RELATED_ERROR) {
       status = media::DECODER_ERROR_RESOURCE_IS_RELEASED;
       released_media_resource_ = true;
+#if defined(USE_GST_MEDIA)
+      // force paused playback state
+      pause();
+      DispatchPaused();
+#endif
     }
     // allocation resources status
     if (errorCode == SMP_RESOURCE_ALLOCATION_ERROR ||
@@ -1365,9 +1381,6 @@ std::string UMediaClientImpl::UpdateMediaOption(const std::string& mediaOption,
     if (!media_transport_type_.empty())
       media_option["mediaTransportType"] = media_transport_type_;
   }
-
-  if (use_umsinfo_ && media_transport_type_ == "GAPLESS")
-    use_force_play_on_same_rate_ = true;
 
   if (media_option.empty())
     return std::string();

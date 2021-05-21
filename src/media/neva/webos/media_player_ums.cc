@@ -319,6 +319,7 @@ void MediaPlayerUMS::SetMediaLayerId(const std::string& media_layer_id) {
 }
 
 media::Ranges<base::TimeDelta> MediaPlayerUMS::GetBufferedTimeRanges() const {
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
   return umedia_client_->GetBufferedTimeRanges();
 }
 

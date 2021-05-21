@@ -371,9 +371,6 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerNeva
   // for external reasons; called during load().
   WebMediaPlayerParams::DeferLoadCB defer_load_cb_;
 
-  // Save the list of buffered time ranges.
-  blink::WebTimeRanges buffered_;
-
   // Size of the video.
   blink::WebSize natural_size_;
 

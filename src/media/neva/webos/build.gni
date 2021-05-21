@@ -18,6 +18,7 @@ import("//neva/neva.gni")
 
 media_player_neva_webos = {
   configs = []
+  defines = []
   public_configs = []
   deps = []
   public_deps = [ "//base" ]
@@ -35,6 +36,11 @@ media_player_neva_webos = {
   support_camera = false
   use_luna_service = false
 
+  if (use_gst_media) {
+    use_umediaclient = true
+    support_camera = true
+  }
+
   if (use_umediaclient) {
     sources -= [
       "$_dir/webos_mediaclient_stub.cc",
@@ -47,6 +53,8 @@ media_player_neva_webos = {
       "$_dir/system_media_manager.h",
       "$_dir/umediaclient_impl.cc",
       "$_dir/umediaclient_impl.h",
+      "$_dir/umedia_info_util_webos.cc",
+      "$_dir/umedia_info_util_webos.h",
     ]
 
     if (!use_gav) {
@@ -65,6 +73,22 @@ media_player_neva_webos = {
 
   if (use_luna_service) {
     deps += [ "//base/neva/webos" ]
+  }
+
+  if (use_gst_media) {
+    configs += [ "//media/neva/webos:media_base_gst_config" ]
+    defines += [ "UMS_INTERNAL_API_VERSION=2" ]
+    deps += [ "//base/neva/webos" ]
+    sources -= [
+      "$_dir/system_media_manager.cc",
+      "$_dir/system_media_manager.h",
+    ]
+    sources += [
+      "$_dir/system_media_manager_gmp.cc",
+      "$_dir/system_media_manager_gmp.h",
+      "$_dir/umedia_info_util_webos_gmp.cc",
+      "$_dir/umedia_info_util_webos_gmp.h",
+    ]
   }
 }
 

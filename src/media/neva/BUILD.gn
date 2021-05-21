@@ -21,6 +21,7 @@ if (is_webos) {
 }
 
 source_set("media_player_neva") {
+  defines = []
   public_configs = []
   public_deps = [
     "//base",
@@ -37,6 +38,7 @@ source_set("media_player_neva") {
   ]
   if (is_webos) {
     configs += media_player_neva_webos.configs
+    defines += media_player_neva_webos.defines
     public_configs += media_player_neva_webos.public_configs
     deps += media_player_neva_webos.deps
     public_deps += media_player_neva_webos.public_deps

@@ -252,8 +252,7 @@ class UMediaClientImpl : public WebOSMediaClient,
   float playback_rate_on_paused_ = 1.0f;
   double volume_ = 1.0f;
   const scoped_refptr<base::SingleThreadTaskRunner> main_task_runner_;
-  base::LunaServiceClient luna_service_client_{
-      base::LunaServiceClient::PrivateBus};
+  base::LunaServiceClient luna_service_client_;
   std::string app_id_;
   std::string url_;
   std::string mime_type_;
