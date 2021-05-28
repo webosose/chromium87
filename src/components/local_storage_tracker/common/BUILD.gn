@@ -1,4 +1,4 @@
-# Copyright (c) 2020 LG Electronics, Inc.
+# Copyright 2020 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,27 +14,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-static_library("browser") {
+static_library("common") {
   sources = [
-    "local_storage_manager_fake_impl.cc",
-    "local_storage_manager_fake_impl.h",
-    "local_storage_manager_impl.cc",
-    "local_storage_manager_impl.h",
-    "local_storage_manager_mojo_impl.cc",
-    "local_storage_manager_mojo_impl.h",
-    "local_storage_manager_url_request_handler.cc",
-    "local_storage_manager_url_request_handler.h",
+    "local_storage_tracker_database.cc",
+    "local_storage_tracker_database.h",
+    "local_storage_tracker_store.cc",
+    "local_storage_tracker_store.h",
+    "local_storage_tracker_types.h",
   ]
 
   deps = [
     "//base",
-    "//components/local_storage_manager/common",
-    "//components/local_storage_manager/public",
     "//content/public/common",
+    "//ipc",
+    "//sql",
     "//url",
-  ]
-
-  public_deps = [
-    "//components/local_storage_manager/public/mojom",
   ]
 }

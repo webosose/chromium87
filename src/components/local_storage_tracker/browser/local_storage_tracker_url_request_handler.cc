@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "components/local_storage_manager/browser/local_storage_manager_url_request_handler.h"
+#include "components/local_storage_tracker/browser/local_storage_tracker_url_request_handler.h"
 
 #include "base/task/post_task.h"
-#include "components/local_storage_manager/public/local_storage_manager.h"
+#include "components/local_storage_tracker/public/local_storage_tracker.h"
 #include "content/browser/web_contents/web_contents_impl.h"
 #include "content/public/browser/browser_task_traits.h"
 #include "content/public/browser/browser_thread.h"
@@ -26,35 +26,36 @@
 #include "services/network/url_loader.h"
 
 namespace content {
-LocalStorageManagerUrlRequestHandler::LocalStorageManagerUrlRequestHandler(
-    base::WeakPtr<LocalStorageManager> local_storage_manager)
-    : local_storage_manager_(local_storage_manager),
-      local_storage_manager_valid_(local_storage_manager) {}
+
+LocalStorageTrackerUrlRequestHandler::LocalStorageTrackerUrlRequestHandler(
+    base::WeakPtr<LocalStorageTracker> local_storage_tracker)
+    : local_storage_tracker_(local_storage_tracker),
+      local_storage_tracker_valid_(local_storage_tracker) {}
 
 void RunOnIOThread(base::OnceClosure callback) {
   base::PostTask(FROM_HERE, {content::BrowserThread::IO}, std::move(callback));
 }
 
-void LocalStorageManagerUrlRequestHandler::OnAccessOrigin(
+void LocalStorageTrackerUrlRequestHandler::OnAccessOrigin(
     content::WebContents* web_contents,
     const GURL& origin,
     base::OnceCallback<void()> callback) const {
-  if (!local_storage_manager_) {
+  if (!local_storage_tracker_) {
     std::move(callback).Run();
     return;
   }
 
   blink::mojom::RendererPreferences* prefs =
       web_contents->GetMutableRendererPrefs();
-  local_storage_manager_->OnAccessOrigin(prefs->file_security_origin, origin,
+  local_storage_tracker_->OnAccessOrigin(prefs->file_security_origin, origin,
                                          std::move(callback));
 }
 
-int LocalStorageManagerUrlRequestHandler::OnBeforeURLRequest(
+int LocalStorageTrackerUrlRequestHandler::OnBeforeURLRequest(
     net::URLRequest* request,
     net::CompletionOnceCallback& callback,
     GURL* new_url) {
-  if (!local_storage_manager_valid_) {
+  if (!local_storage_tracker_valid_) {
     return net::OK;
   }
   if (!DoesRequestAffectStorage(request)) {
@@ -72,15 +73,16 @@ int LocalStorageManagerUrlRequestHandler::OnBeforeURLRequest(
 
   base::PostTask(
       FROM_HERE, {content::BrowserThread::UI},
-      base::BindOnce(&LocalStorageManagerUrlRequestHandler::OnAccessOrigin,
+      base::BindOnce(&LocalStorageTrackerUrlRequestHandler::OnAccessOrigin,
                      this, web_contents, request->url().GetOrigin(),
                      std::move(callback_on_ui)));
 
   return net::ERR_IO_PENDING;
 }
 
-bool LocalStorageManagerUrlRequestHandler::DoesRequestAffectStorage(
+bool LocalStorageTrackerUrlRequestHandler::DoesRequestAffectStorage(
     net::URLRequest* request) const {
   return true;
 }
+
 }  // namespace content

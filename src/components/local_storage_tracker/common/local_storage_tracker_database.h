@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_DATABASE_H_
-#define COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_DATABASE_H_
+#ifndef COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_DATABASE_H_
+#define COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_DATABASE_H_
 
 #include <string>
 
 #include "base/files/file_util.h"
-#include "components/local_storage_manager/common/local_storage_manager_types.h"
+#include "components/local_storage_tracker/common/local_storage_tracker_types.h"
 #include "sql/init_status.h"
 #include "sql/statement.h"
 #include "sql/transaction.h"
@@ -28,9 +28,9 @@
 
 namespace content {
 
-class LocalStorageManagerDatabase {
+class LocalStorageTrackerDatabase {
  public:
-  explicit LocalStorageManagerDatabase(const base::FilePath& data_file_name);
+  explicit LocalStorageTrackerDatabase(const base::FilePath& data_file_name);
 
   bool AddAccess(const AccessData& access);
   bool AddApplication(const ApplicationData& application);
@@ -52,4 +52,4 @@ class LocalStorageManagerDatabase {
 };
 }  // namespace content
 
-#endif  // COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_DATABASE_H_
+#endif  // COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_DATABASE_H_

@@ -59,8 +59,8 @@ extern const char kForceFieldTrialParams[];
 extern const char kEnableThreadInstructionCount[];
 #endif
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-extern const char kLocalStorageManager[];
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+extern const char kLocalStorageTracker[];
 #endif
 }  // namespace switches
 

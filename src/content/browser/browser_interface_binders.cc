@@ -724,9 +724,9 @@ void PopulateFrameBinders(RenderFrameHostImpl* host, mojo::BinderMap* map) {
         base::BindRepeating(&RenderFrameHostImpl::BindInputInjectorReceiver,
                             base::Unretained(host)));
   }
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  map->Add<local_storage::mojom::LocalStorageManager>(
-      base::BindRepeating(&RenderFrameHostImpl::GetLocalStorageManagerMojoImpl,
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  map->Add<local_storage::mojom::LocalStorageTracker>(
+      base::BindRepeating(&RenderFrameHostImpl::GetLocalStorageTrackerMojoImpl,
                           base::Unretained(host)));
 #endif
 

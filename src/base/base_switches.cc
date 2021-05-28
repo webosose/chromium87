@@ -160,9 +160,9 @@ const char kForceFieldTrialParams[] = "force-fieldtrial-params";
 const char kEnableThreadInstructionCount[] = "enable-thread-instruction-count";
 #endif
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-// On/Off local storage manager
-const char kLocalStorageManager[] = "local-storage-manager";
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+// On/Off local storage tracker
+const char kLocalStorageTracker[] = "local-storage-tracker";
 #endif
 
 }  // namespace switches

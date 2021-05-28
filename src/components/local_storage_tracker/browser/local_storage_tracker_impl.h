@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_IMPL_H_
-#define COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_IMPL_H_
+#ifndef COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_IMPL_H_
+#define COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_IMPL_H_
 
 #include "base/memory/singleton.h"
-#include "components/local_storage_manager/public/local_storage_manager.h"
+#include "components/local_storage_tracker/public/local_storage_tracker.h"
 
 namespace content {
 
-class LocalStorageManagerImpl final : public LocalStorageManager {
+class LocalStorageTrackerImpl final : public LocalStorageTracker {
  public:
-  static LocalStorageManagerImpl* GetInstance();
+  LocalStorageTrackerImpl(const LocalStorageTrackerImpl&) = delete;
+  LocalStorageTrackerImpl& operator=(const LocalStorageTrackerImpl&) = delete;
+
+  static LocalStorageTrackerImpl* GetInstance();
 
   void Initialize(const base::FilePath& data_file_path) override;
 
@@ -34,9 +37,11 @@ class LocalStorageManagerImpl final : public LocalStorageManager {
                       const GURL& origin,
                       base::OnceCallback<void()> callback) override;
   void OnDeleteCompleted(const GURL& origin);
-  base::WeakPtr<LocalStorageManager> GetWeakPtr() override;
+  base::WeakPtr<LocalStorageTracker> GetWeakPtr() override;
 
  private:
+  LocalStorageTrackerImpl() = default;
+
   std::set<GURL> GetSubOrigins(const GURL& origin);
   enum class InitializationStatus { kNone, kPending, kFailed, kSucceeded };
   void OnAccessesLoaded(bool success, const AccessDataList& access_list);
@@ -88,18 +93,15 @@ class LocalStorageManagerImpl final : public LocalStorageManager {
 
   AppToStatusMap apps_;
   OriginToAppsMap origins_;
-  std::unique_ptr<LocalStorageManagerStore> store_;
+  std::unique_ptr<LocalStorageTrackerStore> store_;
   CompletionList data_delete_completions_;
 
   InitializationStatus init_status_ = InitializationStatus::kNone;
 
-  base::WeakPtrFactory<LocalStorageManagerImpl> weak_ptr_factory_{this};
-  friend struct base::DefaultSingletonTraits<LocalStorageManagerImpl>;
-  LocalStorageManagerImpl(){};
-
-  DISALLOW_COPY_AND_ASSIGN(LocalStorageManagerImpl);
+  base::WeakPtrFactory<LocalStorageTrackerImpl> weak_ptr_factory_{this};
+  friend struct base::DefaultSingletonTraits<LocalStorageTrackerImpl>;
 };
 
 }  // namespace content
 
-#endif  // COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_IMPL_H_
+#endif  // COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_IMPL_H_

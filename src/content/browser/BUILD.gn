@@ -2866,11 +2866,11 @@ source_set("browser") {
     ]
   }
 
-  if (use_local_storage_manager) {
+  if (use_local_storage_tracker) {
     deps += [
-      "//components/local_storage_manager/browser",
+      "//components/local_storage_tracker/browser",
     ]
-    defines += [ "USE_LOCAL_STORAGE_MANAGER" ]
+    defines += [ "USE_LOCAL_STORAGE_TRACKER" ]
   }
 }
 

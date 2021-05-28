@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_URL_REQUEST_HANDLER_H_
-#define COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_URL_REQUEST_HANDLER_H_
+#ifndef COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_URL_REQUEST_HANDLER_H_
+#define COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_URL_REQUEST_HANDLER_H_
 
 #include "base/memory/ref_counted.h"
-#include "components/local_storage_manager/public/local_storage_manager.h"
+#include "components/local_storage_tracker/public/local_storage_tracker.h"
 #include "net/base/completion_once_callback.h"
 
 namespace net {
@@ -27,13 +27,13 @@ class URLRequest;
 
 namespace content {
 
-class LocalStorageManager;
+class LocalStorageTracker;
 
-class LocalStorageManagerUrlRequestHandler
-    : public base::RefCountedThreadSafe<LocalStorageManagerUrlRequestHandler> {
+class LocalStorageTrackerUrlRequestHandler
+    : public base::RefCountedThreadSafe<LocalStorageTrackerUrlRequestHandler> {
  public:
-  LocalStorageManagerUrlRequestHandler(
-      base::WeakPtr<LocalStorageManager> local_storage_manager);
+  LocalStorageTrackerUrlRequestHandler(
+      base::WeakPtr<LocalStorageTracker> local_storage_tracker);
   void OnAccessOrigin(content::WebContents* web_contents,
                       const GURL& origin,
                       base::OnceCallback<void()> callback) const;
@@ -42,11 +42,12 @@ class LocalStorageManagerUrlRequestHandler
                          GURL* new_url);
 
  private:
-  friend class base::RefCountedThreadSafe<LocalStorageManagerUrlRequestHandler>;
+  friend class base::RefCountedThreadSafe<LocalStorageTrackerUrlRequestHandler>;
   bool DoesRequestAffectStorage(net::URLRequest* request) const;
-  base::WeakPtr<LocalStorageManager> local_storage_manager_;
-  bool local_storage_manager_valid_;
+  base::WeakPtr<LocalStorageTracker> local_storage_tracker_;
+  bool local_storage_tracker_valid_;
 };
+
 }  // namespace content
 
-#endif  // COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_URL_REQUEST_HANDLER_H_
+#endif  // COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_URL_REQUEST_HANDLER_H_

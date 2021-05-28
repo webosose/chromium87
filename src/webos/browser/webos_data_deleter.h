@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ namespace webos {
 class WebOSDataDeleter final : public content::DataDeleter {
  public:
   WebOSDataDeleter();
+  WebOSDataDeleter(const WebOSDataDeleter&) = delete;
+  WebOSDataDeleter& operator=(const WebOSDataDeleter&) = delete;
 
   typedef std::set<GURL> Origins;
 
@@ -47,9 +49,8 @@ class WebOSDataDeleter final : public content::DataDeleter {
   const neva_app_runtime::BrowsingDataRemover::RemoveBrowsingDataMask mask_;
 
   base::WeakPtrFactory<WebOSDataDeleter> weak_factory_;
-
-  DISALLOW_COPY_AND_ASSIGN(WebOSDataDeleter);
 };
+
 }  // namespace webos
 
 #endif  // WEBOS_BROWSER_WEBOS_DATA_DELETER_H_

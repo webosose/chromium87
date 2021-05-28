@@ -142,7 +142,7 @@ config("config") {
     defines += [ "USE_NEVA_WEBRTC=1" ]
   }
 
-  if (use_local_storage_manager) {
-    defines += [ "USE_LOCAL_STORAGE_MANAGER=1" ]
+  if (use_local_storage_tracker) {
+    defines += [ "USE_LOCAL_STORAGE_TRACKER=1" ]
   }
 }

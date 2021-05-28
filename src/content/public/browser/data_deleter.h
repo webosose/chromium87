@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ namespace content {
 class DataDeleter {
  public:
   DataDeleter() = default;
+  DataDeleter(const DataDeleter&) = delete;
+  DataDeleter& operator=(const DataDeleter&) = delete;
 
   typedef std::set<GURL> Origins;
   using CompletionCallback = base::OnceCallback<void()>;
@@ -45,8 +47,6 @@ class DataDeleter {
 
   virtual void OnDeleteCompleted(const GURL& origin,
                                  scoped_refptr<DeletionContext> context) = 0;
-
-  DISALLOW_COPY_AND_ASSIGN(DataDeleter);
 };
 
 CONTENT_EXPORT void SetDataDeleter(DataDeleter*);

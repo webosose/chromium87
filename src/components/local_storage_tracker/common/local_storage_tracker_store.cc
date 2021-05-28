@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "components/local_storage_manager/common/local_storage_manager_store.h"
+#include "components/local_storage_tracker/common/local_storage_tracker_store.h"
 
 #include "base/bind.h"
 #include "base/logging.h"
 
 namespace content {
 
-LocalStorageManagerStore::LocalStorageManagerStore(
+LocalStorageTrackerStore::LocalStorageTrackerStore(
     scoped_refptr<base::SingleThreadTaskRunner> main_thread_runner,
     scoped_refptr<base::SingleThreadTaskRunner> db_thread_runner)
     : main_thread_runner_(main_thread_runner),
@@ -31,71 +31,71 @@ LocalStorageManagerStore::LocalStorageManagerStore(
   DCHECK(db_thread_runner != nullptr);
 }
 
-void LocalStorageManagerStore::Initialize(
+void LocalStorageTrackerStore::Initialize(
     const base::FilePath& data_file_path,
     const base::Callback<void(bool)>& callback) {
   VLOG(1) << "##### Store initialization; data path="
           << data_file_path.AsUTF8Unsafe();
-  db_.reset(new LocalStorageManagerDatabase(data_file_path));
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::InitializeOnDBThread,
+  db_.reset(new LocalStorageTrackerDatabase(data_file_path));
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::InitializeOnDBThread,
                            base::Unretained(this), callback));
 }
 
-void LocalStorageManagerStore::AddAccess(
+void LocalStorageTrackerStore::AddAccess(
     const AccessData& access,
     const base::Callback<void(bool)>& callback) {
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::AddAccessOnDBThread,
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::AddAccessOnDBThread,
                            base::Unretained(this), access, callback));
 }
 
-void LocalStorageManagerStore::AddApplication(
+void LocalStorageTrackerStore::AddApplication(
     const ApplicationData& application,
     const base::Callback<void(bool)>& callback) {
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::AddApplicationOnDBThread,
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::AddApplicationOnDBThread,
                            base::Unretained(this), application, callback));
 }
 
-void LocalStorageManagerStore::AddOrigin(
+void LocalStorageTrackerStore::AddOrigin(
     const OriginData& origin,
     const base::Callback<void(bool)>& callback) {
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::AddOriginOnDBThread,
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::AddOriginOnDBThread,
                            base::Unretained(this), origin, callback));
 }
 
-void LocalStorageManagerStore::DeleteApplication(
+void LocalStorageTrackerStore::DeleteApplication(
     const std::string& app_id,
     const base::Callback<void(bool)>& callback) {
   RunOnDBThread(
-      base::Bind(&LocalStorageManagerStore::DeleteApplicationOnDBThread,
+      base::Bind(&LocalStorageTrackerStore::DeleteApplicationOnDBThread,
                  base::Unretained(this), app_id, callback));
 }
 
-void LocalStorageManagerStore::DeleteOrigin(
+void LocalStorageTrackerStore::DeleteOrigin(
     const GURL& url,
     const base::Callback<void(bool)>& callback) {
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::DeleteOriginOnDBThread,
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::DeleteOriginOnDBThread,
                            base::Unretained(this), url, callback));
 }
 
-void LocalStorageManagerStore::GetAccesses(
+void LocalStorageTrackerStore::GetAccesses(
     const base::Callback<void(bool, const AccessDataList&)>& callback) {
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::GetAccessesOnDBThread,
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::GetAccessesOnDBThread,
                            base::Unretained(this), callback));
 }
-void LocalStorageManagerStore::GetApplications(
+void LocalStorageTrackerStore::GetApplications(
     const base::Callback<void(bool, const ApplicationDataList&)>& callback) {
-  RunOnDBThread(base::Bind(&LocalStorageManagerStore::GetApplicationsOnDBThread,
+  RunOnDBThread(base::Bind(&LocalStorageTrackerStore::GetApplicationsOnDBThread,
                            base::Unretained(this), callback));
 }
 
-void LocalStorageManagerStore::InitializeOnDBThread(
+void LocalStorageTrackerStore::InitializeOnDBThread(
     const base::Callback<void(bool)>& callback) {
   db_initialized_ = db_->Init() == sql::INIT_OK;
   main_thread_runner_->PostTask(FROM_HERE,
                                 base::Bind(callback, db_initialized_));
 }
 
-void LocalStorageManagerStore::AddAccessOnDBThread(
+void LocalStorageTrackerStore::AddAccessOnDBThread(
     const AccessData& access,
     const base::Callback<void(bool)>& callback) {
   bool result = false;
@@ -105,7 +105,7 @@ void LocalStorageManagerStore::AddAccessOnDBThread(
   RunOnUIThread(base::Bind(callback, result));
 }
 
-void LocalStorageManagerStore::AddApplicationOnDBThread(
+void LocalStorageTrackerStore::AddApplicationOnDBThread(
     const ApplicationData& application,
     const base::Callback<void(bool)>& callback) {
   bool result = false;
@@ -115,7 +115,7 @@ void LocalStorageManagerStore::AddApplicationOnDBThread(
   RunOnUIThread(base::Bind(callback, result));
 }
 
-void LocalStorageManagerStore::AddOriginOnDBThread(
+void LocalStorageTrackerStore::AddOriginOnDBThread(
     const OriginData& origin,
     const base::Callback<void(bool)>& callback) {
   bool result = false;
@@ -125,7 +125,7 @@ void LocalStorageManagerStore::AddOriginOnDBThread(
   RunOnUIThread(base::Bind(callback, result));
 }
 
-void LocalStorageManagerStore::DeleteApplicationOnDBThread(
+void LocalStorageTrackerStore::DeleteApplicationOnDBThread(
     const std::string& app_id,
     const base::Callback<void(bool)>& callback) {
   bool result = false;
@@ -135,7 +135,7 @@ void LocalStorageManagerStore::DeleteApplicationOnDBThread(
   RunOnUIThread(base::Bind(callback, result));
 }
 
-void LocalStorageManagerStore::DeleteOriginOnDBThread(
+void LocalStorageTrackerStore::DeleteOriginOnDBThread(
     const GURL& url,
     const base::Callback<void(bool)>& callback) {
   bool result = false;
@@ -145,7 +145,7 @@ void LocalStorageManagerStore::DeleteOriginOnDBThread(
   RunOnUIThread(base::Bind(callback, result));
 }
 
-void LocalStorageManagerStore::GetAccessesOnDBThread(
+void LocalStorageTrackerStore::GetAccessesOnDBThread(
     const base::Callback<void(bool, const AccessDataList&)>& callback) {
   AccessDataList data_list;
   bool result = false;
@@ -155,7 +155,7 @@ void LocalStorageManagerStore::GetAccessesOnDBThread(
   RunOnUIThread(base::Bind(callback, result, data_list));
 }
 
-void LocalStorageManagerStore::GetApplicationsOnDBThread(
+void LocalStorageTrackerStore::GetApplicationsOnDBThread(
     const base::Callback<void(bool, const ApplicationDataList&)>& callback) {
   ApplicationDataList data_list;
   bool result = false;
@@ -165,11 +165,11 @@ void LocalStorageManagerStore::GetApplicationsOnDBThread(
   RunOnUIThread(base::Bind(callback, result, data_list));
 }
 
-void LocalStorageManagerStore::RunOnDBThread(const base::Closure& task) {
+void LocalStorageTrackerStore::RunOnDBThread(const base::Closure& task) {
   db_thread_runner_->PostTask(FROM_HERE, task);
 }
 
-void LocalStorageManagerStore::RunOnUIThread(const base::Closure& task) {
+void LocalStorageTrackerStore::RunOnUIThread(const base::Closure& task) {
   main_thread_runner_->PostTask(FROM_HERE, task);
 }
 

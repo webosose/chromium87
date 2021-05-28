@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "components/local_storage_manager/common/local_storage_manager_database.h"
+#include "components/local_storage_tracker/common/local_storage_tracker_database.h"
 
 #include "base/logging.h"
 
 namespace content {
 
-const base::FilePath::CharType kLocalStorageManagerDataFileName[] =
+const base::FilePath::CharType kLocalStorageTrackerDataFileName[] =
     FILE_PATH_LITERAL("AppsOrigins");
 
-LocalStorageManagerDatabase::LocalStorageManagerDatabase(
+LocalStorageTrackerDatabase::LocalStorageTrackerDatabase(
     const base::FilePath& data_file_name)
-    : data_file_name_(data_file_name.Append(kLocalStorageManagerDataFileName)) {
+    : data_file_name_(data_file_name.Append(kLocalStorageTrackerDataFileName)) {
 }
 
-bool LocalStorageManagerDatabase::AddAccess(const AccessData& access) {
+bool LocalStorageTrackerDatabase::AddAccess(const AccessData& access) {
   sql::Statement statement(
       db_.GetCachedStatement(SQL_FROM_HERE,
                              "INSERT INTO access "
@@ -47,7 +47,7 @@ bool LocalStorageManagerDatabase::AddAccess(const AccessData& access) {
   return true;
 }
 
-bool LocalStorageManagerDatabase::AddApplication(
+bool LocalStorageTrackerDatabase::AddApplication(
     const ApplicationData& application) {
   sql::Statement statement(db_.GetCachedStatement(
       SQL_FROM_HERE,
@@ -63,7 +63,7 @@ bool LocalStorageManagerDatabase::AddApplication(
   return true;
 }
 
-bool LocalStorageManagerDatabase::AddOrigin(const OriginData& origin) {
+bool LocalStorageTrackerDatabase::AddOrigin(const OriginData& origin) {
   sql::Statement statement(db_.GetCachedStatement(
       SQL_FROM_HERE, "INSERT INTO origins (url) VALUES(?)"));
   statement.BindString(0, origin.url_.spec());
@@ -75,7 +75,7 @@ bool LocalStorageManagerDatabase::AddOrigin(const OriginData& origin) {
   return true;
 }
 
-bool LocalStorageManagerDatabase::GetAccesses(AccessDataList* accesses) {
+bool LocalStorageTrackerDatabase::GetAccesses(AccessDataList* accesses) {
   if (accesses == nullptr)
     return false;
 
@@ -96,7 +96,7 @@ bool LocalStorageManagerDatabase::GetAccesses(AccessDataList* accesses) {
   return true;
 }
 
-bool LocalStorageManagerDatabase::GetApplications(
+bool LocalStorageTrackerDatabase::GetApplications(
     ApplicationDataList* applications) {
   if (applications == nullptr)
     return false;
@@ -114,7 +114,7 @@ bool LocalStorageManagerDatabase::GetApplications(
   return true;
 }
 
-bool LocalStorageManagerDatabase::DeleteApplication(const std::string& app_id) {
+bool LocalStorageTrackerDatabase::DeleteApplication(const std::string& app_id) {
   sql::Transaction committer(&db_);
   if (!committer.Begin())
     return false;
@@ -142,7 +142,7 @@ bool LocalStorageManagerDatabase::DeleteApplication(const std::string& app_id) {
   return committer.Commit();
 }
 
-bool LocalStorageManagerDatabase::DeleteOrigin(const GURL& url) {
+bool LocalStorageTrackerDatabase::DeleteOrigin(const GURL& url) {
   sql::Transaction committer(&db_);
   if (!committer.Begin())
     return false;
@@ -169,12 +169,12 @@ bool LocalStorageManagerDatabase::DeleteOrigin(const GURL& url) {
   return committer.Commit();
 }
 
-sql::InitStatus LocalStorageManagerDatabase::Init() {
+sql::InitStatus LocalStorageTrackerDatabase::Init() {
   if (!EnsurePath(data_file_name_)) {
     LOG(ERROR) << "Invalid DB path=" << data_file_name_.AsUTF8Unsafe();
     return sql::INIT_FAILURE;
   }
-  db_.set_histogram_tag("LGE_LocalStorageManager");
+  db_.set_histogram_tag("LGE_LocalStorageTracker");
 
   // Set the database page size to something a little larger to give us
   // better performance (we're typically seek rather than bandwidth limited).
@@ -210,7 +210,7 @@ sql::InitStatus LocalStorageManagerDatabase::Init() {
   return committer.Commit() ? sql::INIT_OK : sql::INIT_FAILURE;
 }
 
-bool LocalStorageManagerDatabase::CreateAppsTable() {
+bool LocalStorageTrackerDatabase::CreateAppsTable() {
   if (!db_.DoesTableExist("applications")) {
     if (!db_.Execute("CREATE TABLE applications("
                      "id INTEGER PRIMARY KEY,"
@@ -221,7 +221,7 @@ bool LocalStorageManagerDatabase::CreateAppsTable() {
   return true;
 }
 
-bool LocalStorageManagerDatabase::CreateLocalStorageAccessTable() {
+bool LocalStorageTrackerDatabase::CreateLocalStorageAccessTable() {
   if (!db_.DoesTableExist("access")) {
     if (!db_.Execute("CREATE TABLE access("
                      "id_app INTEGER NOT NULL,"
@@ -239,7 +239,7 @@ bool LocalStorageManagerDatabase::CreateLocalStorageAccessTable() {
   return true;
 }
 
-bool LocalStorageManagerDatabase::CreateOriginsTable() {
+bool LocalStorageTrackerDatabase::CreateOriginsTable() {
   if (!db_.DoesTableExist("origins")) {
     if (!db_.Execute("CREATE TABLE origins("
                      "id INTEGER PRIMARY KEY,"
@@ -249,7 +249,7 @@ bool LocalStorageManagerDatabase::CreateOriginsTable() {
   return true;
 }
 
-bool LocalStorageManagerDatabase::EnsurePath(const base::FilePath& path) {
+bool LocalStorageTrackerDatabase::EnsurePath(const base::FilePath& path) {
   if (!base::PathExists(path) && !base::CreateDirectory(path.DirName())) {
     LOG(ERROR) << "Failed to create directory: " << path.LossyDisplayName();
     return false;

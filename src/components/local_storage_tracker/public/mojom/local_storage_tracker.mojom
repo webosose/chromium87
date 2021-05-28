@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "components/local_storage_manager/browser/local_storage_manager_mojo_impl.h"
+module local_storage.mojom;
 
-namespace content {
-
-void RenderFrameHostImpl::GetLocalStorageManagerMojoImpl(
-    mojo::PendingReceiver<local_storage::mojom::LocalStorageManager> receiver) {
-  lsm_responder_ =
-      std::make_unique<LocalStorageManagerMojoImpl>(std::move(receiver));
-}
-}  // namespace content
+interface LocalStorageTracker {
+  SaveUrl(string application_id, string url) => ();
+};

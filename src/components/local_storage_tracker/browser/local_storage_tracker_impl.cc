@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "components/local_storage_manager/browser/local_storage_manager_impl.h"
+#include "components/local_storage_tracker/browser/local_storage_tracker_impl.h"
 
 #include "base/bind.h"
 #include "base/bind_helpers.h"
@@ -35,7 +35,7 @@
 
 namespace content {
 
-void LocalStorageManagerImpl::Initialize(const base::FilePath& data_file_path) {
+void LocalStorageTrackerImpl::Initialize(const base::FilePath& data_file_path) {
   if (init_status_ != InitializationStatus::kNone)
     return;
   init_status_ = InitializationStatus::kPending;
@@ -44,33 +44,33 @@ void LocalStorageManagerImpl::Initialize(const base::FilePath& data_file_path) {
   scoped_refptr<base::SingleThreadTaskRunner> db_thread_runner =
       base::CreateSingleThreadTaskRunner({content::BrowserThread::IO});
   store_.reset(
-      new LocalStorageManagerStore(main_thread_runner, db_thread_runner));
+      new LocalStorageTrackerStore(main_thread_runner, db_thread_runner));
   store_->Initialize(
       data_file_path,
-      base::Bind(&LocalStorageManagerImpl::OnStoreInitialized, this));
+      base::Bind(&LocalStorageTrackerImpl::OnStoreInitialized, this));
 }
 
-void LocalStorageManagerImpl::OnAppInstalled(const std::string& app_id) {
+void LocalStorageTrackerImpl::OnAppInstalled(const std::string& app_id) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
   if (!IsInitialized()) {
-    LOG(ERROR) << "LocalStorageManagerImpl not yet initialized";
+    LOG(ERROR) << "LocalStorageTrackerImpl not yet initialized";
     return;
   }
   bool inserted = apps_.insert({app_id, true}).second;
   if (inserted) {
     store_->AddApplication(
         ApplicationData{app_id, true},
-        base::Bind(&LocalStorageManagerImpl::OnStoreModified, this,
+        base::Bind(&LocalStorageTrackerImpl::OnStoreModified, this,
                    StoreModificationOperation::kAddApplication));
   }
   VLOG(1) << "OnAppInstalled appID=" << app_id;
 }
 
-void LocalStorageManagerImpl::OnAppRemoved(const std::string& app_id) {
+void LocalStorageTrackerImpl::OnAppRemoved(const std::string& app_id) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
   VLOG(1) << "OnAppRemoved appID=" << app_id;
   if (!IsInitialized()) {
-    LOG(ERROR) << "LocalStorageManagerImpl not yet initialized";
+    LOG(ERROR) << "LocalStorageTrackerImpl not yet initialized";
   }
   if (apps_.erase(app_id) == 0) {
     return;
@@ -87,7 +87,7 @@ void LocalStorageManagerImpl::OnAppRemoved(const std::string& app_id) {
         origins_to_clear.insert(origin.first);
         store_->DeleteOrigin(
             origin.first,
-            base::Bind(&LocalStorageManagerImpl::OnStoreModified, this,
+            base::Bind(&LocalStorageTrackerImpl::OnStoreModified, this,
                        StoreModificationOperation::kDeleteOrigin));
       }
       StartDeleteOriginData(origin_to_clear);
@@ -96,11 +96,11 @@ void LocalStorageManagerImpl::OnAppRemoved(const std::string& app_id) {
   for (auto origin : origins_to_clear)
     origins_.erase(origin);
   store_->DeleteApplication(
-      app_id, base::Bind(&LocalStorageManagerImpl::OnStoreModified, this,
+      app_id, base::Bind(&LocalStorageTrackerImpl::OnStoreModified, this,
                          StoreModificationOperation::kDeleteApplication));
 }
 
-void LocalStorageManagerImpl::OnDeleteCompleted(const GURL& origin) {
+void LocalStorageTrackerImpl::OnDeleteCompleted(const GURL& origin) {
   VLOG(1) << "On delete completed origin=" << origin;
   OriginToAppsMap::iterator origin_it = origins_.find(origin);
   if (origin_it != origins_.end()) {
@@ -115,23 +115,23 @@ void LocalStorageManagerImpl::OnDeleteCompleted(const GURL& origin) {
           << data_delete_completions_.size();
 }
 
-base::WeakPtr<LocalStorageManager> LocalStorageManagerImpl::GetWeakPtr() {
+base::WeakPtr<LocalStorageTracker> LocalStorageTrackerImpl::GetWeakPtr() {
   return weak_ptr_factory_.GetWeakPtr();
 }
 
-void LocalStorageManagerImpl::OnAccessOrigin(
+void LocalStorageTrackerImpl::OnAccessOrigin(
     const std::string& app_id,
     const GURL& origin,
     base::OnceCallback<void()> callback) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
 
   if (!IsInitialized()) {
-    LOG(ERROR) << "LocalStorageManagerImpl not yet initialized";
+    LOG(ERROR) << "LocalStorageTrackerImpl not yet initialized";
     std::move(callback).Run();
     return;
   }
   if (origin.is_empty() || !origin.is_valid()) {
-    LOG(ERROR) << "LocalStorageManagerImpl invalid origin value";
+    LOG(ERROR) << "LocalStorageTrackerImpl invalid origin value";
     std::move(callback).Run();
     return;
   }
@@ -148,7 +148,7 @@ void LocalStorageManagerImpl::OnAccessOrigin(
     it_app = apps_.insert({app_id, false}).first;
     store_->AddApplication(
         {app_id, false},
-        base::Bind(&LocalStorageManagerImpl::OnStoreModified, this,
+        base::Bind(&LocalStorageTrackerImpl::OnStoreModified, this,
                    StoreModificationOperation::kAddApplication));
   }
 
@@ -166,7 +166,7 @@ void LocalStorageManagerImpl::OnAccessOrigin(
   std::move(callback).Run();
 }
 
-std::set<GURL> LocalStorageManagerImpl::GetSubOrigins(const GURL& origin) {
+std::set<GURL> LocalStorageTrackerImpl::GetSubOrigins(const GURL& origin) {
   std::set<GURL> sub_origins;
   if (!origin.SchemeIsHTTPOrHTTPS()) {
     return sub_origins;
@@ -199,7 +199,7 @@ std::set<GURL> LocalStorageManagerImpl::GetSubOrigins(const GURL& origin) {
   return sub_origins;
 }
 
-void LocalStorageManagerImpl::OnAccessesLoaded(
+void LocalStorageTrackerImpl::OnAccessesLoaded(
     bool success,
     const AccessDataList& access_list) {
   VLOG(1) << "Accesses loaded successfully = " << success;
@@ -219,13 +219,13 @@ void LocalStorageManagerImpl::OnAccessesLoaded(
   OnInitializeSucceeded();
 }
 
-void LocalStorageManagerImpl::OnApplicationsLoaded(
+void LocalStorageTrackerImpl::OnApplicationsLoaded(
     bool success,
     const ApplicationDataList& apps_list) {
   VLOG(1) << "Applications loaded successfully = " << success;
   if (success) {
     store_->GetAccesses(
-        base::Bind(&LocalStorageManagerImpl::OnAccessesLoaded, this));
+        base::Bind(&LocalStorageTrackerImpl::OnAccessesLoaded, this));
     for (auto& item : apps_list) {
       apps_[item.app_id_] = item.installed_;
     }
@@ -235,33 +235,33 @@ void LocalStorageManagerImpl::OnApplicationsLoaded(
   }
 }
 
-void LocalStorageManagerImpl::OnStoreModified(
+void LocalStorageTrackerImpl::OnStoreModified(
     StoreModificationOperation modification_operation,
     bool success) {
   VLOG(1) << "Store modification=" << static_cast<int>(modification_operation)
           << " completed; Successfully = " << success;
 }
 
-void LocalStorageManagerImpl::OnStoreInitialized(bool success) {
+void LocalStorageTrackerImpl::OnStoreInitialized(bool success) {
   VLOG(1) << "Store initialized success=" << success;
   if (success) {
     store_->GetApplications(
-        base::Bind(&LocalStorageManagerImpl::OnApplicationsLoaded, this));
+        base::Bind(&LocalStorageTrackerImpl::OnApplicationsLoaded, this));
   } else {
     init_status_ = InitializationStatus::kFailed;
     OnInitializeFailed();
   }
 }
 
-void LocalStorageManagerImpl::OnInitializeFailed() {}
+void LocalStorageTrackerImpl::OnInitializeFailed() {}
 
-void LocalStorageManagerImpl::OnInitializeSucceeded() {}
+void LocalStorageTrackerImpl::OnInitializeSucceeded() {}
 
-bool LocalStorageManagerImpl::IsInitialized() {
+bool LocalStorageTrackerImpl::IsInitialized() {
   return init_status_ == InitializationStatus::kSucceeded;
 }
 
-bool LocalStorageManagerImpl::IsHTTPOrHTTPSOriginUniqueForHost(
+bool LocalStorageTrackerImpl::IsHTTPOrHTTPSOriginUniqueForHost(
     const std::string& host) {
   int host_origin_count = 0;
   for (auto& origin : origins_) {
@@ -276,7 +276,7 @@ bool LocalStorageManagerImpl::IsHTTPOrHTTPSOriginUniqueForHost(
   return true;
 }
 
-void LocalStorageManagerImpl::StartDeleteOriginData(const GURL& origin,
+void LocalStorageTrackerImpl::StartDeleteOriginData(const GURL& origin,
                                                     bool delete_cookies) {
   VLOG(1) << "Start deleting origin=" << origin
           << " delete_cookies=" << delete_cookies;
@@ -285,7 +285,7 @@ void LocalStorageManagerImpl::StartDeleteOriginData(const GURL& origin,
   base::OnceClosure callback;
   if (iter != origins_.end()) {
     iter->second.deletion_in_progress = true;
-    callback = base::Bind(&LocalStorageManagerImpl::OnDeleteCompleted,
+    callback = base::Bind(&LocalStorageTrackerImpl::OnDeleteCompleted,
                           weak_ptr_factory_.GetWeakPtr(), origin);
   } else {
     callback = base::BindOnce(base::DoNothing::Once());
@@ -296,15 +296,15 @@ void LocalStorageManagerImpl::StartDeleteOriginData(const GURL& origin,
                                     std::move(callback));
 }
 
-LocalStorageManagerImpl::AppLinkVerifyResult
-LocalStorageManagerImpl::VerifyOriginAppLink(const GURL& origin,
+LocalStorageTrackerImpl::AppLinkVerifyResult
+LocalStorageTrackerImpl::VerifyOriginAppLink(const GURL& origin,
                                              const std::string& app_id) {
   OriginToAppsMap::iterator it_origin = origins_.find(origin);
   if (it_origin == origins_.end()) {
     VLOG(1) << "VerifyOriginAppLink: adding origin, origin=" << origin;
     it_origin = origins_.insert({origin, OriginData()}).first;
     store_->AddOrigin(
-        {origin}, base::Bind(&LocalStorageManagerImpl::OnStoreModified, this,
+        {origin}, base::Bind(&LocalStorageTrackerImpl::OnStoreModified, this,
                              StoreModificationOperation::kAddOrigin));
   }
   AppLinkVerifyResult result = AppLinkVerifyResult::kExist;
@@ -314,7 +314,7 @@ LocalStorageManagerImpl::VerifyOriginAppLink(const GURL& origin,
             << " to origin=" << origin;
     data.apps.insert(app_id);
     store_->AddAccess({app_id, origin},
-                      base::Bind(&LocalStorageManagerImpl::OnStoreModified,
+                      base::Bind(&LocalStorageTrackerImpl::OnStoreModified,
                                  this, StoreModificationOperation::kAddAccess));
     result = data.apps.size() == 1 ? AppLinkVerifyResult::kAddedNewOriginEntry
                                    : AppLinkVerifyResult::kAdded;
@@ -325,12 +325,12 @@ LocalStorageManagerImpl::VerifyOriginAppLink(const GURL& origin,
   return result;
 }
 
-LocalStorageManagerImpl::DataDeleteCompletion::DataDeleteCompletion(
+LocalStorageTrackerImpl::DataDeleteCompletion::DataDeleteCompletion(
     std::set<GURL> origins,
     base::OnceClosure callback)
     : origins_(origins), callback_(std::move(callback)) {}
 
-bool LocalStorageManagerImpl::DataDeleteCompletion::OnDataDeleted(
+bool LocalStorageTrackerImpl::DataDeleteCompletion::OnDataDeleted(
     const GURL& origin) {
   VLOG(1) << "OnDataDeleted, origin=" << origin;
   if (origins_.erase(origin) == 1 && origins_.empty()) {

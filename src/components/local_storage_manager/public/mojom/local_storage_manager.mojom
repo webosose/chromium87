@@ -1,5 +1,0 @@
-module local_storage.mojom;
-
-interface LocalStorageManager {
-  SaveUrl(string application_id, string url) => ();
-};

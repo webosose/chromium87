@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_FAKE_IMPL_H_
-#define COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_FAKE_IMPL_H_
+#ifndef COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_FAKE_IMPL_H_
+#define COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_FAKE_IMPL_H_
 
 #include "base/memory/singleton.h"
-#include "components/local_storage_manager/public/local_storage_manager.h"
+#include "components/local_storage_tracker/public/local_storage_tracker.h"
 
 namespace content {
 
-class LocalStorageManagerFakeImpl final : public LocalStorageManager {
+class LocalStorageTrackerFakeImpl final : public LocalStorageTracker {
  public:
-  static LocalStorageManagerFakeImpl* GetInstance();
+  LocalStorageTrackerFakeImpl(const LocalStorageTrackerFakeImpl&) = delete;
+  LocalStorageTrackerFakeImpl& operator=(const LocalStorageTrackerFakeImpl&) =
+      delete;
+
+  static LocalStorageTrackerFakeImpl* GetInstance();
 
   void Initialize(const base::FilePath& data_file_path) override{};
 
@@ -34,15 +38,14 @@ class LocalStorageManagerFakeImpl final : public LocalStorageManager {
                       const GURL& origin,
                       base::OnceCallback<void()> callback) override;
 
-  base::WeakPtr<LocalStorageManager> GetWeakPtr() override;
+  base::WeakPtr<LocalStorageTracker> GetWeakPtr() override;
 
  private:
-  friend struct base::DefaultSingletonTraits<LocalStorageManagerFakeImpl>;
-  LocalStorageManagerFakeImpl(){};
+  LocalStorageTrackerFakeImpl() = default;
 
-  DISALLOW_COPY_AND_ASSIGN(LocalStorageManagerFakeImpl);
+  friend struct base::DefaultSingletonTraits<LocalStorageTrackerFakeImpl>;
 };
 
 }  // namespace content
 
-#endif  // COMPONENTS_LOCAL_STORAGE_MANAGER_BROWSER_LOCAL_STORAGE_MANAGER_FAKE_IMPL_H_
+#endif  // COMPONENTS_LOCAL_STORAGE_TRACKER_BROWSER_LOCAL_STORAGE_TRACKER_FAKE_IMPL_H_

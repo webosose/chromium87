@@ -222,8 +222,8 @@
 #include "url/url_util.h"
 #include "v8/include/v8.h"
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-#include "components/local_storage_manager/public/mojom/local_storage_manager.mojom.h"
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+#include "components/local_storage_tracker/public/mojom/local_storage_tracker.mojom.h"
 #endif
 
 #if BUILDFLAG(ENABLE_PLUGINS)
@@ -4935,11 +4935,11 @@ void RenderFrameImpl::WillSendRequestInternal(
   request.SetDownloadToNetworkCacheOnly(is_for_no_state_prefetch &&
                                         !for_main_frame);
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  mojo::Remote<local_storage::mojom::LocalStorageManager> lsm_responder;
-  mojo::PendingReceiver<local_storage::mojom::LocalStorageManager> receiver =
-      lsm_responder.BindNewPipeAndPassReceiver();
-  lsm_responder->SaveUrl(
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  mojo::Remote<local_storage::mojom::LocalStorageTracker> lst_responder;
+  mojo::PendingReceiver<local_storage::mojom::LocalStorageTracker> receiver =
+      lst_responder.BindNewPipeAndPassReceiver();
+  lst_responder->SaveUrl(
       render_view_->renderer_preferences().file_security_origin,
       request.Url().GetString().Utf8(), base::BindOnce([] {}));
   GetBrowserInterfaceBroker()->GetInterface(std::move(receiver));

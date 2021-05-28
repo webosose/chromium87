@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_STORE_H_
-#define COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_STORE_H_
+#ifndef COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_STORE_H_
+#define COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_STORE_H_
 
 #include <memory>
 
 #include "base/threading/thread.h"
-#include "components/local_storage_manager/common/local_storage_manager_database.h"
+#include "components/local_storage_tracker/common/local_storage_tracker_database.h"
 
 namespace content {
 
-class LocalStorageManagerStore {
+class LocalStorageTrackerStore {
  public:
-  LocalStorageManagerStore(
+  LocalStorageTrackerStore(
       scoped_refptr<base::SingleThreadTaskRunner> main_thread_runner,
       scoped_refptr<base::SingleThreadTaskRunner> db_thread_runner);
   void Initialize(const base::FilePath& data_file_path,
@@ -66,7 +66,7 @@ class LocalStorageManagerStore {
   void RunOnDBThread(const base::Closure& task);
   void RunOnUIThread(const base::Closure& task);
 
-  std::unique_ptr<LocalStorageManagerDatabase> db_;
+  std::unique_ptr<LocalStorageTrackerDatabase> db_;
   scoped_refptr<base::SingleThreadTaskRunner> db_thread_runner_;
   scoped_refptr<base::SingleThreadTaskRunner> main_thread_runner_;
   bool db_initialized_;
@@ -75,4 +75,4 @@ class LocalStorageManagerStore {
 
 }  // namespace content
 
-#endif  // COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_STORE_H_
+#endif  // COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_STORE_H_

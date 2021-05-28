@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,24 +14,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "components/local_storage_manager/browser/local_storage_manager_fake_impl.h"
-
-#include "content/public/browser/browser_thread.h"
+#include "components/local_storage_tracker/browser/local_storage_tracker_mojo_impl.h"
 
 namespace content {
 
-void LocalStorageManagerFakeImpl::OnAccessOrigin(
-    const std::string& app_id,
-    const GURL& origin,
-    base::OnceCallback<void()> callback) {
-  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
-
-  NOTREACHED() << "Should never have been reached here";
-  std::move(callback).Run();
+void RenderFrameHostImpl::GetLocalStorageTrackerMojoImpl(
+    mojo::PendingReceiver<local_storage::mojom::LocalStorageTracker> receiver) {
+  lst_responder_ =
+      std::make_unique<LocalStorageTrackerMojoImpl>(std::move(receiver));
 }
-
-base::WeakPtr<LocalStorageManager> LocalStorageManagerFakeImpl::GetWeakPtr() {
-  return base::WeakPtr<LocalStorageManager>();
-};
 
 }  // namespace content

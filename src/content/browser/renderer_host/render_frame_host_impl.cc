@@ -248,8 +248,8 @@
 #include "url/origin.h"
 #include "url/url_constants.h"
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-#include "components/local_storage_manager/browser/local_storage_manager_mojo_impl.h"
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+#include "components/local_storage_tracker/browser/local_storage_tracker_mojo_impl.h"
 #endif
 
 #if defined(OS_ANDROID)

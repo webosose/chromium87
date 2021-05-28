@@ -1,4 +1,4 @@
-// Copyright (c) 2020 LG Electronics, Inc.
+// Copyright 2020 LG Electronics, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_TYPES_H_
-#define COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_TYPES_H_
+#ifndef COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_TYPES_H_
+#define COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_TYPES_H_
 
 #include <vector>
 
@@ -53,4 +53,4 @@ typedef std::vector<AccessData> AccessDataList;
 
 }  // namespace content
 
-#endif  // COMPONENTS_LOCAL_STORAGE_MANAGER_COMMON_LOCAL_STORAGE_MANAGER_TYPES_H_
+#endif  // COMPONENTS_LOCAL_STORAGE_TRACKER_COMMON_LOCAL_STORAGE_TRACKER_TYPES_H_

@@ -164,8 +164,8 @@
 #include "content/common/media/neva/frame_media_controller.mojom.h"
 #endif
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-#include "components/local_storage_manager/public/mojom/local_storage_manager.mojom.h"
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+#include "components/local_storage_tracker/public/mojom/local_storage_tracker.mojom.h"
 #endif
 
 class GURL;
@@ -205,8 +205,8 @@ class FrameTree;
 class FrameTreeNode;
 class GeolocationServiceImpl;
 class KeepAliveHandleFactory;
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-class LocalStorageManagerMojoImpl;
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+class LocalStorageTrackerMojoImpl;
 #endif
 class MediaInterfaceProxy;
 class NavigationEntryImpl;
@@ -1816,9 +1816,9 @@ class CONTENT_EXPORT RenderFrameHostImpl
   // network::mojom::CookieAccessObserver:
   void OnCookiesAccessed(
       network::mojom::CookieAccessDetailsPtr details) override;
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  void GetLocalStorageManagerMojoImpl(
-      mojo::PendingReceiver<local_storage::mojom::LocalStorageManager>
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  void GetLocalStorageTrackerMojoImpl(
+      mojo::PendingReceiver<local_storage::mojom::LocalStorageTracker>
           receiver);
 #endif
 
@@ -3297,8 +3297,8 @@ class CONTENT_EXPORT RenderFrameHostImpl
   // NOTE: This must be the last member.
   base::WeakPtrFactory<RenderFrameHostImpl> weak_ptr_factory_{this};
 
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  std::unique_ptr<LocalStorageManagerMojoImpl> lsm_responder_;
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  std::unique_ptr<LocalStorageTrackerMojoImpl> lst_responder_;
 #endif
 
   DISALLOW_COPY_AND_ASSIGN(RenderFrameHostImpl);

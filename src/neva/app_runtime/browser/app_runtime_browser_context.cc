@@ -44,8 +44,8 @@ AppRuntimeBrowserContext::AppRuntimeBrowserContext(
     : adapter_(adapter),
       resource_context_(new content::ResourceContext()),
       path_(InitPath(adapter)) {
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  local_storage_manager_ = content::LocalStorageManager::Create().release();
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  local_storage_tracker_ = content::LocalStorageTracker::Create().release();
 #endif
 }
 
@@ -146,15 +146,15 @@ AppRuntimeBrowserContext::GetBrowsingDataRemoverDelegate() {
 }
 
 void AppRuntimeBrowserContext::Initialize() {
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  local_storage_manager_->Initialize(GetPath());
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  local_storage_tracker_->Initialize(GetPath());
 #endif
 }
 
-content::LocalStorageManager*
-AppRuntimeBrowserContext::GetLocalStorageManager() {
-#if defined(USE_LOCAL_STORAGE_MANAGER)
-  return local_storage_manager_.get();
+content::LocalStorageTracker*
+AppRuntimeBrowserContext::GetLocalStorageTracker() {
+#if defined(USE_LOCAL_STORAGE_TRACKER)
+  return local_storage_tracker_.get();
 #else
   return nullptr;
 #endif
