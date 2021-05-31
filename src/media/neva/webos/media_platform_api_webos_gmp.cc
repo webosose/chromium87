@@ -717,11 +717,11 @@ void MediaPlatformAPIWebOSGmp::ResetFeedInfo() {
 }
 
 void MediaPlatformAPIWebOSGmp::SetMediaVideoData(
-    const std::string& video_info) {
+    const std::string& video_info_str) {
   DCHECK(media_task_runner_->BelongsToCurrentThread());
   Json::Reader reader;
   Json::Value json_video_info;
-  if (reader.parse(video_info, json_video_info) &&
+  if (reader.parse(video_info_str, json_video_info) &&
       json_video_info.isObject() &&
       json_video_info.isMember("videoInfo")) {
     Json::Value video_info = json_video_info["videoInfo"];
