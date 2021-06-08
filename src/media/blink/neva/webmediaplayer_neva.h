@@ -39,6 +39,7 @@
 #include "media/neva/media_player_neva_interface.h"
 #include "mojo/public/cpp/bindings/receiver.h"
 #include "mojo/public/cpp/bindings/remote.h"
+#include "services/media_session/public/cpp/media_position.h"
 #include "third_party/blink/public/platform/media/webmediaplayer_delegate.h"
 #include "third_party/blink/public/platform/web_audio_source_provider.h"
 #include "third_party/blink/public/platform/web_media_player.h"
@@ -488,6 +489,9 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerNeva
   mojo::Remote<ui::mojom::VideoWindow> video_window_remote_;
   mojo::Receiver<ui::mojom::VideoWindowClient> video_window_client_receiver_{
       this};
+
+  media_session::MediaPosition media_position_state_;
+  double playback_rate_;
 
   std::unique_ptr<media::VideoHoleGeometryUpdateHelper> geometry_update_helper_;
 

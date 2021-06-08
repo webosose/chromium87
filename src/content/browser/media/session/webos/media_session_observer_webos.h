@@ -77,6 +77,9 @@ class MediaSessionObserverWebOS final
   void SetMetadataPropertyInternal(const std::string& property,
                                    const base::string16& value);
 
+  // Sets the playback position value to MCS.
+  void SetMediaPositionInternal(const base::TimeDelta& position);
+
   // Receives the response from MCS and takes necessary action.
   void HandleMediaKeyEvent(const std::string& payload);
 
@@ -99,6 +102,8 @@ class MediaSessionObserverWebOS final
 
   media_session::mojom::MediaPlaybackState playback_state_ =
       media_session::mojom::MediaPlaybackState::kStopped;
+
+  base::TimeDelta duration_;
 
   mojo::Receiver<media_session::mojom::MediaSessionObserver> observer_receiver_{
       this};

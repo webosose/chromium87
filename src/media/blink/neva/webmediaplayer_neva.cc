@@ -493,6 +493,7 @@ void WebMediaPlayerNeva::SetRate(double rate) {
   interpolator_.SetPlaybackRate(rate);
   player_api_->SetRate(rate);
   is_negative_playback_rate_ = rate < 0.0f;
+  playback_rate_ = rate;
 }
 
 void WebMediaPlayerNeva::SetVolume(double volume) {
@@ -516,7 +517,18 @@ void WebMediaPlayerNeva::SetPreservesPitch(bool preserves_pitch) {
 }
 
 void WebMediaPlayerNeva::OnTimeUpdate() {
-  NOTIMPLEMENTED_LOG_ONCE();
+  media_session::MediaPosition new_position(
+      Paused() ? 0.0 : playback_rate_, duration_,
+      base::TimeDelta::FromSecondsD(CurrentTime()));
+
+  if (media_position_state_ == new_position)
+    return;
+
+  media_position_state_ = new_position;
+
+  if (delegate_)
+    delegate_->DidPlayerMediaPositionStateChange(delegate_id_,
+                                                 media_position_state_);
 }
 
 void WebMediaPlayerNeva::OnPictureInPictureAvailabilityChanged(bool available) {
