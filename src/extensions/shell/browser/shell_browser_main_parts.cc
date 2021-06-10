@@ -81,6 +81,15 @@
 #include "ui/events/devices/x11/touch_factory_x11.h"  // nogncheck
 #endif
 
+#if defined(OS_WEBOS)
+#include <signal.h>
+#include "base/barrier_closure.h"
+#include "content/browser/network_service_instance_impl.h"
+#include "content/public/browser/browser_thread.h"
+#include "content/public/browser/storage_partition.h"
+#include "extensions/shell/neva/webos_shutdown_signal_handler.h"
+#endif
+
 #if defined(USE_NEVA_APPRUNTIME)
 #include "components/web_cache/browser/web_cache_manager.h"
 #include "neva/app_runtime/browser/app_runtime_shared_memory_manager.h"
@@ -211,7 +220,37 @@ void ShellBrowserMainParts::PostMainMessageLoopStart() {
   app_runtime_mem_manager_.reset(
       new neva_app_runtime::AppRuntimeSharedMemoryManager);
 #endif
+#if defined(OS_WEBOS)
+  InstallShutdownSignalHandlers(
+      base::BindOnce(&ShellBrowserMainParts::ExitWhenPossibleOnUIThread,
+                     base::Unretained(this)),
+      content::GetUIThreadTaskRunner({}));
+#endif
 }
+
+#if defined(OS_WEBOS)
+void ShellBrowserMainParts::ExitWhenPossibleOnUIThread(int signal) {
+  VLOG(1) << __func__ << " signal: " << signal;
+  base::RepeatingClosure done_closure = base::BarrierClosure(
+      content::BrowserContext::GetStoragePartitionCount(browser_context()),
+      base::BindOnce(
+          [](int signal) {
+            VLOG(1) << __func__ << " Resend signal(" << signal
+                    << ") after cookie store complete!";
+            kill(getpid(), signal);
+          },
+          signal));
+  content::BrowserContext::ForEachStoragePartition(
+      browser_context(), base::BindRepeating(
+                             [](base::OnceClosure done_closure,
+                                content::StoragePartition* storage_partition) {
+                               storage_partition
+                                   ->GetCookieManagerForBrowserProcess()
+                                   ->FlushCookieStore(std::move(done_closure));
+                             },
+                             std::move(done_closure)));
+}
+#endif
 
 int ShellBrowserMainParts::PreEarlyInitialization() {
   ///@name USE_NEVA_APPRUNTIME

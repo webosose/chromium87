@@ -266,6 +266,8 @@ source_set("app_shell_lib") {
       "neva/webos_language_listener.h",
       "neva/webos_register_app.cc",
       "neva/webos_register_app.h",
+      "neva/webos_shutdown_signal_handler.cc",
+      "neva/webos_shutdown_signal_handler.h",
     ]
 
     deps += [
