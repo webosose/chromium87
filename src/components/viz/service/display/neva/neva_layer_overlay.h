@@ -71,7 +71,7 @@ class NevaLayerOverlayProcessor {
 
   gpu::SurfaceHandle surface_handle_;
 #if defined(USE_NEVA_MEDIA)
-  ui::VideoWindowController* video_window_controller_;
+  ui::VideoWindowController* video_window_controller_ = nullptr;
 #endif
   gfx::Rect previous_frame_underlay_rect_;
   gfx::Rect previous_frame_underlay_occlusion_;
