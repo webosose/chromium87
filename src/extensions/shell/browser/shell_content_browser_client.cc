@@ -515,10 +515,17 @@ void ShellContentBrowserClient::ConfigureNetworkContextParams(
 
   int disk_cache_size = kDefaultDiskCacheSize;
   base::CommandLine* cmd_line = base::CommandLine::ForCurrentProcess();
-  if (cmd_line->HasSwitch(::switches::kShellDiskCacheSize))
-    base::StringToInt(
-        cmd_line->GetSwitchValueASCII(::switches::kShellDiskCacheSize),
-        &disk_cache_size);
+  if (cmd_line->HasSwitch(::switches::kShellDiskCacheSize) &&
+      (!base::StringToInt(
+           cmd_line->GetSwitchValueASCII(::switches::kShellDiskCacheSize),
+           &disk_cache_size) ||
+       disk_cache_size < 0)) {
+    LOG(ERROR) << __func__ << " invalid value("
+               << cmd_line->GetSwitchValueASCII(::switches::kShellDiskCacheSize)
+               << ") for the command-line switch of --"
+               << ::switches::kShellDiskCacheSize;
+    disk_cache_size = kDefaultDiskCacheSize;
+  }
 
   network_context_params->cookie_path =
       context->GetPath().Append(kCookieStoreFile);

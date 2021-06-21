@@ -476,9 +476,16 @@ void AppRuntimeContentBrowserClient::ConfigureNetworkContextParams(
   network_context_params->accept_language = "en-us,en";
   int disk_cache_size = kDefaultDiskCacheSize;
   base::CommandLine* cmd_line = base::CommandLine::ForCurrentProcess();
-  if (cmd_line->HasSwitch(kDiskCacheSize))
-    base::StringToInt(cmd_line->GetSwitchValueASCII(kDiskCacheSize),
-                      &disk_cache_size);
+  if (cmd_line->HasSwitch(kDiskCacheSize) &&
+      (!base::StringToInt(cmd_line->GetSwitchValueASCII(kDiskCacheSize),
+                          &disk_cache_size) ||
+       disk_cache_size < 0)) {
+    LOG(ERROR) << __func__ << " invalid value("
+               << cmd_line->GetSwitchValueASCII(kDiskCacheSize)
+               << ") for the command-line switch of --" << kDiskCacheSize;
+    disk_cache_size = kDefaultDiskCacheSize;
+  }
+
   network_context_params->cookie_path =
       context->GetPath().Append(kCookieStoreFile);
   network_context_params->enable_encrypted_cookies = true;
