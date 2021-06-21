@@ -43,7 +43,7 @@ bool CookieNevaCryptoDelegate::ShouldEncrypt() {
 bool CookieNevaCryptoDelegate::EncryptString(const std::string& plaintext,
                                              std::string* ciphertext) {
   if (os_crypt_.is_bound() && os_crypt_.is_connected()) {
-    bool success;
+    bool success = true;
     base::WaitableEvent finished(
         base::WaitableEvent::ResetPolicy::MANUAL,
         base::WaitableEvent::InitialState::NOT_SIGNALED);
@@ -73,7 +73,7 @@ bool CookieNevaCryptoDelegate::EncryptString(const std::string& plaintext,
 bool CookieNevaCryptoDelegate::DecryptString(const std::string& ciphertext,
                                              std::string* plaintext) {
   if (os_crypt_.is_bound() && os_crypt_.is_connected()) {
-    bool success;
+    bool success = true;
     base::WaitableEvent finished(
         base::WaitableEvent::ResetPolicy::MANUAL,
         base::WaitableEvent::InitialState::NOT_SIGNALED);
