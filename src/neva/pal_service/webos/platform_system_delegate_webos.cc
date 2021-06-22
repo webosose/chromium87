@@ -120,7 +120,9 @@ std::string PlatformSystemDelegateWebOS::GetLocaleRegion() const {
 std::string PlatformSystemDelegateWebOS::GetResource(
     const std::string& path) const {
   std::string file_str;
-  base::ReadFileToString(base::FilePath(path), &file_str);
+  if (!base::ReadFileToString(base::FilePath(path), &file_str))
+    LOG(ERROR) << __func__ << ": Failed to read resource file: " << path;
+
   return file_str;
 }
 
