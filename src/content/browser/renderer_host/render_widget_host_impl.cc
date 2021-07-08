@@ -561,6 +561,13 @@ void RenderWidgetHostImpl::Init() {
 
   if (pending_show_closure_)
     std::move(pending_show_closure_).Run();
+
+#if defined(OS_WEBOS)
+  if (pending_page_focus_.has_value()) {
+    widget_input_handler_->SetFocus(pending_page_focus_.value());
+    pending_page_focus_.reset();
+  }
+#endif
 }
 
 std::pair<mojo::PendingAssociatedRemote<blink::mojom::WidgetHost>,
@@ -641,6 +648,12 @@ void RenderWidgetHostImpl::InitForFrame() {
 
   if (pending_show_closure_)
     std::move(pending_show_closure_).Run();
+#if defined(OS_WEBOS)
+  if (pending_page_focus_.has_value() && widget_input_handler_) {
+    widget_input_handler_->SetFocus(pending_page_focus_.value());
+    pending_page_focus_.reset();
+  }
+#endif
 }
 
 bool RenderWidgetHostImpl::ShouldShowStaleContentOnEviction() {
@@ -1180,7 +1193,17 @@ void RenderWidgetHostImpl::SetPageFocus(bool focused) {
     LockKeyboard();
   }
 
-  GetWidgetInputHandler()->SetFocus(focused);
+#if defined(OS_WEBOS)
+  // This is workaround of bug that found for app_shell and chromium v.87. In
+  // some cases during WebContents initialization SetPageFocus is called when
+  // mojo interface is not bound yet. This change related to specific of
+  // chromium v.87 and most probably will not be needed on next chromium
+  // versions.
+  if (!widget_input_handler_)
+    pending_page_focus_ = focused;
+  else
+    widget_input_handler_->SetFocus(focused);
+#endif
 
   // Also send page-level focus state to other SiteInstances involved in
   // rendering the current FrameTree, if this widget is for a main frame.

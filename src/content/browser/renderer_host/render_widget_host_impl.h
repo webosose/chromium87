@@ -1308,6 +1308,10 @@ class CONTENT_EXPORT RenderWidgetHostImpl
   base::Optional<blink::mojom::ScreenOrientation>
       screen_orientation_type_for_testing_;
 
+#if defined(OS_WEBOS)
+  base::Optional<bool> pending_page_focus_;
+#endif
+
   bool force_enable_zoom_ = false;
 
   RenderFrameMetadataProviderImpl render_frame_metadata_provider_;
