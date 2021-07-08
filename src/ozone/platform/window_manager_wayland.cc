@@ -33,6 +33,7 @@
 #include "ui/events/devices/device_data_manager.h"
 #include "ui/events/event_switches.h"
 #include "ui/events/event_utils.h"
+#include "ui/events/ozone/evdev/touch_evdev_types.h"
 #include "ui/events/ozone/layout/keyboard_layout_engine_manager.h"
 #include "ui/events/platform/platform_event_source.h"
 #include "ui/gfx/geometry/point_f.h"
@@ -701,8 +702,13 @@ void WindowManagerWayland::NotifyTouchEvent(
     const ui::TouchEventInfo& event_info) {
   gfx::PointF position(event_info.x_, event_info.y_);
   base::TimeTicks timestamp = EventTimeForNow();
-  uint32_t touch_slot =
-      touch_slot_generator_.GetGeneratedID(event_info.touch_id_);
+
+  // We need to make the slot ID unique to system, not only to device.
+  // Otherwise gesture recognizer touch lock will fail. To achieve this we copy
+  // the algorithm used in EventFactoryEvdev.
+  int input_id = device_id * ui::kNumTouchEvdevSlots + event_info.touch_id_;
+
+  uint32_t touch_slot = touch_slot_generator_.GetGeneratedID(input_id);
 
   if (type == ET_TOUCH_PRESSED)
     GrabTouchButton(device_id, handle);
@@ -717,7 +723,7 @@ void WindowManagerWayland::NotifyTouchEvent(
   if (type == ET_TOUCH_RELEASED || type == ET_TOUCH_CANCELLED) {
     if (type == ET_TOUCH_CANCELLED)
       UnGrabTouchButton(device_id);
-    touch_slot_generator_.ReleaseNumber(event_info.touch_id_);
+    touch_slot_generator_.ReleaseNumber(input_id);
   }
 }
 
