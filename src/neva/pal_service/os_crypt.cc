@@ -45,6 +45,7 @@ void OSCryptImpl::EncryptString(
   if (!delegate_) {
     VLOG(3) << __func__ << "failed: no delegate";
     std::move(callback).Run(false, std::string());
+    return;
   }
 
   int trace_id = GenerateTracingId();
@@ -69,6 +70,7 @@ void OSCryptImpl::DecryptString(
   if (!delegate_) {
     VLOG(3) << __func__ << " failed: no delegate";
     std::move(callback).Run(false, std::string());
+    return;
   }
 
   int trace_id = GenerateTracingId();
