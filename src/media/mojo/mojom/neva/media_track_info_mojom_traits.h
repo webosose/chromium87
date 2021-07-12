@@ -20,7 +20,7 @@
 #include <string>
 
 #include "media/base/ipc/media_param_traits.h"
-#include "media/mojo/mojom/neva/media_track_info.mojom.h"
+#include "media/mojo/mojom/neva/media_track_info.mojom-shared.h"
 #include "media/neva/media_track_info.h"
 
 namespace mojo {

@@ -15,6 +15,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "media/mojo/mojom/neva/media_track_info_mojom_traits.h"
+#include "media/mojo/mojom/neva/media_track_info.mojom.h"
 
 namespace mojo {
 

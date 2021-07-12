@@ -22,7 +22,7 @@
 #include <string>
 
 #include "media/base/ipc/media_param_traits.h"
-#include "media/mojo/mojom/neva/media_codec_capability.mojom.h"
+#include "media/mojo/mojom/neva/media_codec_capability.mojom-shared.h"
 #include "media/neva/media_codec_capability.h"
 
 namespace mojo {
