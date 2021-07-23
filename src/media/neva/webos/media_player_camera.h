@@ -87,6 +87,7 @@ class MediaPlayerCamera : public base::SupportsWeakPtr<MediaPlayerCamera>,
   void SetVisibility(bool) override;
   bool RequireMediaResource() const override;
   void SetDisableAudio(bool) override {}
+  void SetMediaLayerId(const std::string& media_layer_id) override;
 
   // Implement WebOSMediaClient::EventListener
   void OnPlaybackStateChanged(bool playing) override;
