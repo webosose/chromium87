@@ -21,7 +21,6 @@
 
 #include "components/watchdog/watchdog.h"
 #include "content/public/renderer/content_renderer_client.h"
-#include "content/public/renderer/render_thread_observer.h"
 
 #if defined(USE_NEVA_EXTENSIONS)
 namespace extensions {
@@ -32,6 +31,8 @@ class ShellExtensionsRendererClient;
 #endif
 
 namespace neva_app_runtime {
+
+class AppRuntimeRenderThreadObserver;
 
 class AppRuntimeContentRendererClient : public content::ContentRendererClient {
  public:
@@ -63,11 +64,11 @@ class AppRuntimeContentRendererClient : public content::ContentRendererClient {
   void RunScriptsAtDocumentEnd(content::RenderFrame* render_frame) override;
 #endif
 
+  void DestructObserver();
+
  private:
-  class AppRuntimeRenderThreadObserver;
-  void OnNetworkAppear();
   void ArmWatchdog();
-  std::unique_ptr<content::RenderThreadObserver> render_thread_observer_;
+  std::unique_ptr<AppRuntimeRenderThreadObserver> observer_;
   std::unique_ptr<watchdog::Watchdog> watchdog_;
 
 #if defined(USE_NEVA_EXTENSIONS)
