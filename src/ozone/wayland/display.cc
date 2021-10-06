@@ -154,7 +154,6 @@ gl::EGLDisplayPlatform GLOzoneEGLWayland::GetNativeDisplay() {
 bool GLOzoneEGLWayland::LoadGLES2Bindings(gl::GLImplementation implementation) {
   if (!display_->display())
     return false;
-  setenv("EGL_PLATFORM", "wayland", 0);
   return ui::LoadDefaultEGLGLES2Bindings(implementation);
 }
 
